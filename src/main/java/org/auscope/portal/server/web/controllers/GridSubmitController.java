@@ -1,9 +1,3 @@
-/*
- * This file is part of the AuScope Virtual Rock Lab (VRL) project.
- * Copyright (c) 2009 ESSCC, The University of Queensland
- *
- * Licensed under the terms of the GNU Lesser General Public License.
- */
 package org.auscope.portal.server.web.controllers;
 
 import java.io.File;
@@ -18,7 +12,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,23 +19,20 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import net.sf.json.util.JSONBuilder;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.ssl.Base64;
+import org.auscope.portal.server.cloud.StagingInformation;
 import org.auscope.portal.server.gridjob.FileInformation;
-import org.auscope.portal.server.gridjob.GeodesyJob;
-import org.auscope.portal.server.gridjob.GeodesyJobManager;
-import org.auscope.portal.server.gridjob.GeodesySeries;
-import org.auscope.portal.server.gridjob.GridAccessController;
-import org.auscope.portal.server.gridjob.Util;
+import org.auscope.portal.server.util.FileUtil;
 import org.auscope.portal.server.util.PortalPropertyPlaceholderConfigurer;
+import org.auscope.portal.server.vegl.VEGLJob;
+import org.auscope.portal.server.vegl.VEGLJobManager;
+import org.auscope.portal.server.vegl.VEGLSeries;
 import org.auscope.portal.server.web.service.HttpServiceCaller;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
-import org.jets3t.service.Jets3tProperties;
-import org.jets3t.service.S3Service;
 import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.model.S3Bucket;
 import org.jets3t.service.model.S3Object;
@@ -69,10 +59,7 @@ import com.amazonaws.services.ec2.model.RunInstancesResult;
  *
  * @author Cihan Altinay
  * @author Abdi Jama
- */
-/**
- * @author jam19d
- *
+ * @author Josh Vote
  */
 @Controller
 public class GridSubmitController {
@@ -80,19 +67,15 @@ public class GridSubmitController {
     /** Logger for this class */
     private final Log logger = LogFactory.getLog(getClass());
     @Autowired
-    private GridAccessController gridAccess;
+    private StagingInformation stagingInformation;
     @Autowired
-    private GeodesyJobManager jobManager;
+    private VEGLJobManager jobManager;
     @Autowired
     private HttpServiceCaller serviceCaller;
     
     @Autowired
     @Qualifier(value = "propertyConfigurer")
     private PortalPropertyPlaceholderConfigurer hostConfigurer;
-
-    public static final String TABLE_DIR = "tables";
-    public static final String PRE_STAGE_IN_TABLE_FILES = "/home/vegl-portal/tables/";
-    public static final String FOR_ALL = "Common";
 
     //Grid File Transfer messages
     private static final String INTERNAL_ERROR= "Job submission failed due to INTERNAL ERROR";
@@ -101,169 +84,10 @@ public class GridSubmitController {
     // AWS error messages
     private static final String S3_FILE_COPY_ERROR = "Unable to upload file to S3 bucket, upload was aborted.";
     
-    /**
-     * Returns a JSON object containing a list of the current user's series.
-     *
-     * @param request The servlet request
-     * @param response The servlet response
-     *
-     * @return A JSON object with a series attribute which is an array of
-     *         GeodesySeries objects.
-     */
-    @RequestMapping("/mySeries.do")
-    public ModelAndView mySeries(HttpServletRequest request,
-                                 HttpServletResponse response) {
-
-        String user = (String)request.getSession().getAttribute("openID-Email");//request.getRemoteUser();
-        List<GeodesySeries> series = jobManager.querySeries(user, null, null);
-
-        logger.debug("Returning list of "+series.size()+" series.");
-        return new ModelAndView("jsonView", "series", series);
-    }
-
-    /**
-     * Very simple helper class (bean).
-     */
-    public class SimpleBean {
-        private String value;
-        public SimpleBean(String value) { this.value = value; }
-        public String getValue() { return value; }
-    }
-
-    /**
-     * Returns a JSON object containing a list of code.
-     *
-     * @param request The servlet request
-     * @param response The servlet response
-     *
-     * @return A JSON object with a series attribute which is an array of
-     *         SimpleBean objects contain available code.
-     */
-    @RequestMapping("/getCodeObject.do")
-    public ModelAndView getCodeObject(HttpServletRequest request,
-                                 HttpServletResponse response) {
-
-        String user = (String)request.getSession().getAttribute("openID-Email");//request.getRemoteUser();
-        logger.error("Querying code list for "+user);
-        List<SimpleBean> code = new ArrayList<SimpleBean>();
-        code.add(new SimpleBean("Gamit"));
-        code.add(new SimpleBean("Burmese"));
-        code.add(new SimpleBean("UBC-GIF"));
-
-        logger.error("Returning list of "+code.size()+" codeObject.");
-        return new ModelAndView("jsonView", "code", code);
-    }    
-
-    /**
-     * Returns a JSON object containing a list of jobTypes.
-     *
-     * @param request The servlet request
-     * @param response The servlet response
-     *
-     * @return A JSON object with a series attribute which is an array of
-     *         SimpleBean objects contain available jobTypes.
-     */
-    @RequestMapping("/listJobTypes.do")
-    public ModelAndView listJobTypes(HttpServletRequest request,
-                                 HttpServletResponse response) {
-
-        String user = (String)request.getSession().getAttribute("openID-Email");//request.getRemoteUser();
-        logger.debug("Querying job types list for "+user);
-        List<SimpleBean> jobType = new ArrayList<SimpleBean>();
-        jobType.add(new SimpleBean("multi"));
-        jobType.add(new SimpleBean("single"));
-
-        logger.debug("Returning list of "+jobType.size()+" jobType.");
-        return new ModelAndView("jsonView", "jobType", jobType);
-    }    
-
-    /**
-     * Returns a JSON object containing a list of jobTypes.
-     *
-     * @param request The servlet request
-     * @param response The servlet response
-     *
-     * @return A JSON object with a series attribute which is an array of
-     *         SimpleBean objects contain available jobTypes.
-     */
-    @RequestMapping("/getGetArguments.do")
-    public ModelAndView getGetArguments(HttpServletRequest request,
-                                 HttpServletResponse response) {
-
-        String user = (String)request.getSession().getAttribute("openID-Email");//request.getRemoteUser();
-        logger.debug("Querying param for "+user);
-        List<SimpleBean> params = new ArrayList<SimpleBean>();
-        params.add(new SimpleBean("enter args ..."));
-
-        logger.debug("Returning list of "+params.size()+" params.");
-        return new ModelAndView("jsonView", "paramLines", params);
-    }
+    public static final String TABLE_DIR = "tables";
+    public static final String PRE_STAGE_IN_TABLE_FILES = "/home/vegl-portal/tables/";
+    public static final String FOR_ALL = "Common";
     
-
-    /**
-     * Returns a JSON object containing an array of sites that have the code.
-     *
-     * @param request The servlet request
-     * @param response The servlet response
-     *
-     * @return A JSON object with a sites attribute which is an array of
-     *         sites on the grid that have an installation of the selected code.
-     */
-    @RequestMapping("/listSites.do")    
-    public ModelAndView listSites(HttpServletRequest request,
-                                  HttpServletResponse response) {
-    	String myCode = request.getParameter("code");
-        logger.debug("Retrieving sites with "+myCode+" installations.");
-        List<SimpleBean> sites = new ArrayList<SimpleBean>();
-        sites.add(new SimpleBean("iVEC"));
-        sites.add(new SimpleBean("eRSA"));
-
-        logger.debug("Returning list of "+sites.size()+" sites.");
-        return new ModelAndView("jsonView", "sites", sites);
-    }
-    
-    /**
-     * Returns a JSON object containing an array of job manager queues at
-     * the specified site.
-     *
-     * @param request The servlet request including a site parameter
-     * @param response The servlet response
-     *
-     * @return A JSON object with a queues attribute which is an array of
-     *         job queues available at requested site.
-     */
-    @RequestMapping("/listSiteQueues.do")    
-    public ModelAndView listSiteQueues(HttpServletRequest request,
-                                       HttpServletResponse response) {
-
-        List<SimpleBean> queues = new ArrayList<SimpleBean>();
-        queues.add(new SimpleBean("normal"));
-
-        logger.debug("Returning list of "+queues.size()+" queue names.");
-        return new ModelAndView("jsonView", "queues", queues);
-    }
-
-    /**
-     * Returns a JSON object containing an array of versions at
-     * the specified site.
-     *
-     * @param request The servlet request including a site parameter
-     * @param response The servlet response
-     *
-     * @return A JSON object with a versions attribute which is an array of
-     *         versions installed at requested site.
-     */
-    @RequestMapping("/listSiteVersions.do")    
-    public ModelAndView listSiteVersions(HttpServletRequest request,
-                                         HttpServletResponse response) {
-
-        List<SimpleBean> versions = new ArrayList<SimpleBean>();
-        versions.add(new SimpleBean("10.35"));
-
-        logger.debug("Returning list of "+versions.size()+" versions.");
-        return new ModelAndView("jsonView", "versions", versions);
-    }
-
     /**
      * Returns a JSON object containing a populated GeodesyJob object.
      *
@@ -277,7 +101,7 @@ public class GridSubmitController {
     public ModelAndView getJobObject(HttpServletRequest request,
                                      HttpServletResponse response) {
 
-        GeodesyJob job = prepareModel(request);
+        VEGLJob job = prepareModel(request);
 
         logger.debug("Returning job.");
         ModelAndView result = new ModelAndView("jsonView");
@@ -589,7 +413,7 @@ public class GridSubmitController {
         if (jobInputDir != null) {
             logger.debug("Deleting temporary job files.");
             File jobDir = new File(jobInputDir);
-            Util.deleteFilesRecursive(jobDir);
+            FileUtil.deleteFilesRecursive(jobDir);
             request.getSession().removeAttribute("localJobInputDir");
         }
 
@@ -605,7 +429,7 @@ public class GridSubmitController {
     	GSSCredential cred = (GSSCredential)credential;
         return cred.getName().toString().replaceAll("=", "_").replaceAll("/", "_").replaceAll(" ", "_").substring(1);//certDN.replaceAll("=", "_").replaceAll(" ", "_").replaceAll(",", "_");
     }
-    
+
     /**
      * Processes a job submission request.
      *
@@ -618,10 +442,10 @@ public class GridSubmitController {
     @RequestMapping("/submitJob.do")    
     public ModelAndView submitJob(HttpServletRequest request,
                                   HttpServletResponse response,
-                                  GeodesyJob job) {
+                                  VEGLJob job) {
 
     	boolean success = true;
-    	GeodesySeries series = null;
+    	VEGLSeries series = null;
     	final String user = (String)request.getSession().getAttribute("openID-Email");//request.getRemoteUser();
     	String newSeriesName = request.getParameter("seriesName");
     	String seriesIdStr = request.getParameter("seriesId");
@@ -638,7 +462,7 @@ public class GridSubmitController {
             String newSeriesDesc = request.getParameter("seriesDesc");
 
             logger.debug("Creating new series '"+newSeriesName+"'.");
-            series = new GeodesySeries();
+            series = new VEGLSeries();
             series.setUser(user);
             series.setName(newSeriesName);
             if (newSeriesDesc != null) {
@@ -673,25 +497,19 @@ public class GridSubmitController {
         } else {
         	
         	job.setSeriesId(series.getId());
-            job.setJobType(job.getJobType().replace(",", ""));
-            job.setScriptFile(job.getScriptFile().replace(",", ""));
-            JSONArray args = JSONArray.fromObject(request.getParameter("arguments"));
-			logger.info("Args count: " + job.getArguments().length
-					+ " | Args in Json : " + args.toArray().length);
-            job.setArguments((String[])args.toArray(new String [args.toArray().length]));
             job.setEmailAddress(user);
             
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
             String dateFmt = sdf.format(new Date());
             
-            logger.info("Submitting job with name " + job.getName());
+            logger.info("Submitting job " + job);
             AWSCredentials credentials = (AWSCredentials)request.getSession().getAttribute("AWSCred");
             ProviderCredentials outputS3StorageCreds = new org.jets3t.service.security.AWSCredentials(job.getS3OutputAccessKey(), job.getS3OutputSecretKey());
             
             // create the base S3 object storage key path. The final key will be this with
 			// the filename appended.
-			String jobKeyPath = String.format("%1$s-%2$s-%3$s", user, job.getName(), dateFmt);
-			String virtualPath = ""; //required due to limitations in euca walrus
+			String jobKeyPath = String.format("VEGL-%1$s-%2$s", user, dateFmt);
+			
 			
             // copy files to S3 storage for processing 
 	        try {
@@ -710,15 +528,11 @@ public class GridSubmitController {
 				}
 				
 				// set the output directory for results to be transferred to
-				job.setOutputDir(jobKeyPath + "/output");
+				job.setS3OutputBaseKey(jobKeyPath + "/output");
 				
 				// copy job files to S3 storage service. 
 				S3Bucket bucket = new S3Bucket(job.getS3OutputBucket());
 				RestS3Service s3Service = new RestS3Service(outputS3StorageCreds);
-				
-				virtualPath = s3Service.getJetS3tProperties().getStringProperty("s3service.s3-endpoint-virtual-path", "");
-				logger.debug("virtualPath=" + virtualPath);
-				
 				
 				for (File file : files) {
 					String fileKeyPath =String.format("%1$s/%2$s", jobKeyPath, file.getName());
@@ -750,16 +564,12 @@ public class GridSubmitController {
         	String imageId = hostConfigurer.resolvePlaceholder("ami.id");
 			RunInstancesRequest instanceRequest = new RunInstancesRequest(imageId, 1, 1);
 			
-			//output virtual path
-			String outputVirtualPath = String.format("%1$s/%2$s", virtualPath, jobKeyPath);
-			outputVirtualPath = outputVirtualPath.replace("//", "/");
-			
 			// user data is passed to the instance on launch. This will be the path to the S3 directory 
 			// where the input files are stored. The instance will download the input files and attempt
 			// to run the vegl_script.sh that was built in the Script Builder.
 			JSONObject encodedUserData = new JSONObject();
 			encodedUserData.put("s3OutputBucket", job.getS3OutputBucket());
-			encodedUserData.put("s3OutputBaseKeyPath", outputVirtualPath);
+			encodedUserData.put("s3OutputBaseKeyPath", jobKeyPath.replace("//", "/"));
 			encodedUserData.put("s3OutputAccessKey", job.getS3OutputAccessKey());
 			encodedUserData.put("s3OutputSecretKey", job.getS3OutputSecretKey());
 			
@@ -778,7 +588,7 @@ public class GridSubmitController {
    				success = true;
    				
    				// set reference as instanceId for use when killing a job 
-   				job.setReference(instanceId);
+   				job.setEc2InstanceId(instanceId);
 			}
 			else
 			{
@@ -789,7 +599,6 @@ public class GridSubmitController {
    			if (success) {
                 job.setSubmitDate(dateFmt);
                 job.setStatus("Active");
-                jobSupplementInfo(job);
                 jobManager.saveJob(job);
                 gridStatus.jobSubmissionStatus = JobSubmissionStatus.Running;
 	        } else {
@@ -810,49 +619,15 @@ public class GridSubmitController {
     }
     
     /**
-     * Method that store extra job info required for registering into Geonetwork
-     * @param job
-     */
-    private void jobSupplementInfo(GeodesyJob job){
-    	StringBuilder detail = new StringBuilder();
-    	detail.append("ExecutedCode: "+job.getCode()+"\n");
-    	detail.append("Version: "+job.getVersion()+"\n");
-    	detail.append("Site: "+job.getSite()+"\n");
-    	detail.append("QueueOnSite: "+job.getQueue()+"\n");
-    	detail.append("Walltime: "+job.getMaxWallTime()+"\n");
-    	detail.append("MaxMemory: "+job.getMaxMemory()+"\n");
-    	detail.append("NumberOfCPUs: "+job.getCpuCount()+"\n");
-    	detail.append("JobType: "+job.getJobType()+"\n");
-    	detail.append("Arguments: "+job.getArguments()[0]);
-    	
-    	//We need to store this for when register
-    	job.setExtraJobDetails(detail.toString());
-    }
-    
-    /**
      * Creates a new Job object with predefined values for some fields.
      *
      * @param request The servlet request containing a session object
      *
      * @return The new job object.
      */
-    private GeodesyJob prepareModel(HttpServletRequest request) {
-        final String user = (String)request.getSession().getAttribute("openID-Email");//request.getRemoteUser();
-        final String maxWallTime = "60"; // in minutes
-        final String maxMemory = "2048"; // in MB
-        final String stdInput = "";
-        final String stdOutput = "stdOutput.txt";
-        final String stdError = "stdError.txt";
-        final String[] arguments = new String[0];
-        final String[] inTransfers = new String[0];
-        final String[] outTransfers = new String[0];
-        String name = "VEGLJob";
-        String site = "iVEC";
-        Integer cpuCount = 1;
-        String version = "10.35";
-        String queue = "normal";
+    private VEGLJob prepareModel(HttpServletRequest request) {
+        final String email = (String)request.getSession().getAttribute("openID-Email");//request.getRemoteUser();
         String description = "";
-        String scriptFile = "";
       
         //Create local stageIn directory.
         boolean success = createLocalDir(request);
@@ -862,9 +637,8 @@ public class GridSubmitController {
         }        
 
         logger.debug("Creating new GeodesyJob instance");
-        GeodesyJob job = new GeodesyJob(site, name, version, arguments, queue,
-                maxWallTime, maxMemory, cpuCount, inTransfers, outTransfers,
-                user, stdInput, stdOutput, stdError);
+        VEGLJob job = new VEGLJob(); 
+		
         
         // create subset request script file
         success = createSubsetScriptFile(request);
@@ -878,22 +652,21 @@ public class GridSubmitController {
         // system temp directory which needs to be staged in. 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
         String dateFmt = sdf.format(new Date());
-        String jobID = user + "-" + dateFmt + File.separator;
-        String jobInputDir = gridAccess.getlocalGridStageInDir() + jobID;
+        String jobID = email + "-" + dateFmt + File.separator;
+        String jobInputDir = stagingInformation.getStageInDirectory() + jobID;
         String newScript = (String) request.getSession().getAttribute("scriptFile");
 	    
         if (newScript != null) {
 	        logger.debug("Adding "+newScript+" to stage-in directory");
 	        File tmpScriptFile = new File(System.getProperty("java.io.tmpdir") + File.separator+newScript+".sh");
 	        File newScriptFile = new File(jobInputDir+GridSubmitController.TABLE_DIR, tmpScriptFile.getName());
-	        success = Util.moveFile(tmpScriptFile, newScriptFile);
+	        success = FileUtil.moveFile(tmpScriptFile, newScriptFile);
 	        
 	        if (!success){
 	            logger.error("Could not move "+newScript+" to stage-in!");
 	        }
 	    }
 
-        job.setScriptFile(scriptFile);
         job.setDescription(description);
 
         return job;
@@ -966,7 +739,7 @@ public class GridSubmitController {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
         String dateFmt = sdf.format(new Date());
         String jobID = user + "-" + dateFmt + File.separator;
-        String jobInputDir = gridAccess.getlocalGridStageInDir() + jobID;
+        String jobInputDir = stagingInformation.getStageInDirectory() + jobID;
         
         boolean success = (new File(jobInputDir)).mkdir();
         

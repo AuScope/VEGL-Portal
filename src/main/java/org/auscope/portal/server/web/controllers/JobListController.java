@@ -20,11 +20,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.auscope.portal.server.gridjob.FileInformation;
-import org.auscope.portal.server.gridjob.GeodesyJob;
-import org.auscope.portal.server.gridjob.GeodesyJobManager;
-import org.auscope.portal.server.gridjob.GeodesySeries;
+import org.auscope.portal.server.cloud.S3FileInformation;
+import org.auscope.portal.server.vegl.VEGLJob;
+import org.auscope.portal.server.vegl.VEGLSeries;
 import org.auscope.portal.server.util.PortalPropertyPlaceholderConfigurer;
+import org.auscope.portal.server.vegl.VEGLJobManager;
 import org.auscope.portal.server.web.service.JobStorageService;
 import org.jets3t.service.S3Service;
 import org.jets3t.service.S3ServiceException;
@@ -58,7 +58,7 @@ public class JobListController {
     private final Log logger = LogFactory.getLog(getClass());
 
     @Autowired
-    private GeodesyJobManager jobManager;
+    private VEGLJobManager jobManager;
     @Autowired
     @Qualifier(value = "propertyConfigurer")
     private PortalPropertyPlaceholderConfigurer hostConfigurer;
@@ -67,7 +67,25 @@ public class JobListController {
     
     private AmazonEC2 ec2;
 
-    
+    /**
+     * Returns a JSON object containing a list of the current user's series.
+     *
+     * @param request The servlet request
+     * @param response The servlet response
+     *
+     * @return A JSON object with a series attribute which is an array of
+     *         VEGLSeries objects.
+     */
+    @RequestMapping("/mySeries.do")
+    public ModelAndView mySeries(HttpServletRequest request,
+                                 HttpServletResponse response) {
+
+        String user = (String)request.getSession().getAttribute("openID-Email");//request.getRemoteUser();
+        List<VEGLSeries> series = jobManager.querySeries(user, null, null);
+
+        logger.debug("Returning list of "+series.size()+" series.");
+        return new ModelAndView("jsonView", "series", series);
+    }
     
     /**
      * Delete the job given by its reference.
@@ -83,7 +101,7 @@ public class JobListController {
                                 HttpServletResponse response) {
     	String userEmail = (String)request.getSession().getAttribute("openID-Email");
         String jobIdStr = request.getParameter("jobId");
-        GeodesyJob job = null;
+        VEGLJob job = null;
         ModelAndView mav = new ModelAndView("jsonView");
         boolean success = false;
 
@@ -105,7 +123,7 @@ public class JobListController {
 
         } else {
             // check if current user is the owner of the job
-            GeodesySeries s = jobManager.getSeriesById(job.getSeriesId());
+            VEGLSeries s = jobManager.getSeriesById(job.getSeriesId());
             if (userEmail.equals(s.getUser())) {
                 logger.info("Deleting job with ID "+jobIdStr);
                 jobManager.deleteJob(job);
@@ -135,7 +153,7 @@ public class JobListController {
     	
     	String userEmail = (String)request.getSession().getAttribute("openID-Email");
         String seriesIdStr = request.getParameter("seriesId");
-        List<GeodesyJob> jobs = null;
+        List<VEGLJob> jobs = null;
         ModelAndView mav = new ModelAndView("jsonView");
         boolean success = false;
         int seriesId = -1;
@@ -159,11 +177,11 @@ public class JobListController {
 
         } else {
             // check if current user is the owner of the series
-            GeodesySeries s = jobManager.getSeriesById(seriesId);
+            VEGLSeries s = jobManager.getSeriesById(seriesId);
             if (userEmail.equals(s.getUser())) {
                 logger.info("Deleting jobs of series "+seriesIdStr);
                 boolean jobsDeleted = true;
-                for (GeodesyJob job : jobs) {
+                for (VEGLJob job : jobs) {
                     String oldStatus = job.getStatus();
                     if (oldStatus.equals("Failed") || oldStatus.equals("Done") ||
                             oldStatus.equals("Cancelled")) {
@@ -212,7 +230,7 @@ public class JobListController {
 
     	String userEmail = (String)request.getSession().getAttribute("openID-Email");
         String jobIdStr = request.getParameter("jobId");
-        GeodesyJob job = null;
+        VEGLJob job = null;
         ModelAndView mav = new ModelAndView("jsonView");
         boolean success = false;
 
@@ -234,7 +252,7 @@ public class JobListController {
 
         } else {
             // check if current user is the owner of the job
-            GeodesySeries s = jobManager.getSeriesById(job.getSeriesId());
+            VEGLSeries s = jobManager.getSeriesById(job.getSeriesId());
             if (userEmail.equals(s.getUser())) {
                 logger.info("Cancelling job with ID "+jobIdStr);
                 
@@ -244,7 +262,7 @@ public class JobListController {
 	                success = true;
 	                
 				} catch (AmazonServiceException e) {
-					final String errorString = "Failed to terminate instance with id: " + job.getReference();
+					final String errorString = "Failed to terminate instance with id: " + job.getEc2InstanceId();
 					logger.error(errorString);
 					mav.addObject(errorString);
 				} 
@@ -266,7 +284,7 @@ public class JobListController {
 	 * @param request The HttpServletRequest
 	 * @param job The job linked the to instance that is to be terminated
 	 */
-	private void terminateInstance(HttpServletRequest request, GeodesyJob job) {
+	private void terminateInstance(HttpServletRequest request, VEGLJob job) {
 		
 		if (ec2 == null) {
 			AWSCredentials credentials = (AWSCredentials)request.getSession().getAttribute("AWSCred");
@@ -276,7 +294,7 @@ public class JobListController {
 		
 		TerminateInstancesRequest termReq = new TerminateInstancesRequest();
 		ArrayList<String> instanceIdList = new ArrayList<String>();
-		instanceIdList.add(job.getReference());
+		instanceIdList.add(job.getEc2InstanceId());
 		termReq.setInstanceIds(instanceIdList);
 		ec2.terminateInstances(termReq);
 							
@@ -299,7 +317,7 @@ public class JobListController {
 
     	String userEmail = (String)request.getSession().getAttribute("openID-Email");
         String seriesIdStr = request.getParameter("seriesId");
-        List<GeodesyJob> jobs = null;
+        List<VEGLJob> jobs = null;
         ModelAndView mav = new ModelAndView("jsonView");
         boolean success = false;
         int seriesId = -1;
@@ -323,10 +341,10 @@ public class JobListController {
 
         } else {
             // check if current user is the owner of the series
-            GeodesySeries s = jobManager.getSeriesById(seriesId);
+            VEGLSeries s = jobManager.getSeriesById(seriesId);
             if (userEmail.equals(s.getUser())) {
                 logger.info("Cancelling jobs of series "+seriesIdStr);
-                for (GeodesyJob job : jobs) {
+                for (VEGLJob job : jobs) {
                     String oldStatus = job.getStatus();
                     if (oldStatus.equals("Failed") || oldStatus.equals("Done") ||
                             oldStatus.equals("Cancelled")) {
@@ -341,7 +359,7 @@ public class JobListController {
     	                success = true;
     	                
     				} catch (AmazonServiceException e) {
-    					final String errorString = "Failed to terminate instance with id: " + job.getReference();
+    					final String errorString = "Failed to terminate instance with id: " + job.getEc2InstanceId();
     					logger.error(errorString);
     					mav.addObject(errorString);
     				} 
@@ -374,7 +392,7 @@ public class JobListController {
     public ModelAndView jobFiles(HttpServletRequest request,
                                  HttpServletResponse response) {
 
-    	GeodesyJob job = null;
+    	VEGLJob job = null;
         ModelAndView mav = new ModelAndView("jsonView");
         String jobIdStr = request.getParameter("jobId");
         logger.debug("jobIdStr: " + jobIdStr);
@@ -395,9 +413,9 @@ public class JobListController {
             final String errorString = "The requested job was not found.";
             logger.error("The requested job was not found.");
             mav.addObject("error", errorString);
-        } else if (job.getOutputDir() != null) {
+        } else if (job.getS3OutputBaseKey() != null) {
         	// get results file information to display in the Files tab
-        	FileInformation[] fileDetails = null;
+        	S3FileInformation[] fileDetails = null;
 			try {
 				fileDetails = jobStorageService.getOutputFileDetails(job);
 				logger.info(fileDetails.length + " job files located");
@@ -429,7 +447,7 @@ public class JobListController {
         String jobIdStr = request.getParameter("jobId");
         String fileName = request.getParameter("filename");
         String key = request.getParameter("key");
-        GeodesyJob job = null;
+        VEGLJob job = null;
         String errorString = null;
 
         if (jobIdStr != null) {
@@ -521,7 +539,7 @@ public class JobListController {
         String jobIdStr = request.getParameter("jobId");
         String filesParam = request.getParameter("files");
         logger.debug("filesParam: " + filesParam);
-        GeodesyJob job = null;
+        VEGLJob job = null;
         String errorString = null;
 
         if (jobIdStr != null) {
@@ -607,7 +625,7 @@ public class JobListController {
      * @param response The servlet response
      *
      * @return A JSON object with a series attribute which is an array of
-     *         GeodesySeries objects matching the criteria.
+     *         VEGLSeries objects matching the criteria.
      */
     @RequestMapping("/querySeries.do")
     public ModelAndView querySeries(HttpServletRequest request,
@@ -623,7 +641,7 @@ public class JobListController {
         }
 
         logger.debug("qUser="+qUser+", qName="+qName+", qDesc="+qDesc);
-        List<GeodesySeries> series = jobManager.querySeries(qUser, qName, qDesc);
+        List<VEGLSeries> series = jobManager.querySeries(qUser, qName, qDesc);
 
         logger.debug("Returning list of "+series.size()+" series.");
         return new ModelAndView("jsonView", "series", series);
@@ -636,14 +654,14 @@ public class JobListController {
      * @param response The servlet response
      *
      * @return A JSON object with a jobs attribute which is an array of
-     *         <code>GeodesyJob</code> objects.
+     *         <code>VEGLJob</code> objects.
      */
     @RequestMapping("/listJobs.do")
     public ModelAndView listJobs(HttpServletRequest request,
                                  HttpServletResponse response) {
 
         String seriesIdStr = request.getParameter("seriesId");
-        List<GeodesyJob> seriesJobs = null;
+        List<VEGLJob> seriesJobs = null;
         ModelAndView mav = new ModelAndView("jsonView");
         int seriesId = -1;
 
@@ -661,8 +679,8 @@ public class JobListController {
         // check to see if any active jobs have completed or failed so the status can be updated
         if (seriesJobs != null) {
         	
-        	for (GeodesyJob job : seriesJobs) {
-        		FileInformation[] results = null;
+        	for (VEGLJob job : seriesJobs) {
+        		S3FileInformation[] results = null;
 				try {
 					results = jobStorageService.getOutputFileDetails(job);
 				} catch (S3ServiceException e) {
@@ -674,7 +692,7 @@ public class JobListController {
         			job.setStatus("Done");
         			 
         			// check if any errors occurred. Errors will be written to stderr.txt
-        			for (FileInformation result : results) {
+        			for (S3FileInformation result : results) {
         				if (result.getName().endsWith("stderr.txt") && result.getSize() > 0) {
         					// change status to failed
         					job.setStatus("Failed");
