@@ -143,29 +143,6 @@ public class MenuController {
       return mav;
    }
    
-   /**
-    * If the user has valid grid credentials, this function will return a ModelAndView with redirectViewName
-    * If the user doesn't have valid credentials they will be redirected to the login page (and afterwards redirected to redirectUrl)
-    * 
-    * @param request
-    * @param redirectViewName
-    * @param redirectUrl
-    * @return
-    */
-   private ModelAndView doShibbolethAndSLCSLogin(HttpServletRequest request,String redirectViewName, String redirectUrl) {
-       if (gridAccess.isProxyValid(
-                   request.getSession().getAttribute("userCred"))) {
-           logger.debug("No/invalid action parameter; returning " + redirectViewName + " view.");
-           return new ModelAndView(redirectViewName);
-       } else {
-           request.getSession().setAttribute(
-                   "redirectAfterLogin", redirectUrl);
-           logger.warn("Proxy not initialized. Redirecting to gridLogin.");
-           return new ModelAndView(
-                   new RedirectView("/gridLogin.do", true, false, false));
-       }
-   }
-   
    private ModelAndView setCloudCredentials(HttpServletRequest request,String redirectViewName) {
 	   
 	   if (request.getSession().getAttribute("AWSCred") == null) {

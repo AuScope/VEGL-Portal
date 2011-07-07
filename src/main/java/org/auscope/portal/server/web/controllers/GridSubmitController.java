@@ -605,7 +605,7 @@ public class GridSubmitController {
     	GSSCredential cred = (GSSCredential)credential;
         return cred.getName().toString().replaceAll("=", "_").replaceAll("/", "_").replaceAll(" ", "_").substring(1);//certDN.replaceAll("=", "_").replaceAll(" ", "_").replaceAll(",", "_");
     }
-    
+
     /**
      * Processes a job submission request.
      *
