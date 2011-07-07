@@ -70,29 +70,30 @@
        <constructor-arg name="layerName" value="radmap10_filtered_totaldose"/>
    </bean>
     
-    <bean id="stagingInfo" class="org.auscope.portal.server.cloud.StagingInformation">
-    	<property name="stageInDirectory" value="${HOST.localStageInDir}"></property>
+   <bean id="gridAccess" class="org.auscope.portal.server.gridjob.GridAccessController">
+        <property name="localGridStageInDir" value="${grid.localStageInDir}"/>
     </bean>
     
-    <bean id="veglJobManager" class="org.auscope.portal.server.vegl.VEGLJobManager">
-        <property name="veglJobDao" ref="veglJobDao"/>
-        <property name="veglSeriesDao" ref="veglSeriesDao"/>
+    <bean id="geodesyJobManager" class="org.auscope.portal.server.gridjob.GeodesyJobManager">
+        <property name="geodesyJobDao" ref="geodesyJobDao"/>
+        <property name="geodesySeriesDao" ref="geodesySeriesDao"/>
     </bean>
     
-    <bean id="veglJobDao" class="org.auscope.portal.server.vegl.VEGLJobDao">
-        <property name="sessionFactory" ref="veglSessionFactory"/>
+    <bean id="geodesyJobDao" class="org.auscope.portal.server.gridjob.GeodesyJobDao">
+        <property name="sessionFactory" ref="geodesySessionFactory"/>
     </bean>
     
-    <bean id="veglSeriesDao" class="org.auscope.portal.server.vegl.VEGLSeriesDao">
-        <property name="sessionFactory" ref="veglSessionFactory"/>
+    <bean id="geodesySeriesDao" class="org.auscope.portal.server.gridjob.GeodesySeriesDao">
+        <property name="sessionFactory" ref="geodesySessionFactory"/>
     </bean>
     
-    <bean id="veglSessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+    <bean id="geodesySessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
         <property name="dataSource" ref="dataSource"/>
         <property name="mappingResources">
             <list>
-                <value>vegljob.hbm.xml</value>
-                <value>veglseries.hbm.xml</value>
+                <value>geodesyjob.hbm.xml</value>
+                <value>geodesyseries.hbm.xml</value>
+                <value>user.hbm.xml</value>
             </list>
         </property>
         <property name="hibernateProperties">
