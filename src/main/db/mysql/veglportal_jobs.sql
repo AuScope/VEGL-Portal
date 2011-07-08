@@ -25,7 +25,8 @@ DROP TABLE IF EXISTS `jobs`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `jobs` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) DEFAULT NULL,
   `description` varchar(255) DEFAULT NULL,
   `submitDate` varchar(255) DEFAULT NULL,
   `ec2InstanceId` varchar(255) DEFAULT NULL,

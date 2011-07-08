@@ -42,7 +42,7 @@ public class VEGLSeries implements Serializable {
      *
      * @param id The new ID for this series.
      */
-    private void setId(Integer id) {
+    protected void setId(Integer id) {
         assert (id != null);
         this.id = id;
     }

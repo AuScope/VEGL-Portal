@@ -49,11 +49,11 @@ public class VEGLJob extends CloudJob {
 	 * @param s3OutputBaseKey the base key path (folder name) for all S3 output
 	 * @param registeredUrl Where this job has been registered for future reference
 	 */
-    public VEGLJob(Integer id, String description, String user, String emailAddress, String submitDate,
+    public VEGLJob(Integer id, String name, String description, String user, String emailAddress, String submitDate,
 			String status, String ec2InstanceId, String ec2Endpoint, String ec2AMI, String s3OutputAccessKey,
 			String s3OutputSecretKey, String s3OutputBucket,
 			String s3OutputBaseKey, String registeredUrl, Integer seriesId) {
-		super(id, description, user, emailAddress, submitDate, status, ec2InstanceId, ec2AMI, ec2Endpoint);
+		super(id,name, description, user, emailAddress, submitDate, status, ec2InstanceId, ec2AMI, ec2Endpoint);
 		
 		this.s3OutputAccessKey = s3OutputAccessKey;
 		this.s3OutputSecretKey = s3OutputSecretKey;
@@ -170,6 +170,7 @@ public class VEGLJob extends CloudJob {
 				+ s3OutputBaseKey + ", s3OutputBucket=" + s3OutputBucket
 				+ ", seriesId=" + seriesId + ", getDescription()="
 				+ getDescription() + ", getEc2AMI()=" + getEc2AMI()
+				+ ", getName()=" + getName()
 				+ ", getEc2Endpoint()=" + getEc2Endpoint()
 				+ ", getEc2InstanceId()=" + getEc2InstanceId()
 				+ ", getEmailAddress()=" + getEmailAddress() + ", getId()="

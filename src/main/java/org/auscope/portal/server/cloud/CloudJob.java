@@ -12,6 +12,7 @@ import java.io.Serializable;
 public abstract class CloudJob implements Serializable {
 
     private Integer id;
+    private String name;
     private String description;
     private String emailAddress;
     private String user;
@@ -28,6 +29,7 @@ public abstract class CloudJob implements Serializable {
 		this.user = "";
 		this.emailAddress = "";
 		this.status = "";
+		this.name = "";
 		this.description = "";
 		this.submitDate = "";
 		this.ec2InstanceId = "";
@@ -35,13 +37,14 @@ public abstract class CloudJob implements Serializable {
 		this.ec2Endpoint = "";
     }
     
-    protected CloudJob(Integer id, String description, String user, String emailAddress, String submitDate, 
+    protected CloudJob(Integer id, String name, String description, String user, String emailAddress, String submitDate, 
     		String status,String ec2InstanceId, String ec2AMI, String ec2Endpoint) {
 		super();
 		this.id = id;
 		this.user = user;
 		this.emailAddress = emailAddress;
 		this.status = status;
+		this.name = name;
 		this.description = description;
 		this.submitDate = submitDate;
 		this.ec2InstanceId = ec2InstanceId;
@@ -194,16 +197,30 @@ public abstract class CloudJob implements Serializable {
 	public void setEmailAddress(String emailAddress) {
 		this.emailAddress = emailAddress;
 	}
+	
+	
+	/**
+	 * Gets the descriptive name of this job
+	 * @return
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * Sets the descriptive name of this job
+	 * @param name
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
 
 	@Override
 	public String toString() {
 		return "CloudJob [description=" + description + ", ec2AMI=" + ec2AMI
 				+ ", ec2Endpoint=" + ec2Endpoint + ", ec2InstanceId="
 				+ ec2InstanceId + ", emailAddress=" + emailAddress + ", id="
-				+ id + ", status=" + status + ", submitDate=" + submitDate
-				+ ", user=" + user + "]";
+				+ id + ", name=" + name + ", status=" + status
+				+ ", submitDate=" + submitDate + ", user=" + user + "]";
 	}
-
-	
-
 }

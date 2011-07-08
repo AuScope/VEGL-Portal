@@ -89,13 +89,13 @@ public class GridSubmitController {
     public static final String FOR_ALL = "Common";
     
     /**
-     * Returns a JSON object containing a populated GeodesyJob object.
+     * Returns a JSON object containing a populated VEGLJob object.
      *
      * @param request The servlet request
      * @param response The servlet response
      *
      * @return A JSON object with a data attribute containing a populated
-     *         GeodesyJob object and a success attribute.
+     *         VEGLJob object and a success attribute.
      */
     @RequestMapping("/getJobObject.do")    
     public ModelAndView getJobObject(HttpServletRequest request,
@@ -134,16 +134,13 @@ public class GridSubmitController {
 
         String jobInputDir = (String) request.getSession()
             .getAttribute("localJobInputDir");
-        String jobType = (String) request.getParameter("jobType");
         logger.debug("Inside listJobFiles.do");
         List<FileInformation> files = new ArrayList<FileInformation>();
 
         if (jobInputDir != null) {
-        	if(jobType != null ){
-	            String filePath = jobInputDir+GridSubmitController.TABLE_DIR;
-	            File dir = new File(filePath+File.separator);
-	            addFileNamesOfDirectory(files, dir, filePath);
-        	}
+	        String filePath = jobInputDir+GridSubmitController.TABLE_DIR;
+	        File dir = new File(filePath+File.separator);
+	        addFileNamesOfDirectory(files, dir, filePath);
         }
 
         logger.debug("Returning list of "+files.size()+" files.");
@@ -619,6 +616,25 @@ public class GridSubmitController {
     }
     
     /**
+     * Creates a new VEGL job initialised with the default configuration values
+     * @param email
+     * @return
+     */
+    private VEGLJob createDefaultVEGLJob(String email) {
+    	VEGLJob job = new VEGLJob(); 
+    	
+    	job.setUser(email);
+    	job.setEmailAddress(email);
+    	job.setEc2AMI(hostConfigurer.resolvePlaceholder("ami.id"));
+    	job.setEc2Endpoint(hostConfigurer.resolvePlaceholder("ec2.endpoint"));
+    	job.setS3OutputBucket("vegl-portal");
+    	job.setName("VEGL-Job");
+    	job.setDescription("");
+    	
+    	return job;
+    }
+    
+    /**
      * Creates a new Job object with predefined values for some fields.
      *
      * @param request The servlet request containing a session object
@@ -636,8 +652,8 @@ public class GridSubmitController {
         	return null;
         }        
 
-        logger.debug("Creating new GeodesyJob instance");
-        VEGLJob job = new VEGLJob(); 
+        logger.debug("Creating new VEGLJob instance");
+        VEGLJob job = createDefaultVEGLJob(email); 
 		
         
         // create subset request script file
