@@ -40,6 +40,7 @@ CREATE TABLE `jobs` (
   `status` varchar(255) DEFAULT NULL,
   `seriesId` int(11) DEFAULT NULL,
   `user` varchar(255) DEFAULT NULL,
+  `fileStorageId` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `SERIES` (`seriesId`),
   KEY `USER` (`user`)

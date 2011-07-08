@@ -574,6 +574,7 @@ GridSubmit.initialize = function() {
         { xtype: 'hidden', name: 'status' },
         { xtype: 'hidden', name: 'ec2InstanceId' },
         { xtype: 'hidden', name: 's3OutputBaseKey' },
+        { xtype: 'hidden', name: 'fileStorageId' },
         { xtype: 'hidden', name: 'registeredUrl' }
         ]
     });

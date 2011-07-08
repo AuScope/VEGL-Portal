@@ -37,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.amazonaws.AmazonServiceException;
@@ -647,6 +648,32 @@ public class JobListController {
         return new ModelAndView("jsonView", "series", series);
     }
 
+    /**
+     * Attempts to creates a new series for the specified user.
+     * @param user
+     * @param seriesName
+     * @param seriesDescription
+     * @return
+     */
+    @RequestMapping("/querySeries.do")
+    public ModelAndView createSeries(@RequestParam("user") String user,
+						    		@RequestParam("seriesName") String seriesName,
+						    		@RequestParam("seriesDescription") String seriesDescription) {
+    	VEGLSeries series = new VEGLSeries();
+    	series.setUser(user);
+    	series.setName(seriesName);
+    	series.setDescription(seriesDescription);
+    	
+    	try {
+    		jobManager.saveSeries(series);
+    	} catch (Exception ex) {
+    		logger.error("failure saving series", ex);
+    		return new ModelAndView("jsonView", "success", false);
+    	}
+    	
+    	return new ModelAndView("jsonView", "success", true);
+    }
+    
     /**
      * Returns a JSON object containing an array of jobs for the given series.
      *

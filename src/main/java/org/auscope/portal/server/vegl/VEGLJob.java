@@ -17,6 +17,7 @@ public class VEGLJob extends CloudJob {
     private String s3OutputBaseKey;
     private String registeredUrl;
     private Integer seriesId;
+    private String fileStorageId;
 	
     /**
      * Creates an unitialised VEGLJob
@@ -30,6 +31,7 @@ public class VEGLJob extends CloudJob {
 		this.s3OutputBaseKey = "";
 		this.registeredUrl = "";
 		this.seriesId = 0;
+		this.fileStorageId = "";
     }
     
 	/**
@@ -48,11 +50,12 @@ public class VEGLJob extends CloudJob {
 	 * @param s3OutputBucket the S3 bucket name where output will be stored
 	 * @param s3OutputBaseKey the base key path (folder name) for all S3 output
 	 * @param registeredUrl Where this job has been registered for future reference
+	 * @param fileStorageId The ID of this job that is used for storing input/output files
 	 */
     public VEGLJob(Integer id, String name, String description, String user, String emailAddress, String submitDate,
 			String status, String ec2InstanceId, String ec2Endpoint, String ec2AMI, String s3OutputAccessKey,
 			String s3OutputSecretKey, String s3OutputBucket,
-			String s3OutputBaseKey, String registeredUrl, Integer seriesId) {
+			String s3OutputBaseKey, String registeredUrl, Integer seriesId, String fileStorageId) {
 		super(id,name, description, user, emailAddress, submitDate, status, ec2InstanceId, ec2AMI, ec2Endpoint);
 		
 		this.s3OutputAccessKey = s3OutputAccessKey;
@@ -61,6 +64,7 @@ public class VEGLJob extends CloudJob {
 		this.s3OutputBaseKey = s3OutputBaseKey;
 		this.registeredUrl = registeredUrl;
 		this.seriesId = seriesId;
+		this.fileStorageId = fileStorageId;
 	}
     
     /**
@@ -159,6 +163,23 @@ public class VEGLJob extends CloudJob {
 	 */
 	public void setSeriesId(Integer seriesId) {
 		this.seriesId = seriesId;
+	}
+	
+	
+	/**
+	 * Gets the ID that is used for storing job input/output files
+	 * @return
+	 */
+	public String getFileStorageId() {
+		return fileStorageId;
+	}
+
+	/**
+	 * Sets the ID that is used for storing job input/output files
+	 * @param fileStorageId
+	 */
+	public void setFileStorageId(String fileStorageId) {
+		this.fileStorageId = fileStorageId;
 	}
 
 	/**

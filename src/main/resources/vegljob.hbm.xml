@@ -20,6 +20,8 @@
         <property name="status"/>
         <property name="seriesId"/>
         <property name="user"/>
+        <property name="fileStorageId"/>
+        
     </class>
 </hibernate-mapping>
 
