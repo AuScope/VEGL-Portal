@@ -53,7 +53,7 @@ import com.amazonaws.services.ec2.model.RunInstancesResult;
  * @author Josh Vote
  */
 @Controller
-public class GridSubmitController {
+public class GridSubmitController extends BaseVEGLController {
 
     /** Logger for this class */
     private final Log logger = LogFactory.getLog(getClass());
@@ -66,26 +66,13 @@ public class GridSubmitController {
     @Qualifier(value = "propertyConfigurer")
     private PortalPropertyPlaceholderConfigurer hostConfigurer;
     
-    public static final String TABLE_DIR = "tables";
-    public static final String PRE_STAGE_IN_TABLE_FILES = "/home/vegl-portal/tables/";
-    public static final String FOR_ALL = "Common";
+    public static final String STATUS_FAILED = "Failed";
+    public static final String STATUS_ACTIVE = "Active";
+    public static final String STATUS_DONE = "Done";
+    public static final String STATUS_CANCELLED = "Cancelled";
+    public static final String STATUS_UNSUBMITTED = "Unsubmitted";
     
-    /**
-     * Utility method to generate a standard MAV
-     * @param success
-     * @param data
-     * @param message
-     * @return
-     */
-    private ModelAndView generateResponseMAV(boolean success, Object data, String message) {
-    	ModelAndView result = new ModelAndView("jsonView");
-    	
-    	result.addObject("data", data);
-        result.addObject("success", success);
-        result.addObject("msg", success);
-        
-        return result;
-    }
+    
     
     /**
      * Returns a JSON object containing a populated VEGLJob object.
@@ -100,10 +87,10 @@ public class GridSubmitController {
     public ModelAndView getJobObject(@RequestParam("jobId") String jobId) {
         try {
         	VEGLJob job = jobManager.getJobById(Integer.parseInt(jobId));
-        	return generateResponseMAV(true, job, "");
+        	return generateJSONResponseMAV(true, job, "");
         } catch (Exception ex) {
         	logger.error("Error fetching job with id " + jobId, ex);
-    		return generateResponseMAV(false, null, "Error fetching job with id " + jobId);
+    		return generateJSONResponseMAV(false, null, "Error fetching job with id " + jobId);
         }
     }
     
@@ -122,9 +109,10 @@ public class GridSubmitController {
     		jobFileService.generateStageInDirectory(newJob);
     	} catch (Exception ex) {
     		logger.error("Error creating input dir", ex);
-    		return generateResponseMAV(false, null, "Error creating input directory");
+    		return generateJSONResponseMAV(false, null, "Error creating input directory");
     	}
     	
+    	//Create the subset file and dump it in our stage in directory
     	HashMap<String,String> erdapUrlMap = (HashMap) request.getSession().getAttribute("erddapUrlMap");
     	if (erdapUrlMap != null) {
     		createSubsetScriptFile(newJob, erdapUrlMap);
@@ -135,12 +123,12 @@ public class GridSubmitController {
     	//Save our job to the database before returning it to the user
     	try {
     		jobManager.saveJob(newJob);
-    		return generateResponseMAV(true, newJob, "");
+    		return generateJSONResponseMAV(true, newJob, "");
     	} catch (Exception ex) {
     		//On failure make sure we delete the new directory
     		jobFileService.deleteStageInDirectory(newJob);
     		logger.error("Error saving newly created job", ex);
-    		return generateResponseMAV(false, null, "Error saving newly created job");
+    		return generateJSONResponseMAV(false, null, "Error saving newly created job");
     	}
     }
     
@@ -163,7 +151,7 @@ public class GridSubmitController {
         	job = jobManager.getJobById(Integer.parseInt(jobId));
         } catch (Exception ex) {
         	logger.error("Error fetching job with id " + jobId, ex);
-    		return generateResponseMAV(false, null, "Error fetching job with id " + jobId);
+    		return generateJSONResponseMAV(false, null, "Error fetching job with id " + jobId);
         }
 
         //Get our files
@@ -172,14 +160,14 @@ public class GridSubmitController {
 			files = jobFileService.listStageInDirectoryFiles(job);
 		} catch (IOException ex) {
 			logger.error("Error listing job stage in directory", ex);
-			return generateResponseMAV(false, null, "Error reading job stage in directory");
+			return generateJSONResponseMAV(false, null, "Error reading job stage in directory");
 		}
 		List<FileInformation> fileInfos = new ArrayList<FileInformation>();
 		for (File file : files) {
-			fileInfos.add(new FileInformation(file.getPath(), file.length()));
+			fileInfos.add(new FileInformation(file));
 		}
         
-        return generateResponseMAV(true, fileInfos, "");
+        return generateJSONResponseMAV(true, fileInfos, "");
     }
 
     /**
@@ -226,7 +214,7 @@ public class GridSubmitController {
         	job = jobManager.getJobById(Integer.parseInt(jobId));
         } catch (Exception ex) {
         	logger.error("Error fetching job with id " + jobId, ex);
-    		return generateResponseMAV(false, null, "Error fetching job with id " + jobId);
+    		return generateJSONResponseMAV(false, null, "Error fetching job with id " + jobId);
         }
         
         //Handle incoming file
@@ -235,35 +223,14 @@ public class GridSubmitController {
         	file = jobFileService.handleFileUpload(job, (MultipartHttpServletRequest) request);
 		} catch (IOException ex) {
 			logger.error("Error uploading file", ex);
-    		return generateResponseMAV(false, null, "Error uploading file");
+    		return generateJSONResponseMAV(false, null, "Error uploading file");
 		}
-		FileInformation fileInfo = new FileInformation(file.getPath(), file.length());
+		FileInformation fileInfo = new FileInformation(file);
 		
-		return generateResponseMAV(true, fileInfo, "");
-    	
-    	/*
-		//JV - I have no idea why the following exists but I'm going to leave
-		//it in place as I'm afraid of introducing new horrible bugs
-		
-        // We cannot use jsonView here since this is a file upload request and
-        // ExtJS uses a hidden iframe which receives the response.
-        response.setContentType("text/html");
-        response.setStatus(HttpServletResponse.SC_OK);
-        try {
-            PrintWriter pw = response.getWriter();
-            pw.print("{success:'"+success+"'");
-            if (error != null) {
-                pw.print(",error:'"+error+"'");
-            }
-            if (fileInfo != null) {
-                pw.print(",name:'"+fileInfo.getName()+"',size:"+fileInfo.getSize()+",parentPath:'"+destinationPath+"',subJob:'"+subJobId+"'");
-            }
-            pw.print("}");
-            pw.flush();
-        } catch (IOException e) {
-            logger.error(e.getMessage());
-        }
-        return null;*/
+		//We have to use a HTML response due to ExtJS's use of a hidden iframe for file uploads
+		//Failure to do this will result in the upload working BUT the user will also get prompted
+		//for a file download containing the encoded response from this function (which we don't want).
+		return generateHTMLResponseMAV(true, fileInfo, "");
     }
 
     /**
@@ -284,7 +251,7 @@ public class GridSubmitController {
         	job = jobManager.getJobById(Integer.parseInt(jobId));
         } catch (Exception ex) {
         	logger.error("Error fetching job with id " + jobId, ex);
-    		return generateResponseMAV(false, null, "Error fetching job with id " + jobId);
+    		return generateJSONResponseMAV(false, null, "Error fetching job with id " + jobId);
         }
     	
         for (String fileName : fileNames) {
@@ -292,7 +259,7 @@ public class GridSubmitController {
         	logger.debug("Deleting " + fileName + " success=" + success);
         }
         
-        return generateResponseMAV(true, null, "");
+        return generateJSONResponseMAV(true, null, "");
     }
     
     /**
@@ -313,14 +280,10 @@ public class GridSubmitController {
         	job = jobManager.getJobById(Integer.parseInt(jobId));
         } catch (Exception ex) {
         	logger.error("Error fetching job with id " + jobId, ex);
-    		return generateResponseMAV(false, null, "Error fetching job with id " + jobId);
+    		return generateJSONResponseMAV(false, null, "Error fetching job with id " + jobId);
         }
         
-        String status = job.getStatus();
-        if (status == null || status.isEmpty()) {
-        	status = "Pending";
-        }
-        return generateResponseMAV(true, status, "");
+        return generateJSONResponseMAV(true, job.getStatus(), "");
     }
     
     /**
@@ -340,11 +303,32 @@ public class GridSubmitController {
         	job = jobManager.getJobById(Integer.parseInt(jobId));
         } catch (Exception ex) {
         	logger.error("Error fetching job with id " + jobId, ex);
-    		return generateResponseMAV(false, null, "Error fetching job with id " + jobId);
+    		return generateJSONResponseMAV(false, null, "Error fetching job with id " + jobId);
         }
         
         boolean success = jobFileService.deleteStageInDirectory(job);
-        return generateResponseMAV(success, null, "");
+        return generateJSONResponseMAV(success, null, "");
+    }
+    
+    /**
+     * Given an entire job object this function attempts to save the specified job with ID
+     * to the internal database.
+     * 
+     * @return A JSON object with a success attribute that indicates whether
+     *         the job was successfully updated.
+     * @param job
+     * @return
+     */
+    @RequestMapping("/updateJob.do")
+    public ModelAndView updateJob(VEGLJob job) {
+    	try {
+    		jobManager.saveJob(job);
+    	} catch (Exception ex) {
+        	logger.error("Error updating job " + job, ex);
+    		return generateJSONResponseMAV(false, null, "Error saving job");
+        }
+    	
+    	return generateJSONResponseMAV(true, null, "");
     }
     
     /**
@@ -367,7 +351,7 @@ public class GridSubmitController {
         	job = jobManager.getJobById(Integer.parseInt(jobId));
         } catch (Exception ex) {
         	logger.error("Error fetching job with id " + jobId, ex);
-    		return generateResponseMAV(false, null, "Error fetching job with id " + jobId);
+    		return generateJSONResponseMAV(false, null, "Error fetching job with id " + jobId);
         }
         
     	//Check we have S3 credentials otherwise there is no point in continuing
@@ -376,10 +360,10 @@ public class GridSubmitController {
         	job.getS3OutputBucket() == null || job.getS3OutputBucket().isEmpty()) {
         	logger.error("No output S3 credentials found. NOT submitting job!");
         	
-            job.setStatus("Failed");
+            job.setStatus(STATUS_FAILED);
             jobManager.saveJob(job);
             
-            return generateResponseMAV(false, null, "No output S3 credentials found. NOT submitting job!");
+            return generateJSONResponseMAV(false, null, "No output S3 credentials found. NOT submitting job!");
         }  
         
 
@@ -395,9 +379,9 @@ public class GridSubmitController {
 			// get job files from local directory
         	File[] files = jobFileService.listStageInDirectoryFiles(job);
         	if (files.length == 0) {
-        		job.setStatus("Failed");
+        		job.setStatus(STATUS_FAILED);
                 jobManager.saveJob(job);
-        		return generateResponseMAV(false, null, "No input files found. NOT submitting job!");
+        		return generateJSONResponseMAV(false, null, "No input files found. NOT submitting job!");
         	}
         	
 			
@@ -418,9 +402,9 @@ public class GridSubmitController {
 		} catch (Exception e) {
 			//We failed uploading
 			logger.error("Job submission failed.", e);
-			job.setStatus("Failed");
+			job.setStatus(STATUS_FAILED);
 			jobManager.saveJob(job);
-			return generateResponseMAV(false, null, "Failed uploading files to S3");
+			return generateJSONResponseMAV(false, null, "Failed uploading files to S3");
 		}
         
 		// launch the ec2 instance
@@ -448,9 +432,9 @@ public class GridSubmitController {
 		//We should get a single item on success
 		if (instances.size() == 0) {
 			logger.error("Failed to launch instance to run job " + job.getId());
-			job.setStatus("Failed");
+			job.setStatus(STATUS_FAILED);
 			jobManager.saveJob(job);
-			return generateResponseMAV(false, null, "Failed submitting to EC2");
+			return generateJSONResponseMAV(false, null, "Failed submitting to EC2");
 		}
 		
 		Instance instance = instances.get(0);
@@ -459,12 +443,13 @@ public class GridSubmitController {
 			
 		// set reference as instanceId for use when killing a job 
 		job.setEc2InstanceId(instanceId);
-		job.setStatus("Active");
+		job.setStatus(STATUS_ACTIVE);
+		job.setSubmitDate(new Date());
 		jobManager.saveJob(job);
 		
 
         // Save in session for status update request for this job.
-		return generateResponseMAV(true, null, "");
+		return generateJSONResponseMAV(true, null, "");
     }
     
     /**
@@ -482,6 +467,7 @@ public class GridSubmitController {
     	job.setS3OutputBucket("vegl-portal");
     	job.setName("VEGL-Job");
     	job.setDescription("");
+    	job.setStatus(STATUS_UNSUBMITTED);
     	
     	//We need an ID for storing our job file that won't collide with other storage ID's
     	SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");

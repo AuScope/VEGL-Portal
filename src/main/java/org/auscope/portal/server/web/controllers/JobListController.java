@@ -25,6 +25,7 @@ import org.auscope.portal.server.vegl.VEGLJob;
 import org.auscope.portal.server.vegl.VEGLSeries;
 import org.auscope.portal.server.util.PortalPropertyPlaceholderConfigurer;
 import org.auscope.portal.server.vegl.VEGLJobManager;
+import org.auscope.portal.server.web.service.JobFileService;
 import org.auscope.portal.server.web.service.JobStorageService;
 import org.jets3t.service.S3Service;
 import org.jets3t.service.S3ServiceException;
@@ -51,9 +52,10 @@ import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
  *
  * @author Cihan Altinay
  * @author Abdi Jama
+ * @author Josh Vote
  */
 @Controller
-public class JobListController {
+public class JobListController extends BaseVEGLController  {
 
     /** Logger for this class */
     private final Log logger = LogFactory.getLog(getClass());
@@ -65,6 +67,8 @@ public class JobListController {
     private PortalPropertyPlaceholderConfigurer hostConfigurer;
     @Autowired
     private JobStorageService jobStorageService;
+    @Autowired
+    private JobFileService jobFileService;
     
     private AmazonEC2 ec2;
 
@@ -84,7 +88,7 @@ public class JobListController {
         String user = (String)request.getSession().getAttribute("openID-Email");//request.getRemoteUser();
         List<VEGLSeries> series = jobManager.querySeries(user, null, null);
 
-        logger.debug("Returning list of "+series.size()+" series.");
+        logger.debug("Returning " + series);
         return new ModelAndView("jsonView", "series", series);
     }
     
@@ -127,6 +131,7 @@ public class JobListController {
             VEGLSeries s = jobManager.getSeriesById(job.getSeriesId());
             if (userEmail.equals(s.getUser())) {
                 logger.info("Deleting job with ID "+jobIdStr);
+                jobFileService.deleteStageInDirectory(job);
                 jobManager.deleteJob(job);
                 success = true;
             } else {
@@ -184,8 +189,9 @@ public class JobListController {
                 boolean jobsDeleted = true;
                 for (VEGLJob job : jobs) {
                     String oldStatus = job.getStatus();
-                    if (oldStatus.equals("Failed") || oldStatus.equals("Done") ||
-                            oldStatus.equals("Cancelled")) {
+                    if (oldStatus.equals(GridSubmitController.STATUS_FAILED) || oldStatus.equals(GridSubmitController.STATUS_DONE) ||
+                    		oldStatus.equals(GridSubmitController.STATUS_CANCELLED) || oldStatus.equals(GridSubmitController.STATUS_UNSUBMITTED)) {
+                    	jobFileService.deleteStageInDirectory(job);
                         jobManager.deleteJob(job);
                         
                     }else{
@@ -650,17 +656,20 @@ public class JobListController {
 
     /**
      * Attempts to creates a new series for the specified user.
-     * @param user
+     * 
+     * The series object will be returned in a JSON response on success.
+     * 
      * @param seriesName
      * @param seriesDescription
      * @return
      */
-    @RequestMapping("/querySeries.do")
-    public ModelAndView createSeries(@RequestParam("user") String user,
-						    		@RequestParam("seriesName") String seriesName,
+    @RequestMapping("/createSeries.do")
+    public ModelAndView createSeries(HttpServletRequest request,
+    								@RequestParam("seriesName") String seriesName,
 						    		@RequestParam("seriesDescription") String seriesDescription) {
+    	String openIdEmail = (String)request.getSession().getAttribute("openID-Email");
     	VEGLSeries series = new VEGLSeries();
-    	series.setUser(user);
+    	series.setUser(openIdEmail);
     	series.setName(seriesName);
     	series.setDescription(seriesDescription);
     	
@@ -668,10 +677,10 @@ public class JobListController {
     		jobManager.saveSeries(series);
     	} catch (Exception ex) {
     		logger.error("failure saving series", ex);
-    		return new ModelAndView("jsonView", "success", false);
+    		return generateJSONResponseMAV(false, null, "Failure saving series");
     	}
     	
-    	return new ModelAndView("jsonView", "success", true);
+    	return generateJSONResponseMAV(true, series, "");
     }
     
     /**
@@ -705,29 +714,31 @@ public class JobListController {
         
         // check to see if any active jobs have completed or failed so the status can be updated
         if (seriesJobs != null) {
-        	
         	for (VEGLJob job : seriesJobs) {
-        		S3FileInformation[] results = null;
-				try {
-					results = jobStorageService.getOutputFileDetails(job);
-				} catch (S3ServiceException e) {
-					logger.error("Unable to list output job files", e);
-				}
-        		
-        		if (job.getStatus().equals("Active") && results != null && results.length > 0) {
-        			// update status to done
-        			job.setStatus("Done");
-        			 
-        			// check if any errors occurred. Errors will be written to stderr.txt
-        			for (S3FileInformation result : results) {
-        				if (result.getName().endsWith("stderr.txt") && result.getSize() > 0) {
-        					// change status to failed
-        					job.setStatus("Failed");
-        					break;
-        				}
-        			}
-        			
-        			jobManager.saveJob(job);
+        		//Don't lookup files for jobs that haven't been submitted
+        		if (!job.getStatus().equals(GridSubmitController.STATUS_UNSUBMITTED)) {
+	        		S3FileInformation[] results = null;
+					try {
+						results = jobStorageService.getOutputFileDetails(job);
+					} catch (S3ServiceException e) {
+						logger.error("Unable to list output job files", e);
+					}
+	        		
+	        		if (job.getStatus().equals(GridSubmitController.STATUS_ACTIVE) && results != null && results.length > 0) {
+	        			// update status to done
+	        			job.setStatus(GridSubmitController.STATUS_DONE);
+	        			 
+	        			// check if any errors occurred. Errors will be written to stderr.txt
+	        			for (S3FileInformation result : results) {
+	        				if (result.getName().endsWith("stderr.txt") && result.getSize() > 0) {
+	        					// change status to failed
+	        					job.setStatus(GridSubmitController.STATUS_FAILED);
+	        					break;
+	        				}
+	        			}
+	        			
+	        			jobManager.saveJob(job);
+	        		}
         		}
         	}
         	

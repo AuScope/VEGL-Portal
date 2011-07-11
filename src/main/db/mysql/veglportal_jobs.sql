@@ -29,6 +29,7 @@ CREATE TABLE `jobs` (
   `name` varchar(255) DEFAULT NULL,
   `description` varchar(255) DEFAULT NULL,
   `submitDate` varchar(255) DEFAULT NULL,
+  `ec2AMI` varchar(255) DEFAULT NULL,
   `ec2InstanceId` varchar(255) DEFAULT NULL,
   `ec2Endpoint` varchar(255) DEFAULT NULL,
   `s3OutputAccessKey` varchar(255) DEFAULT NULL,

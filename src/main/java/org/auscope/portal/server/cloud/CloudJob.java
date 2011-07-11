@@ -1,6 +1,8 @@
 package org.auscope.portal.server.cloud;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Abstract base class representing the base state of a job that is sent to the cloud for
@@ -164,6 +166,11 @@ public abstract class CloudJob implements Serializable {
 	 */
 	public void setSubmitDate(String submitDate) {
 		this.submitDate = submitDate;
+	}
+	
+	public void setSubmitDate(Date date) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+        this.submitDate = sdf.format(date);
 	}
 
 	/**

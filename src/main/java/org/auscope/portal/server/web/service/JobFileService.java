@@ -48,13 +48,13 @@ public class JobFileService {
      * @return
      */
     private static String pathConcat(String p1, String p2) {
-    	if (p1.endsWith(File.pathSeparator) && p2.startsWith(File.pathSeparator)) {
+    	if (p1.endsWith(File.separator) && p2.startsWith(File.separator)) {
     		return p1 + p2.substring(1);
-    	} else if ((!p1.endsWith(File.pathSeparator) && p2.startsWith(File.pathSeparator)) ||
-    			    (p1.endsWith(File.pathSeparator) && !p2.startsWith(File.pathSeparator))) {
+    	} else if ((!p1.endsWith(File.separator) && p2.startsWith(File.separator)) ||
+    			    (p1.endsWith(File.separator) && !p2.startsWith(File.separator))) {
     		return p1 + p2;
     	} else {
-    		return p1 + File.pathSeparator + p2;
+    		return p1 + File.separator + p2;
     	}
     }
     
@@ -86,11 +86,12 @@ public class JobFileService {
     	if (job.getFileStorageId() == null || job.getFileStorageId().isEmpty()) {
         	throw new IllegalArgumentException("Job has no FileStorageID");
         }
-    	if (fileName.contains(File.pathSeparator)) {
-    		throw new IllegalArgumentException("fileName cannot include " + File.pathSeparator);
+    	if (fileName.contains(File.pathSeparator) || fileName.contains(File.separator)) {
+    		throw new IllegalArgumentException("fileName cannot include " + File.pathSeparator + " or " + File.separator);
     	}
     	
-    	File file = new File(pathConcat(stagingInformation.getStageInDirectory(), job.getFileStorageId()));
+    	String directoryPath = pathConcat(stagingInformation.getStageInDirectory(), job.getFileStorageId()); 
+    	File file = new File(pathConcat(directoryPath, fileName));
     	logger.debug("deleting " + file.getPath());
     	if (!file.exists()) {
     		return true;
@@ -155,8 +156,8 @@ public class JobFileService {
     	if (job.getFileStorageId() == null || job.getFileStorageId().isEmpty()) {
         	throw new IllegalArgumentException("Job has no FileStorageID");
         }
-    	if (fileName.contains(File.pathSeparator)) {
-    		throw new IllegalArgumentException("fileName cannot include " + File.pathSeparator);
+    	if (fileName.contains(File.pathSeparator) || fileName.contains(File.separator)) {
+    		throw new IllegalArgumentException("fileName cannot include " + File.pathSeparator + " or " + File.separator);
     	}
     	
     	String directory = pathConcat(stagingInformation.getStageInDirectory(), job.getFileStorageId());

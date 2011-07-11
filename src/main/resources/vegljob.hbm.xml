@@ -9,6 +9,7 @@
         <property name="name"/>
         <property name="description"/>
         <property name="submitDate"/>
+        <property name="ec2AMI"/>
         <property name="ec2InstanceId"/>
         <property name="ec2Endpoint"/>
         <property name="s3OutputAccessKey"/>
