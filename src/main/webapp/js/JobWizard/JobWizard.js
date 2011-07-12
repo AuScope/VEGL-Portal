@@ -33,14 +33,14 @@ JobWizard =  Ext.extend(Ext.Panel, {
 		var gotoStep = function(newStep, requireValidation) {
 			var layout = jobWizard.getLayout();
 			var setNewStep = function(layout, step) {
+				//Deactivate our current form
+				layout.activeItem.items.get(0).fireEvent('jobWizardDeactive');
 				
+				//Move to our next step (if it is a valid value)
 				if (step >= 0) {
 					layout.setActiveItem(step);
+					layout.activeItem.items.get(0).fireEvent('jobWizardActive');
 				}
-				
-				var frm = layout.activeItem.items.get(0);
-				//jobWizard.setSize(frm.getRequestedSize());
-				layout.activeItem.items.get(0).fireEvent('jobWizardActive');
 			};
 			
 			if (requireValidation) {
@@ -73,7 +73,8 @@ JobWizard =  Ext.extend(Ext.Panel, {
 			}
 			
 			//Always show our "next step" but set it to < 0 if there is no more cards
-			//This way the last card can still be validated and submitted.
+			//This way the last card can still be validated and submitted. (it can 
+			//decide what to do from there)
 			var nextStep = i + 1;
 			if (nextStep >= baseJobWizardForms.length) {
 				nextStep = -1;
@@ -91,13 +92,20 @@ JobWizard =  Ext.extend(Ext.Panel, {
 			});
 		}
 		                          
+		var startingJobIndex = 0;
 		JobWizard.superclass.constructor.call(this, {
 	        layout: 'card',
-	        activeItem: 0,
+	        activeItem: startingJobIndex,
 	        defaults: { layout:'fit', frame: true, buttonAlign: 'right' },
 	        //bodyStyle: 'padding:20px 200px;',
-	        items: items
+	        items: items,
+	        listeners: {
+	        	//When we load init our first card with the 'active' event
+	        	render : function() {
+	        		var activeItem = baseJobWizardForms[startingJobIndex];
+	        		activeItem.fireEvent('jobWizardActive');
+	        	}
+	        }
 		});
-		
 	}
 });

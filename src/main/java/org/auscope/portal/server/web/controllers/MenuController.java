@@ -159,25 +159,12 @@ public class MenuController {
 	   
 	   return new ModelAndView(redirectViewName);
    }
-   
-   @RequestMapping("/scriptbuilder.html")
-   public ModelAndView scriptbuilder(HttpServletRequest request) {
-	   return new ModelAndView("scriptbuilder");
-   }
  
    @RequestMapping("/jobbuilder.html")
    public ModelAndView jobbuilder(HttpServletRequest request) {
        // Ensure user has valid grid credentials
 	   //return doShibbolethAndSLCSLogin(request, "gridsubmit", "/gridsubmit.html");
 	   return setCloudCredentials(request, "jobbuilder");
-	   //return new ModelAndView("gridsubmit");
-   }
-   
-   @RequestMapping("/gridsubmit.html")
-   public ModelAndView gridsubmit(HttpServletRequest request) {
-       // Ensure user has valid grid credentials
-	   //return doShibbolethAndSLCSLogin(request, "gridsubmit", "/gridsubmit.html");
-	   return setCloudCredentials(request, "gridsubmit");
 	   //return new ModelAndView("gridsubmit");
    }
    

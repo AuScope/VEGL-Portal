@@ -26,6 +26,7 @@ JobSubmitForm =  Ext.extend(JobUploadForm, {
 				if (success) {
 					var responseObj = Ext.util.JSON.decode(response.responseText);
 					if (responseObj.success) {
+						jobSubmitFrm.noWindowUnloadWarning = true;
 						callback(true);
 						window.location = 'joblist.html';
 						return;

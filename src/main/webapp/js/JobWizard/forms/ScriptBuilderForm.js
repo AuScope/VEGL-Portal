@@ -35,9 +35,6 @@ ESySComponentLoader = Ext.extend(Ext.ux.XmlTreeLoader, {
 
 ScriptBuilderForm =  Ext.extend(BaseJobWizardForm, {
 	
-	
-	
-	
 	textEditMode : false,
 	
 	ControllerURL : "scriptbuilder.html",
@@ -95,6 +92,9 @@ ScriptBuilderForm =  Ext.extend(BaseJobWizardForm, {
 	        maxSize: 250,
 	        rootVisible: true,
 	        root: new SimContainerNode,
+	        style : {
+	        	'background-color' : '#ffffff'
+	        },
 	        //rootVisible: false,
 	        //root: new Ext.tree.TreeNode(),
 	        contextMenu: new Ext.menu.Menu({
@@ -177,6 +177,9 @@ ScriptBuilderForm =  Ext.extend(BaseJobWizardForm, {
 	        height: 300,
 	        minSize: 150,
 	        autoScroll: true,
+	        style : {
+	        	'background-color' : '#ffffff'
+	        },
 	        
 	        // tree-specific configs:
 	        rootVisible: false,
@@ -446,8 +449,15 @@ ScriptBuilderForm =  Ext.extend(BaseJobWizardForm, {
 	// submit script source for storage at the server
 	beginValidation : function(callback) {
 		var scriptBuilderFrm = this;
+		var sourceTextCmp = Ext.getCmp('sourcetext'); 
+		var sourceText = null;
+		
         if (scriptBuilderFrm.textEditMode == false) {
-            Ext.getCmp('sourcetext').enable();
+        	sourceTextCmp.enable();
+        	sourceText = sourceTextCmp.getValue();
+        	sourceTextCmp.disable();
+        } else {
+        	sourceText = sourceTextCmp.getValue();
         }
         
         Ext.Ajax.request({
@@ -460,7 +470,7 @@ ScriptBuilderForm =  Ext.extend(BaseJobWizardForm, {
             	callback(false);
         	},
             params: {
-                'sourceText': Ext.getCmp('sourcetext').getValue(),
+                'sourceText': sourceText,
                 'jobId': scriptBuilderFrm.wizardState.jobId
             }
         });
