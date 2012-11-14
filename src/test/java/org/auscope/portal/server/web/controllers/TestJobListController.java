@@ -11,12 +11,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.auscope.portal.core.cloud.CloudFileInformation;
 import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.services.cloud.CloudComputeService;
 import org.auscope.portal.core.services.cloud.CloudStorageService;
 import org.auscope.portal.core.services.cloud.FileStagingService;
+import org.auscope.portal.core.test.ResourceUtil;
 import org.auscope.portal.core.test.jmock.ReadableServletOutputStream;
 import org.auscope.portal.jmock.VEGLJobMatcher;
 import org.auscope.portal.jmock.VEGLSeriesMatcher;
@@ -30,6 +32,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.dao.DataAccessException;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -42,10 +45,12 @@ public class TestJobListController {
         setImposteriser(ClassImposteriser.INSTANCE);
     }};
 
+    private final String computeServiceId = "comp-service-id";
+    private final String storageServiceId = "storage-service-id";
     private VEGLJobManager mockJobManager;
-    private CloudStorageService mockCloudStorageService;
+    private CloudStorageService[] mockCloudStorageServices;
     private FileStagingService mockFileStagingService;
-    private CloudComputeService mockCloudComputeService;
+    private CloudComputeService[] mockCloudComputeServices;
     private HttpServletRequest mockRequest;
     private HttpServletResponse mockResponse;
     private HttpSession mockSession;
@@ -57,14 +62,19 @@ public class TestJobListController {
     @Before
     public void init() {
         mockJobManager = context.mock(VEGLJobManager.class);
-        mockCloudStorageService = context.mock(CloudStorageService.class);
+        mockCloudStorageServices = new CloudStorageService[] {context.mock(CloudStorageService.class)};
         mockFileStagingService = context.mock(FileStagingService.class);
-        mockCloudComputeService = context.mock(CloudComputeService.class);
+        mockCloudComputeServices = new CloudComputeService[] {context.mock(CloudComputeService.class)};
         mockResponse = context.mock(HttpServletResponse.class);
         mockRequest = context.mock(HttpServletRequest.class);
         mockSession = context.mock(HttpSession.class);
 
-        controller = new JobListController(mockJobManager, mockCloudStorageService, mockFileStagingService, mockCloudComputeService);
+        context.checking(new Expectations() {{
+            allowing(mockCloudStorageServices[0]).getId();will(returnValue(storageServiceId));
+            allowing(mockCloudComputeServices[0]).getId();will(returnValue(computeServiceId));
+        }});
+
+        controller = new JobListController(mockJobManager, mockCloudStorageServices, mockFileStagingService, mockCloudComputeServices);
     }
 
 
@@ -127,6 +137,8 @@ public class TestJobListController {
             allowing(mockJob).getUser();will(returnValue(userEmail));
 
             //Make sure the job marked as deleted and its transition audit trial record is created
+            allowing(mockJob).getComputeServiceId();will(returnValue(computeServiceId));
+            allowing(mockJob).getStorageServiceId();will(returnValue(storageServiceId));
             oneOf(mockJob).getStatus();will(returnValue("old mock job status"));
             oneOf(mockJob).setStatus(JobBuilderController.STATUS_DELETED);
             oneOf(mockJobManager).saveJob(mockJob);
@@ -134,7 +146,41 @@ public class TestJobListController {
 
             oneOf(mockFileStagingService).deleteStageInDirectory(mockJob);
             oneOf(mockJob).getRegisteredUrl();will(returnValue("geonetwork url"));
-            oneOf(mockCloudStorageService).deleteJobFiles(mockJob);
+            oneOf(mockCloudStorageServices[0]).deleteJobFiles(mockJob);
+        }});
+
+        ModelAndView mav = controller.deleteJob(mockRequest, mockResponse, jobId);
+        Assert.assertTrue((Boolean)mav.getModel().get("success"));
+    }
+
+    /**
+     * Tests deleting a job successfully
+     */
+    @Test
+    public void testDeleteJob_NotRegistered() throws Exception {
+        final String userEmail = "exampleuser@email.com";
+        final int jobId = 1234;
+        final VEGLJob mockJob = context.mock(VEGLJob.class);
+
+        context.checking(new Expectations() {{
+            allowing(mockRequest).getSession();will(returnValue(mockSession));
+            allowing(mockSession).getAttribute("openID-Email");will(returnValue(userEmail));
+
+            oneOf(mockJobManager).getJobById(jobId);will(returnValue(mockJob));
+            allowing(mockJob).getUser();will(returnValue(userEmail));
+            allowing(mockJob).getStorageServiceId();will(returnValue(storageServiceId));
+            allowing(mockJob).getComputeServiceId();will(returnValue(computeServiceId));
+
+
+            //Make sure the job marked as deleted and its transition audit trial record is created
+            oneOf(mockJob).getStatus();will(returnValue("old mock job status"));
+            oneOf(mockJob).setStatus(JobBuilderController.STATUS_DELETED);
+            oneOf(mockJobManager).saveJob(mockJob);
+            oneOf(mockJobManager).createJobAuditTrail("old mock job status", mockJob, "Job deleted.");
+
+            oneOf(mockFileStagingService).deleteStageInDirectory(mockJob);
+            oneOf(mockJob).getRegisteredUrl();will(returnValue(null)); //the job isn't registered
+            oneOf(mockCloudStorageServices[0]).deleteJobFiles(mockJob); //this must occur if the job isnt registered
         }});
 
         ModelAndView mav = controller.deleteJob(mockRequest, mockResponse, jobId);
@@ -211,7 +257,7 @@ public class TestJobListController {
             oneOf(mockJobManager).createJobAuditTrail(JobBuilderController.STATUS_PENDING, mockJobs.get(0), "Job deleted.");
             oneOf(mockFileStagingService).deleteStageInDirectory(mockJobs.get(0));
             oneOf(mockJobs.get(0)).getRegisteredUrl();will(returnValue("geonetwork url"));
-            oneOf(mockCloudStorageService).deleteJobFiles(mockJobs.get(0));
+            oneOf(mockCloudStorageServices[0]).deleteJobFiles(mockJobs.get(0));
 
             oneOf(mockJobs.get(1)).getStatus();will(returnValue(JobBuilderController.STATUS_DONE));
             oneOf(mockJobs.get(1)).setStatus(JobBuilderController.STATUS_DELETED);
@@ -219,7 +265,7 @@ public class TestJobListController {
             oneOf(mockJobManager).createJobAuditTrail(JobBuilderController.STATUS_DONE, mockJobs.get(1), "Job deleted.");
             oneOf(mockFileStagingService).deleteStageInDirectory(mockJobs.get(1));
             oneOf(mockJobs.get(1)).getRegisteredUrl();will(returnValue("geonetwork url"));
-            oneOf(mockCloudStorageService).deleteJobFiles(mockJobs.get(1));
+            oneOf(mockCloudStorageServices[0]).deleteJobFiles(mockJobs.get(1));
 
             oneOf(mockJobManager).deleteSeries(mockSeries);
         }});
@@ -291,11 +337,13 @@ public class TestJobListController {
             allowing(mockSession).getAttribute("openID-Email");will(returnValue(userEmail));
             allowing(mockJob).getUser();will(returnValue(userEmail));
             oneOf(mockJobManager).getJobById(jobId);will(returnValue(mockJob));
+            allowing(mockJob).getStorageServiceId();will(returnValue(storageServiceId));
+            allowing(mockJob).getComputeServiceId();will(returnValue(computeServiceId));
 
             allowing(mockJob).getStatus();will(returnValue(JobBuilderController.STATUS_PENDING));
-            oneOf(mockCloudStorageService).listJobFiles(with(mockJob));will(returnValue(jobPendingFiles));
+            oneOf(mockCloudStorageServices[0]).listJobFiles(with(mockJob));will(returnValue(jobPendingFiles));
 
-            oneOf(mockCloudComputeService).terminateJob(mockJob);
+            oneOf(mockCloudComputeServices[0]).terminateJob(mockJob);
             oneOf(mockJob).setStatus(JobBuilderController.STATUS_UNSUBMITTED);
             oneOf(mockJobManager).saveJob(mockJob);
             oneOf(mockJobManager).createJobAuditTrail(JobBuilderController.STATUS_PENDING, mockJob, "Job cancelled by user.");
@@ -408,12 +456,20 @@ public class TestJobListController {
             allowing(mockJobs.get(1)).getId();will(returnValue(new Integer(1)));
             allowing(mockJobs.get(2)).getId();will(returnValue(new Integer(2)));
             allowing(mockJobs.get(3)).getId();will(returnValue(new Integer(3)));
+            allowing(mockJobs.get(0)).getStorageServiceId();will(returnValue(storageServiceId));
+            allowing(mockJobs.get(0)).getComputeServiceId();will(returnValue(computeServiceId));
+            allowing(mockJobs.get(1)).getStorageServiceId();will(returnValue(storageServiceId));
+            allowing(mockJobs.get(1)).getComputeServiceId();will(returnValue(computeServiceId));
+            allowing(mockJobs.get(2)).getStorageServiceId();will(returnValue(storageServiceId));
+            allowing(mockJobs.get(2)).getComputeServiceId();will(returnValue(computeServiceId));
+            allowing(mockJobs.get(3)).getStorageServiceId();will(returnValue(storageServiceId));
+            allowing(mockJobs.get(3)).getComputeServiceId();will(returnValue(computeServiceId));
 
             //Only the pending and active job can be cancelled
-            oneOf(mockCloudStorageService).listJobFiles(with(mockJobs.get(1)));will(returnValue(jobActiveFiles));
-            oneOf(mockCloudStorageService).listJobFiles(with(mockJobs.get(3)));will(returnValue(jobPendingFiles));
-            oneOf(mockCloudComputeService).terminateJob(mockJobs.get(1));
-            oneOf(mockCloudComputeService).terminateJob(mockJobs.get(3));
+            oneOf(mockCloudStorageServices[0]).listJobFiles(with(mockJobs.get(1)));will(returnValue(jobActiveFiles));
+            oneOf(mockCloudStorageServices[0]).listJobFiles(with(mockJobs.get(3)));will(returnValue(jobPendingFiles));
+            oneOf(mockCloudComputeServices[0]).terminateJob(mockJobs.get(1));
+            oneOf(mockCloudComputeServices[0]).terminateJob(mockJobs.get(3));
             oneOf(mockJobs.get(1)).setStatus(JobBuilderController.STATUS_UNSUBMITTED);
             oneOf(mockJobs.get(3)).setStatus(JobBuilderController.STATUS_UNSUBMITTED);
             oneOf(mockJobManager).saveJob(mockJobs.get(1));
@@ -487,8 +543,10 @@ public class TestJobListController {
 
             oneOf(mockJobManager).getJobById(jobId);will(returnValue(mockJob));
             allowing(mockJob).getUser();will(returnValue(userEmail));
+            allowing(mockJob).getStorageServiceId();will(returnValue(storageServiceId));
+            allowing(mockJob).getComputeServiceId();will(returnValue(computeServiceId));
 
-            oneOf(mockCloudStorageService).listJobFiles(mockJob);will(returnValue(fileDetails));
+            oneOf(mockCloudStorageServices[0]).listJobFiles(mockJob);will(returnValue(fileDetails));
         }});
 
         ModelAndView mav = controller.jobFiles(mockRequest, mockResponse, jobId);
@@ -555,8 +613,10 @@ public class TestJobListController {
 
             oneOf(mockJobManager).getJobById(jobId);will(returnValue(mockJob));
             allowing(mockJob).getUser();will(returnValue(userEmail));
+            allowing(mockJob).getStorageServiceId();will(returnValue(storageServiceId));
+            allowing(mockJob).getComputeServiceId();will(returnValue(computeServiceId));
 
-            oneOf(mockCloudStorageService).listJobFiles(mockJob);will(throwException(new PortalServiceException("")));
+            oneOf(mockCloudStorageServices[0]).listJobFiles(mockJob);will(throwException(new PortalServiceException("")));
         }});
 
         ModelAndView mav = controller.jobFiles(mockRequest, mockResponse, jobId);
@@ -583,8 +643,10 @@ public class TestJobListController {
 
             oneOf(mockJobManager).getJobById(jobId);will(returnValue(mockJob));
             allowing(mockJob).getUser();will(returnValue(userEmail));
+            allowing(mockJob).getStorageServiceId();will(returnValue(storageServiceId));
+            allowing(mockJob).getComputeServiceId();will(returnValue(computeServiceId));
 
-            oneOf(mockCloudStorageService).getJobFile(mockJob, key);will(returnValue(inputStream));
+            oneOf(mockCloudStorageServices[0]).getJobFile(mockJob, key);will(returnValue(inputStream));
 
             //Ensure our response stream gets written to
             oneOf(mockResponse).setContentType("application/octet-stream");
@@ -672,10 +734,12 @@ public class TestJobListController {
 
             oneOf(mockJobManager).getJobById(jobId);will(returnValue(mockJob));
             allowing(mockJob).getUser();will(returnValue(userEmail));
+            allowing(mockJob).getStorageServiceId();will(returnValue(storageServiceId));
+            allowing(mockJob).getComputeServiceId();will(returnValue(computeServiceId));
 
-            oneOf(mockCloudStorageService).getJobFile(mockJob, fileKey1);will(returnValue(is1));
-            oneOf(mockCloudStorageService).getJobFile(mockJob, fileKey2);will(returnValue(is2));
-            oneOf(mockCloudStorageService).getJobFile(mockJob, fileKey3);will(returnValue(is3));
+            oneOf(mockCloudStorageServices[0]).getJobFile(mockJob, fileKey1);will(returnValue(is1));
+            oneOf(mockCloudStorageServices[0]).getJobFile(mockJob, fileKey2);will(returnValue(is2));
+            oneOf(mockCloudStorageServices[0]).getJobFile(mockJob, fileKey3);will(returnValue(is3));
 
             //Ensure our response stream gets written to
             oneOf(mockResponse).setContentType("application/zip");
@@ -928,11 +992,18 @@ public class TestJobListController {
             allowing(mockJobs.get(1)).getStatus();will(returnValue(JobBuilderController.STATUS_UNSUBMITTED));
             allowing(mockJobs.get(2)).getStatus();will(returnValue(JobBuilderController.STATUS_DONE));
             allowing(mockJobs.get(3)).getStatus();will(returnValue(JobBuilderController.STATUS_PENDING));
+            allowing(mockJobs.get(0)).getStorageServiceId();will(returnValue(storageServiceId));
+            allowing(mockJobs.get(0)).getComputeServiceId();will(returnValue(computeServiceId));
+            allowing(mockJobs.get(1)).getStorageServiceId();will(returnValue(storageServiceId));
+            allowing(mockJobs.get(1)).getComputeServiceId();will(returnValue(computeServiceId));
+            allowing(mockJobs.get(2)).getStorageServiceId();will(returnValue(storageServiceId));
+            allowing(mockJobs.get(2)).getComputeServiceId();will(returnValue(computeServiceId));
+            allowing(mockJobs.get(3)).getStorageServiceId();will(returnValue(storageServiceId));
+            allowing(mockJobs.get(3)).getComputeServiceId();will(returnValue(computeServiceId));
 
             //Output files for each job
-            oneOf(mockCloudStorageService).listJobFiles(with(mockJobs.get(0)));will(returnValue(jobActiveFiles));
-            oneOf(mockCloudStorageService).listJobFiles(with(mockJobs.get(2)));will(returnValue(jobDoneFiles));
-            oneOf(mockCloudStorageService).listJobFiles(with(mockJobs.get(3)));will(returnValue(jobPendingFiles));
+            oneOf(mockCloudStorageServices[0]).listJobFiles(with(mockJobs.get(0)));will(returnValue(jobActiveFiles));
+            oneOf(mockCloudStorageServices[0]).listJobFiles(with(mockJobs.get(3)));will(returnValue(jobPendingFiles));
 
             //Update our running job to done (due to presence of vegl.sh.log)
             oneOf(mockJobs.get(0)).setStatus(JobBuilderController.STATUS_DONE);
@@ -1006,6 +1077,8 @@ public class TestJobListController {
         final String baseKey = "base-key";
         final VEGLJob existingJob = new VEGLJob(jobId);
         existingJob.setUser(userEmail);
+        existingJob.setComputeServiceId(computeServiceId);
+        existingJob.setStorageServiceId(storageServiceId);
 
         final ByteArrayOutputStream bos1 = new ByteArrayOutputStream();
         final ByteArrayOutputStream bos2 = new ByteArrayOutputStream();
@@ -1021,10 +1094,10 @@ public class TestJobListController {
             oneOf(mockFileStagingService).writeFile(with(aNonMatchingVeglJob(jobId)), with(cloudFiles[0].getName()));will(returnValue(bos1));
             oneOf(mockFileStagingService).writeFile(with(aNonMatchingVeglJob(jobId)), with(cloudFiles[1].getName()));will(returnValue(bos2));
 
-            oneOf(mockCloudStorageService).generateBaseKey(with(aNonMatchingVeglJob(jobId)));will(returnValue(baseKey));
-            oneOf(mockCloudStorageService).listJobFiles(with(aVeglJob(jobId)));will(returnValue(cloudFiles));
-            oneOf(mockCloudStorageService).getJobFile(with(aVeglJob(jobId)), with(cloudFiles[0].getName()));will(returnValue(is1));
-            oneOf(mockCloudStorageService).getJobFile(with(aVeglJob(jobId)), with(cloudFiles[1].getName()));will(returnValue(is2));
+            oneOf(mockCloudStorageServices[0]).generateBaseKey(with(aNonMatchingVeglJob(jobId)));will(returnValue(baseKey));
+            oneOf(mockCloudStorageServices[0]).listJobFiles(with(aVeglJob(jobId)));will(returnValue(cloudFiles));
+            oneOf(mockCloudStorageServices[0]).getJobFile(with(aVeglJob(jobId)), with(cloudFiles[0].getName()));will(returnValue(is1));
+            oneOf(mockCloudStorageServices[0]).getJobFile(with(aVeglJob(jobId)), with(cloudFiles[1].getName()));will(returnValue(is2));
 
             //We should have 1 call to our job manager to create a job audit trail record
             oneOf(mockJobManager).createJobAuditTrail(with(any(String.class)), with(any(VEGLJob.class)), with(any(String.class)));
@@ -1038,5 +1111,122 @@ public class TestJobListController {
 
         Assert.assertArrayEquals(data1, fis1Data);
         Assert.assertArrayEquals(data2, fis2Data);
+    }
+
+    private String stripCarriageReturns(String s) {
+        return s.replaceAll("\r", "");
+    }
+
+    /**
+     * Tests that log sectioning works as expected
+     * @throws Exception
+     */
+    @Test
+    public void testGetSectionedLogs() throws Exception {
+        final InputStream logContents = ResourceUtil.loadResourceAsStream("sectionedVglLog.txt");
+        final String logContentString = IOUtils.toString(ResourceUtil.loadResourceAsStream("sectionedVglLog.txt"));
+        final String userEmail = "user@example.org";
+        final Integer jobId = 54321;
+
+        final VEGLJob mockJob = context.mock(VEGLJob.class);
+
+        context.checking(new Expectations() {{
+            allowing(mockRequest).getSession();will(returnValue(mockSession));
+            allowing(mockSession).getAttribute("openID-Email");will(returnValue(userEmail));
+
+            allowing(mockJob).getUser();will(returnValue(userEmail));
+            allowing(mockJob).getStorageServiceId();will(returnValue(storageServiceId));
+
+            oneOf(mockJobManager).getJobById(jobId);will(returnValue(mockJob));
+
+            oneOf(mockCloudStorageServices[0]).getJobFile(mockJob, JobListController.VGL_LOG_FILE);will(returnValue(logContents));
+        }});
+
+        ModelAndView mav = controller.getSectionedLogs(mockRequest, jobId);
+        Assert.assertTrue((Boolean) mav.getModel().get("success"));
+
+        ModelMap map = ((List<ModelMap>) mav.getModel().get("data")).get(0);
+
+        //There should be 3 sections (we don't care about line ending formats - normalise it to unix style \n)
+        Assert.assertEquals(4, map.keySet().size());
+        Assert.assertEquals("contents of env\n", stripCarriageReturns(map.get("environment").toString()));
+        Assert.assertEquals("multiple\nlines\n", stripCarriageReturns(map.get("test").toString()));
+        Assert.assertEquals("text\n", stripCarriageReturns(map.get("spaced header").toString()));
+        Assert.assertEquals(stripCarriageReturns(logContentString), stripCarriageReturns(map.get("Full").toString()));
+    }
+
+    /**
+     * Tests that log sectioning fails when job ID DNE
+     * @throws Exception
+     */
+    @Test
+    public void testGetSectionedLogs_JobDne() throws Exception {
+        final InputStream logContents = ResourceUtil.loadResourceAsStream("sectionedVglLog.txt");
+        final String userEmail = "user@example.org";
+        final Integer jobId = 54321;
+
+        context.checking(new Expectations() {{
+            allowing(mockRequest).getSession();will(returnValue(mockSession));
+            allowing(mockSession).getAttribute("openID-Email");will(returnValue(userEmail));
+
+            oneOf(mockJobManager).getJobById(jobId);will(returnValue(null));
+        }});
+
+        ModelAndView mav = controller.getSectionedLogs(mockRequest, jobId);
+        Assert.assertFalse((Boolean) mav.getModel().get("success"));
+    }
+
+    /**
+     * Tests that log sectioning fails as expected when log lookup fails
+     * @throws Exception
+     */
+    @Test
+    public void testGetSectionedLogs_LogAccessError() throws Exception {
+        final InputStream logContents = ResourceUtil.loadResourceAsStream("sectionedVglLog.txt");
+        final String userEmail = "user@example.org";
+        final Integer jobId = 54321;
+
+        final VEGLJob mockJob = context.mock(VEGLJob.class);
+
+        context.checking(new Expectations() {{
+            allowing(mockRequest).getSession();will(returnValue(mockSession));
+            allowing(mockSession).getAttribute("openID-Email");will(returnValue(userEmail));
+
+            allowing(mockJob).getUser();will(returnValue(userEmail));
+            allowing(mockJob).getStorageServiceId();will(returnValue(storageServiceId));
+
+            oneOf(mockJobManager).getJobById(jobId);will(returnValue(mockJob));
+
+            oneOf(mockCloudStorageServices[0]).getJobFile(mockJob, JobListController.VGL_LOG_FILE);will(throwException(new PortalServiceException("error")));
+        }});
+
+        ModelAndView mav = controller.getSectionedLogs(mockRequest, jobId);
+        Assert.assertFalse((Boolean) mav.getModel().get("success"));
+    }
+
+    /**
+     * Tests that log sectioning fails as expected when log lookup fails
+     * @throws Exception
+     */
+    @Test
+    public void testGetSectionedLogs_NoStorageService() throws Exception {
+        final InputStream logContents = ResourceUtil.loadResourceAsStream("sectionedVglLog.txt");
+        final String userEmail = "user@example.org";
+        final Integer jobId = 54321;
+
+        final VEGLJob mockJob = context.mock(VEGLJob.class);
+
+        context.checking(new Expectations() {{
+            allowing(mockRequest).getSession();will(returnValue(mockSession));
+            allowing(mockSession).getAttribute("openID-Email");will(returnValue(userEmail));
+
+            allowing(mockJob).getUser();will(returnValue(userEmail));
+            allowing(mockJob).getStorageServiceId();will(returnValue("id-that-dne"));
+
+            oneOf(mockJobManager).getJobById(jobId);will(returnValue(mockJob));
+        }});
+
+        ModelAndView mav = controller.getSectionedLogs(mockRequest, jobId);
+        Assert.assertFalse((Boolean) mav.getModel().get("success"));
     }
 }

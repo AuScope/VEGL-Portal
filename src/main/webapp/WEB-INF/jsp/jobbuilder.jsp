@@ -28,7 +28,6 @@
     <link rel="stylesheet" type="text/css" href="portal-core/js/extjs-4.1.0-rc1/examples/ux/css/CheckHeader.css">
     <script type="text/javascript" src="portal-core/js/extjs-4.1.0-rc1/ext-all-debug.js"></script>
     <script type="text/javascript" src="portal-core/js/extjs-4.1.0-rc1/examples/ux/RowExpander.js"></script>
-    <script type="text/javascript" src="portal-core/js/extjs-patches/ext-4.1.1a/EXTJSIV-6745.js"></script>
     <script type="text/javascript" src="portal-core/js/portal/util/FileDownloader.js"></script>
     <script type="text/javascript" src="portal-core/js/portal/util/ObservableMap.js"></script>
     <script type="text/javascript" src="portal-core/js/portal/widgets/window/ErrorWindow.js"></script>
