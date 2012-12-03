@@ -18,6 +18,7 @@ import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.services.cloud.CloudComputeService;
 import org.auscope.portal.core.services.cloud.CloudStorageService;
 import org.auscope.portal.core.services.cloud.FileStagingService;
+import org.auscope.portal.core.test.PortalTestClass;
 import org.auscope.portal.core.test.ResourceUtil;
 import org.auscope.portal.core.test.jmock.ReadableServletOutputStream;
 import org.auscope.portal.jmock.VEGLJobMatcher;
@@ -38,11 +39,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Josh Vote
  * @author Richard Goh
  */
-public class TestJobListController {
-    private Mockery context = new Mockery() {{
-        setImposteriser(ClassImposteriser.INSTANCE);
-    }};
-
+public class TestJobListController extends PortalTestClass {
     private final String computeServiceId = "comp-service-id";
     private final String storageServiceId = "storage-service-id";
     private VEGLJobManager mockJobManager;
