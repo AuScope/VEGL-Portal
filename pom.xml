@@ -5,7 +5,7 @@
     <groupId>org.auscope.portal</groupId>
     <artifactId>VGL-Portal</artifactId>
     <packaging>war</packaging>
-    <version>1.2.0-SNAPSHOT</version>
+    <version>1.1.1-RELEASE</version>
     <name>VGL-Portal</name>
     <url>https://www.seegrid.csiro.au/wiki/bin/view/ASRDC/VEGLProject</url>
 	<issueManagement>
@@ -186,7 +186,7 @@
         <dependency>
             <groupId>org.auscope.portal</groupId>
             <artifactId>portal-core</artifactId>
-            <version>0.4.0-SNAPSHOT</version>
+            <version>0.4.0-RELEASE</version>
         </dependency>
         <dependency>
             <groupId>taglibs</groupId>
