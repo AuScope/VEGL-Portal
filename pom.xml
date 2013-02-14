@@ -5,7 +5,7 @@
     <groupId>org.auscope.portal</groupId>
     <artifactId>VGL-Portal</artifactId>
     <packaging>war</packaging>
-    <version>1.1.1-RELEASE</version>
+    <version>1.1.2-RELEASE</version>
     <name>VGL-Portal</name>
     <url>https://www.seegrid.csiro.au/wiki/bin/view/ASRDC/VEGLProject</url>
 	<issueManagement>
