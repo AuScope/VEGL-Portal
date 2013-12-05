@@ -207,9 +207,8 @@ Ext.define('vegl.layer.querier.csw.GAProjectsQuerier', {
         
         //source url/domain
         var sourceUrl = cswRecord.get('recordInfoUrl');
-        var urlRegexp = /^((http[s]?|ftp):\/)?\/?([^:\/\s]+)((\/\w+)*\/)([\w\-\.]+[^#?\s]+)(.*)?(#[\w\-]+)?$/;
-        var match = urlRegexp.exec(sourceUrl);
-        var sourceHost = match[3];
+        var sourceHost = portal.util.URL.extractHost(sourceUrl);
+        
         
         var dateStamp = cswRecord.get('extensions').dateStamp;
         if (dateStamp) {

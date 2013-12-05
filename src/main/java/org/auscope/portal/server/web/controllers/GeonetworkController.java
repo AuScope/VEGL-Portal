@@ -8,6 +8,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -17,6 +18,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.auscope.portal.core.cloud.CloudFileInformation;
+import org.auscope.portal.core.server.controllers.BaseCSWController;
+import org.auscope.portal.core.services.CSWCacheService;
 import org.auscope.portal.core.services.GeonetworkService;
 import org.auscope.portal.core.services.cloud.CloudComputeService;
 import org.auscope.portal.core.services.cloud.CloudStorageService;
@@ -26,6 +29,7 @@ import org.auscope.portal.core.services.responses.csw.CSWGeographicElement;
 import org.auscope.portal.core.services.responses.csw.CSWOnlineResourceImpl;
 import org.auscope.portal.core.services.responses.csw.CSWRecord;
 import org.auscope.portal.core.services.responses.csw.CSWResponsibleParty;
+import org.auscope.portal.core.view.ViewCSWRecordFactory;
 import org.auscope.portal.server.vegl.VEGLJob;
 import org.auscope.portal.server.vegl.VEGLJobManager;
 import org.auscope.portal.server.vegl.VEGLSeries;
@@ -33,6 +37,7 @@ import org.auscope.portal.server.vegl.VGLSignature;
 import org.auscope.portal.server.vegl.VglDownload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
@@ -44,17 +49,25 @@ import org.springframework.web.servlet.ModelAndView;
  */
 @Controller
 public class GeonetworkController extends BaseCloudController {
+    /** Added to all records as a marker */
+    public static final String PROVENANCE_KEYWORD = "provenance";
+    
     protected final Log logger = LogFactory.getLog(getClass());
 
+    protected ViewCSWRecordFactory viewCSWRecordFactory;
+    
     private VEGLJobManager jobManager;
     private GeonetworkService gnService;
+    private CSWCacheService cswService;
 
     @Autowired
-    public GeonetworkController(VEGLJobManager jobManager, GeonetworkService gnService, CloudStorageService[] cloudStorageServices, CloudComputeService[] cloudComputeServices) {
+    public GeonetworkController(VEGLJobManager jobManager, GeonetworkService gnService, CloudStorageService[] cloudStorageServices, CloudComputeService[] cloudComputeServices, CSWCacheService cswService, ViewCSWRecordFactory viewCSWRecordFactory) {
         super(cloudStorageServices, cloudComputeServices);
         this.jobManager = jobManager;
         this.gnService = gnService;
         this.cloudStorageServices = cloudStorageServices;
+        this.cswService = cswService;
+        this.viewCSWRecordFactory = viewCSWRecordFactory;
     }
 
     /**
@@ -142,10 +155,13 @@ public class GeonetworkController extends BaseCloudController {
         rec.setDataIdentificationAbstract(job.getDescription());
         rec.setDate(job.getSubmitDate());
 
-        String descriptiveKeywords = request.getParameter("keywords");
-        if (StringUtils.isNotEmpty(descriptiveKeywords)) {
-            rec.setDescriptiveKeywords(descriptiveKeywords.split("[\\s,]+"));
+        List<String> descKeywordsToAdd = new ArrayList<String>();
+        descKeywordsToAdd.add(PROVENANCE_KEYWORD); //default keyword
+        String userKeywords = request.getParameter("keywords");
+        if (StringUtils.isNotEmpty(userKeywords)) {
+            descKeywordsToAdd.addAll(Arrays.asList(userKeywords.split("[\\s,]+")));
         }
+        rec.setDescriptiveKeywords(descKeywordsToAdd.toArray(new String[descKeywordsToAdd.size()]));
 
         rec.setOnlineResources(onlineResources.toArray(new CSWOnlineResourceImpl[onlineResources.size()]));
         rec.setResourceProvider(request.getParameter("organisationName"));
@@ -269,5 +285,63 @@ public class GeonetworkController extends BaseCloudController {
             logger.warn("Error registering job to Geonetwork for jobId=" + jobId, ex);
             return generateJSONResponseMAV(false, null, "Internal error");
         }
+    }
+    
+    /**
+     * Utility for generating a response model that represents a number of
+     * CSWRecord objects
+     * @param records The records to transform
+     * @return
+     */
+    protected ModelAndView generateJSONResponseMAV(CSWRecord[] records) {
+        if (records == null) {
+            return generateJSONResponseMAV(false, new CSWRecord[] {}, "");
+        }
+
+        List<ModelMap> recordRepresentations = new ArrayList<ModelMap>();
+
+        try {
+            for (CSWRecord record : records) {
+                recordRepresentations.add(viewCSWRecordFactory.toView(record));
+            }
+         } catch (Exception ex) {
+             log.error("Error converting data records", ex);
+             return generateJSONResponseMAV(false, new CSWRecord[0], 0, "Error converting data records");
+         }
+        return generateJSONResponseMAV(true, recordRepresentations, (Integer) null, "No errors");
+    }
+    
+    @RequestMapping("/getProvenanceRecords.do")
+    public ModelAndView getProvenanceRecords(@RequestParam(required=false, value="northBoundLatitude") final Double northBoundLatitude,
+            @RequestParam(required=false, value="eastBoundLongitude") final Double eastBoundLongitude,
+            @RequestParam(required=false, value="southBoundLatitude") final Double southBoundLatitude,
+            @RequestParam(required=false, value="westBoundLongitude") final Double westBoundLongitude) {
+        
+        //We already have a cache of all records broken down by keywords. Let's re-use that rather than
+        //firing off more requests to Geonetwork
+        Set<CSWRecord> allProvenanceRecords = cswService.getKeywordCache().get(PROVENANCE_KEYWORD);        
+        if (allProvenanceRecords == null) {
+            return generateJSONResponseMAV(true, new ArrayList<CSWRecord>(), "");
+        }
+        
+        //Unfortunately that means filtering ourselves. At the moment filtering is pretty simple
+        //so it's OK to do here. If it grows more complex then it will be better to instead offload
+        //the effort to the CSW service via a filter.
+        List<CSWRecord> matchingRecords = new ArrayList<CSWRecord>();
+        if (northBoundLatitude != null && eastBoundLongitude != null &&  southBoundLatitude != null && westBoundLongitude != null) {
+            for (CSWRecord recToTest : allProvenanceRecords) {
+                for (CSWGeographicElement elToTest :  recToTest.getCSWGeographicElements()) {
+                    CSWGeographicBoundingBox bbox = (CSWGeographicBoundingBox) elToTest;
+                    if (bbox.intersects(westBoundLongitude, eastBoundLongitude, southBoundLatitude, northBoundLatitude)) {
+                        matchingRecords.add(recToTest);
+                        break;
+                    }
+                }
+            }
+        } else {
+            matchingRecords.addAll(allProvenanceRecords);
+        }
+        
+        return generateJSONResponseMAV(matchingRecords.toArray(new CSWRecord[matchingRecords.size()]));
     }
 }
