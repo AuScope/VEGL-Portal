@@ -12,6 +12,7 @@
         <constructor-arg>
             <list>
                 <ref bean="knownTypeBouguerGeodetic" />
+                <ref bean="knownTypeWesternAreaAem" />
             </list>
         </constructor-arg>
     </bean>
@@ -19,7 +20,7 @@
     <bean id="cswServiceList" class="java.util.ArrayList">
         <constructor-arg>
             <list>
-                <ref bean="cswVhirlProduction" />
+                <ref bean="cswVhirlTest" />
             </list>
         </constructor-arg>
     </bean>
@@ -30,7 +31,7 @@
             <bean class="org.auscope.portal.core.services.methodmakers.GeonetworkMethodMaker">
             </bean>
         </constructor-arg>
-        <constructor-arg name="cswServiceItem" ref="cswVhirlProduction"/>
+        <constructor-arg name="cswServiceItem" ref="cswVhirlTest"/>
     </bean>
 
 </beans>

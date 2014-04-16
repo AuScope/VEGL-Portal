@@ -4,7 +4,7 @@
 <html>
 
 <head>
-    <title>VGL Portal - Build Job</title>
+    <title>VHIRL Portal - Build Job</title>
     <link rel="stylesheet" type="text/css" href="css/styles.css">
     <link rel="stylesheet" type="text/css" href="css/menu.css">
     <link rel="stylesheet" type="text/css" href="css/grid-examples.css">

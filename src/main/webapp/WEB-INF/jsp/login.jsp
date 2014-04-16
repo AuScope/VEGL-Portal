@@ -3,7 +3,7 @@
 <html>
 
 <head>
-    <title>VGL Portal - OpenID Login</title>
+    <title>VHIRL Portal - OpenID Login</title>
     <link rel="stylesheet" type="text/css" href="css/styles.css">
     <link rel="stylesheet" type="text/css" href="css/menu.css">
     <link rel="stylesheet" type="text/css" href="css/zocial/zocial.css" />
