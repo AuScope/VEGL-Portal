@@ -3,7 +3,7 @@
 <html>
 
 <head>
-    <title>VGL Portal - Access Error</title>
+    <title>VHIRL Portal - Access Error</title>
 
     <link rel="stylesheet" type="text/css" href="css/styles.css">
     <link rel="stylesheet" type="text/css" href="css/menu.css">
