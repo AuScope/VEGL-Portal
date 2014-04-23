@@ -12,7 +12,7 @@
             </security:authorize>
 
             <li><a id="help-button">Help<span></span></a></li>
-            <li><a href="https://www.seegrid.csiro.au/wiki/NeCTARProjects/VglUserGuide">Wiki<span></span></a></li>
+            <li><a href="https://www.seegrid.csiro.au/wiki/NeCTARProjects/Vhirl/WebHome">Wiki<span></span></a></li>
             <li <%if (request.getRequestURL().toString().contains("/gmap.jsp")) {%>class="current" <%} %>><a href="gmap.html">VHIRL Portal<span></span></a></li>
             <li <%if (request.getRequestURL().toString().contains("/jobbuilder.jsp")) {%>class="current" <%} %>><a href="jobbuilder.html">Submit Jobs<span></span></a></li>
             <li <%if (request.getRequestURL().toString().contains("/joblist.jsp")) {%>class="current" <%} %>><a href="joblist.html">Monitor Jobs<span></span></a></li>
