@@ -19,10 +19,8 @@
 </head>
 <body>
     <div id="header-container">
-      <div id="logo">
-         <h1>
+      <div id="logo" align="centre">
             <a href="#" onclick="window.open('about.html','AboutWin','toolbar=no, menubar=no,location=no,resizable=no,scrollbars=yes,statusbar=no,top=100,left=200,height=650,width=450');return false"><img alt="VEGL Header" src="img/img-vhirl-banner.gif"></a>
-         </h1>
       </div>
     </div>
     <div>
