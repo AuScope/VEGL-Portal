@@ -10,11 +10,6 @@
     <link rel="stylesheet" type="text/css" href="css/grid-examples.css">
     <link rel="stylesheet" type="text/css" href="portal-core/css/styles.css">
 
-    <style type="text/css">
-      #sitenav-03 a {
-        background: url( "img/navigation.gif" ) -200px -38px no-repeat;
-      }
-    </style>
 
     <!-- Portal Core Includes -->
     <link rel="stylesheet" type="text/css" href="portal-core/js/ext-4.1.1a/resources/css/ext-all.css">
@@ -23,8 +18,8 @@
 <body>
     <%@ include file="page_header.jsp" %>
 
-    <div style="margin-top: 150px;">
-        <p>You do not have adequate permissions to access the specified resource.</p>
+    <div style="margin-top: 130px; margin-left: 10px; color:red; font-size:20px">
+        <p><img align="top" src="img/exclamation.png"> You do not have adequate permissions to access the specified resource.</p>
     </div>
 
     <%@ include file="page_footer.jsp" %>

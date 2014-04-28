@@ -23,8 +23,9 @@
     <script type="text/javascript" src="CodeMirror-2.33/lib/util/formatting.js"></script>
     <script type="text/javascript" src="CodeMirror-2.33/lib/util/simple-hint.js"></script>
 
+    <%-- CSS imports - relative paths back to the webapp directory--%>
+    <jsp:include page="../../cssimports.htm"/>
     <!-- Portal Core Includes -->
-    <jsp:include page="../../portal-core/cssimports.htm"/>
     <jsp:include page="../../portal-core/jsimports.htm"/>
 
     <!-- component includes -->

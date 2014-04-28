@@ -20,8 +20,10 @@
     <script type="text/javascript" src="CodeMirror-2.33/lib/util/formatting.js"></script>
     <script type="text/javascript" src="CodeMirror-2.33/lib/util/simple-hint.js"></script>
 
-    <!-- Portal Core Includes -->
-    <jsp:include page="../../portal-core/cssimports.htm"/>
+
+    <%-- CSS imports - relative paths back to the webapp directory--%>
+    <jsp:include page="../../cssimports.htm"/>
+    <!-- Portal Core Includes -->    
     <jsp:include page="../../portal-core/jsimports.htm"/>
 
     <script type="text/javascript" src="mzExt/ux/form/field/Ext.ux.form.field.CodeMirror.411.js"></script>

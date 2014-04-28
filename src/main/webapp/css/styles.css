@@ -4,37 +4,26 @@
         padding: 0px;
     }
 
-    #header-container {
+    #header-container {       
         width: 100%;
         height: 100px;
         background-color: #ffffff;
+        position:fixed;
+        top: 0px;
+        left: 0px;
+        z-index: 1;
     }
 
-    #logo {
-        float: left;
-        width: 531px;
-        height: 100px;
+    #body-container {
+        position: fixed;
+        top: 100px;
+        bottom: 0px;
+        width: 100%;
+        overflow-y: auto;
+        overflow-x: hidden;
     }
 
-    #logo h1 {
-        float: left;
-        margin: 0;
-        padding: 0;
-        width: 531px;
-    }
 
-    #logo h1 a {
-        padding: 0;
-        margin: 0;
-        width: 531px;
-        height: 100px;
-        display: block;
-        background: url( "../img/img-auscope-banner.gif" ) no-repeat top left;
-    }
-
-    #logo h1 a span {
-        display: none;
-    }
 
 .jobdesc-title {
     font-weight: bold;
