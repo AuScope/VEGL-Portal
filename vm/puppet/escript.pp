@@ -64,6 +64,14 @@ puppi::netinstall { 'silo':
     require => [Class["escript_packages"], Class["vgl_common"]],
 }
 
+# Install SymPy
+puppi::netinstall { 'sympy':
+    url => 'http://sympy.googlecode.com/files/sympy-0.7.2.tar.gz',
+    extracted_dir => 'sympy-0.7.2',
+    destination_dir => '/tmp',
+    postextract_command => '/tmp/sympy-0.7.2/setup.py install',
+    require => [Class["escript_packages"], Class["vgl_common"]],
+}
 
 #Checkout, configure and install escript
 exec { "escript-co":
