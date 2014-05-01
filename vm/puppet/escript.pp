@@ -13,16 +13,10 @@ class { autofsck:
 
 #Install escript specific packages...
 class escript_packages {
-    package { ["atlas-devel", "boost-devel", "blas-devel", "netcdf-devel", "scons", "suitesparse-devel"]: 
+    package { ["boost-devel", "blas-devel", "netcdf-devel", "scons", "suitesparse-devel", "python-matplotlib", "gdal-python", "sympy" ]: 
         ensure => installed,
         require => Class["epel"],
     }
-}
-
-package {"matplotlib":
-        ensure => installed,
-        provider => "pip",
-        require => [Class["python_pip"], Package["numpy"]],
 }
 
 class {"escript_packages": }
@@ -60,14 +54,6 @@ puppi::netinstall { 'proj':
     require => [Class["escript_packages"], Class["vgl_common"]],
 }
 
-# Install GDAL
-puppi::netinstall { 'gdal':
-    url => 'http://download.osgeo.org/gdal/gdal-1.9.2.tar.gz',
-    extracted_dir => 'gdal-1.9.2',
-    destination_dir => '/tmp',
-    postextract_command => '/tmp/gdal-1.9.2/configure && make install',
-    require => [Class["escript_packages"], Class["vgl_common"]],
-}
 
 # Install SILO
 puppi::netinstall { 'silo':
@@ -78,21 +64,13 @@ puppi::netinstall { 'silo':
     require => [Class["escript_packages"], Class["vgl_common"]],
 }
 
-# Install SymPy
-puppi::netinstall { 'sympy':
-    url => 'http://sympy.googlecode.com/files/sympy-0.7.2.tar.gz',
-    extracted_dir => 'sympy-0.7.2',
-    destination_dir => '/tmp',
-    postextract_command => '/tmp/sympy-0.7.2/setup.py install',
-    require => [Class["escript_packages"], Class["vgl_common"]],
-}
 
 #Checkout, configure and install escript
 exec { "escript-co":
     cwd => "/tmp",
     command => "/usr/bin/svn co https://svn.esscc.uq.edu.au/svn/esys13/trunk escript_trunk",
     creates => "/tmp/escript_trunk",
-    require => [Puppi::Netinstall["sympy"], Puppi::Netinstall["proj"], Puppi::Netinstall["gdal"], Puppi::Netinstall['openmpi'], Puppi::Netinstall['silo']],
+    require => [Puppi::Netinstall["proj"], Puppi::Netinstall['openmpi'], Puppi::Netinstall['silo']],
     timeout => 0,
 }
 # Copy vm_options.py to <hostname>_options.py AND set the mpi prefix to correct values
