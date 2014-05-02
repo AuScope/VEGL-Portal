@@ -4,23 +4,17 @@
 class vgl_common {
 
     # Install default packages
-    package { ["wget", "subversion", "mercurial", "ftp", "bzip2", "elfutils", "ntp", "ntpdate", "gcc", "gcc-c++", "make", "openssh", "openssh-clients", "swig", "libpng-devel", "freetype-devel", "atlas", "atlas-devel", "libffi-devel"]: 
+    package { ["wget", "subversion", "mercurial", "ftp", "bzip2", "elfutils", "ntp", "ntpdate", "gcc", "gcc-c++", "make", "openssh", "openssh-clients", "swig", "libpng-devel", "freetype-devel", "atlas", "atlas-devel", "libffi-devel", "swift", "scipy"]: 
         ensure => installed,
         require => Class["epel"],
     }
     
     # Install default pip packages
-    package {  ["numpy", "boto", "pyproj", "swift", "python-keystoneclient"]:
+    package {  ["numpy", "boto", "pyproj", "python-keystoneclient"]:
         ensure => installed,
         provider => "pip",
         require => Class["python_pip"],
     }  
-    package {["scipy"]:
-        ensure => installed,
-        provider => "pip",
-        require => [Class["python_pip"], Package["numpy"]],
-    }
-
     
     
     # Install startup bootstrap
