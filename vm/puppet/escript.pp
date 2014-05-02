@@ -84,7 +84,7 @@ exec { "escript-co":
 # Copy vm_options.py to <hostname>_options.py AND set the mpi prefix to correct values
 exec { "escript-config":
     cwd => "/tmp/escript_trunk/scons",
-    command => "/bin/sed \"s/^mpi_prefix.*$/mpi_prefix = ['\\/usr\\/local\\/include', '\\/usr\\/local\\/lib']/g\" ./os/centos6.5_options.py > `/bin/hostname | /bin/sed s/[^a-zA-Z0-9]/_/g`_options.py",
+    command => "/bin/sed -e \"s/^mpi_prefix.*$/mpi_prefix = ['\\/usr\\/local\\/include', '\\/usr\\/local\\/lib']/g\" -e \"\\\$a# compressed files are not supported in centos 6.5 due to old boost version.\" -e \"\\\$acompressed_files=False\" vm_options.py > `/bin/hostname | /bin/sed s/[^a-zA-Z0-9]/_/g`_options.py",
     require => Exec["escript-co"],
 }
 exec { "escript-install":
@@ -101,3 +101,4 @@ file {"escript-profile-env":
     content => $escriptShContent,
     require => Exec['escript-install'],
 }
+
