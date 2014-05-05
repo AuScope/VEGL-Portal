@@ -34,7 +34,7 @@ then
     exit 1
 fi
 
-# VGL Portal Custom Modules - download from user specified SVN (or default)
+# VHIRL Portal Custom Modules - download from user specified SVN (or default)
 yum install -y wget 
 baseUrl="https://svn.auscope.org/subversion/AuScopePortal/VEGL-Portal/branches/VHIRL-Portal/"
 pathSuffix="/vm/puppet/modules/"
