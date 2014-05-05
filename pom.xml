@@ -7,7 +7,7 @@
     <packaging>war</packaging>
     <version>1.0.0-SNAPSHOT</version>
     <name>VHIRL-Portal</name>
-    <url>https://www.seegrid.csiro.au/wiki/bin/view/ASRDC/VEGLProject</url>
+    <url>https://www.seegrid.csiro.au/wiki/NeCTARProjects/Vhirl/WebHome</url>
     <issueManagement>
         <system>Jira</system>
         <url>https://jira.csiro.au/browse/VHIRL</url>
