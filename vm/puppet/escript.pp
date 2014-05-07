@@ -76,7 +76,7 @@ puppi::netinstall { 'sympy':
 #Checkout, configure and install escript
 exec { "escript-co":
     cwd => "/tmp",
-    command => "/usr/bin/svn co https://svn.esscc.uq.edu.au/svn/esys13/trunk escript_trunk",
+    command => "/usr/bin/svn co https://svn.geocomp.uq.edu.au/svn/esys13/trunk escript_trunk",
     creates => "/tmp/escript_trunk",
     require => [Puppi::Netinstall["proj"], Puppi::Netinstall['openmpi'], Puppi::Netinstall['silo']],
     timeout => 0,
