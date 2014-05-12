@@ -13,7 +13,7 @@ class { autofsck:
 
 #Install escript specific packages...
 class escript_packages {
-    package { ["boost-devel", "blas-devel", "netcdf-devel", "cppunit-devel", "scons", "suitesparse-devel", "python-matplotlib", "gdal-python" ]: 
+    package { ["boost-devel", "blas-devel", "netcdf-devel", "cppunit-devel", "scons", "suitesparse-devel", "python-matplotlib", "gdal-python", "ca-certificates" ]: 
         ensure => installed,
         require => Class["epel"],
     }
