@@ -4,19 +4,25 @@
 class vgl_common {
 
     # Install default packages
-    package { ["wget", "subversion", "mercurial", "ftp", "bzip2", "elfutils", "ntp", "ntpdate", "gcc", "gcc-c++", "make", "openssh", "openssh-clients", "swig", "libpng-devel", "freetype-devel", "atlas", "atlas-devel", "libffi-devel"]: 
+    package { ["wget", "ca-certificates", "subversion", "mercurial", "ftp", "bzip2", "elfutils", "ntp", "ntpdate", "gcc", "gcc-c++", "make", "openssh", "openssh-clients", "swig", "libpng-devel", "freetype-devel", "atlas", "atlas-devel", "libffi-devel", "mlocate"]: 
         ensure => installed,
         require => Class["epel"],
     }
     
     # Install default pip packages
-    package {  ["numpy", "boto", "pyproj", "python-swiftclient", "python-keystoneclient"]:
+    package {  ["boto", "pyproj", "python-swiftclient", "python-keystoneclient"]:
         ensure => installed,
         provider => "pip",
         require => Class["python_pip"],
-    }      
-    package {["scipy"]:
-        ensure => installed,
+    }
+	package { ["numpy"]:
+	    ensure => latest,
+        provider => "pip",
+        require => [Class["python_pip"]],
+	}
+		
+    package { ["scipy"]:
+        ensure => latest,
         provider => "pip",
         require => [Class["python_pip"], Package["numpy"]],
     }

@@ -13,7 +13,7 @@ class { autofsck:
 
 #Install escript specific packages...
 class escript_packages {
-    package { ["boost-devel", "blas-devel", "netcdf-devel", "scons", "suitesparse-devel", "python-matplotlib", "gdal-python" ]: 
+    package { ["boost-devel", "blas-devel", "netcdf-devel", "cppunit-devel", "scons", "suitesparse-devel", "python-matplotlib", "gdal-python" ]: 
         ensure => installed,
         require => Class["epel"],
     }
@@ -29,12 +29,13 @@ class {"visit": }
 # hopefully fix the issue in an updated package (see http://bugs.centos.org/view.php?id=5931). 
 # When that bug is fixed you should be able run yum install openmpi but until that time you will need to build from source: 
 puppi::netinstall { 'openmpi':
-    url => 'http://www.open-mpi.org/software/ompi/v1.6/downloads/openmpi-1.6.3.tar.gz',
-    extracted_dir => 'openmpi-1.6.3',
+    url => 'http://www.open-mpi.org/software/ompi/v1.6/downloads/openmpi-1.6.5.tar.gz',
+    extracted_dir => 'openmpi-1.6.5',
     destination_dir => '/tmp',
-    postextract_command => '/tmp/openmpi-1.6.3/configure --prefix=/usr/local && make install',
+    postextract_command => '/tmp/openmpi-1.6.5/configure --prefix=/usr/local && make install',
     require => [Class["escript_packages"], Class["vgl_common"]],
 }
+
 $mpiShContent= '# Environment for MPI
 export PATH=/usr/local/bin:$PATH
 export LD_LIBRARY_PATH=/usr/local/lib/openmpi:/usr/local/lib/:$LD_LIBRARY_PATH'
@@ -54,6 +55,14 @@ puppi::netinstall { 'proj':
     require => [Class["escript_packages"], Class["vgl_common"]],
 }
 
+# Install gmsh
+puppi::netinstall { 'gmsh':
+    url => 'http://geuz.org/gmsh/bin/Linux/gmsh-2.8.4-Linux64.tgz',
+    extracted_dir => 'gmsh-2.8.4-Linux',
+    destination_dir => '/tmp',
+    postextract_command => 'mv /tmp/gmsh-2.8.4-Linux/bin/gmsh /usr/local/bin/',
+    require => [Class["escript_packages"], Class["vgl_common"]],
+}
 
 # Install SILO
 puppi::netinstall { 'silo':
