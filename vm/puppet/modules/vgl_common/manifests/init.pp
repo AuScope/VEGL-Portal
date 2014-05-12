@@ -4,9 +4,15 @@
 class vgl_common {
 
     # Install default packages
-    package { ["wget", "ca-certificates", "subversion", "mercurial", "ftp", "bzip2", "elfutils", "ntp", "ntpdate", "gcc", "gcc-c++", "make", "openssh", "openssh-clients", "swig", "libpng-devel", "freetype-devel", "atlas", "atlas-devel", "libffi-devel", "mlocate"]: 
+    package { ["wget", "subversion", "mercurial", "ftp", "bzip2", "elfutils", "ntp", "ntpdate", "gcc", "gcc-c++", "make", "openssh", "openssh-clients", "swig", "libpng-devel", "freetype-devel", "atlas", "atlas-devel", "libffi-devel", "mlocate"]: 
         ensure => installed,
         require => Class["epel"],
+    }
+	
+	# I want the new one....
+    package { ["ca-certificates" ]:
+		ensure => latest,
+		require => Class["epel"],
     }
     
     # Install default pip packages
