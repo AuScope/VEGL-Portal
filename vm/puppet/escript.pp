@@ -32,7 +32,7 @@ puppi::netinstall { 'openmpi':
     url => 'http://www.open-mpi.org/software/ompi/v1.6/downloads/openmpi-1.6.5.tar.gz',
     extracted_dir => 'openmpi-1.6.5',
     destination_dir => '/tmp',
-    postextract_command => '/tmp/openmpi-1.6.5/configure --prefix=/usr/local && make install',
+    postextract_command => '/tmp/openmpi-1.6.5/configure --prefix=/usr/local && make all install',
     require => [Class["escript_packages"], Class["vgl_common"]],
 }
 
@@ -75,10 +75,10 @@ puppi::netinstall { 'silo':
 
 # Install SymPy
 puppi::netinstall { 'sympy':
-    url => 'http://sympy.googlecode.com/files/sympy-0.7.2.tar.gz',
-    extracted_dir => 'sympy-0.7.2',
+    url => 'https://github.com/sympy/sympy/releases/download/sympy-0.7.5/sympy-0.7.5.tar.gz',
+    extracted_dir => 'sympy-0.7.5',
     destination_dir => '/tmp',
-    postextract_command => '/tmp/sympy-0.7.2/setup.py install',
+    postextract_command => 'python /tmp/sympy-0.7.5/setup.py install',
     require => [Class["escript_packages"], Class["vgl_common"]],
 }
 
@@ -102,7 +102,7 @@ exec { "escript-co":
 # Copy vm_options.py to <hostname>_options.py AND set the mpi prefix to correct values
 exec { "escript-config":
     cwd => "/tmp/escript-3.4.2/scons",
-    command => "/bin/sed -e \"s/^mpi_prefix.*$/mpi_prefix = ['\\/usr\\/local\\/include', '\\/usr\\/local\\/lib']/g\" -e \"s/#boost_prefix.*$/boost_prefix = ['\\/usr\\/local\\/include', '\\/usr\\/local\\/lib']/g\" -e \"s/boost_libs.*$/boost_libs = ['boost_python']/g\" vm_options.py > `/bin/hostname | /bin/sed s/[^a-zA-Z0-9]/_/g`_options.py",
+    command => "/bin/sed -e \"s/^mpi_prefix.*$/mpi_prefix = ['\\/usr\\/local\\/include', '\\/usr\\/local\\/lib']/g\" -e \"s/#boost_prefix.*$/boost_prefix = ['\\/usr\\/local\\/include', '\\/usr\\/local\\/lib']/g\"  -e \"s/#werror/werror/g\"  -e \"s/boost_libs.*$/boost_libs = ['boost_python']/g\" vm_options.py > `/bin/hostname | /bin/sed s/[^a-zA-Z0-9]/_/g`_options.py",
     require => Exec["escript-co"],
 }
 exec { "escript-install":
