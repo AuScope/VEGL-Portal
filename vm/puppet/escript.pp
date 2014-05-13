@@ -112,7 +112,10 @@ exec { "escript-install":
     timeout => 0,
 }
 $escriptShContent= '# Environment for escript
-export PATH=/opt/escript/bin:$PATH'
+export PATH=/opt/escript/bin:$PATH
+# where is boost - why it is here....
+export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+'
 file {"escript-profile-env":
     path => "/etc/profile.d/escript.sh",
     ensure => present,
