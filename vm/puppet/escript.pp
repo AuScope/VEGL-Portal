@@ -13,7 +13,7 @@ class { autofsck:
 
 #Install escript specific packages...
 class escript_packages {
-    package { ["boost-devel", "blas-devel", "netcdf-devel", "cppunit-devel", "scons", "suitesparse-devel", "python-matplotlib", "gdal-python" ]: 
+    package { ["blas-devel", "netcdf-devel", "gdal-python", "cppunit-devel", "scons", "suitesparse-devel", "python-matplotlib", ]: 
         ensure => installed,
         require => Class["epel"],
     }
@@ -82,23 +82,32 @@ puppi::netinstall { 'sympy':
     require => [Class["escript_packages"], Class["vgl_common"]],
 }
 
+# Install boost
+puppi::netinstall { 'boost':
+    url => 'http://downloads.sourceforge.net/boost/boost_1_55_0.tar.gz',
+    extracted_dir => 'boost_1_55_0',
+    destination_dir => '/tmp',
+    postextract_command => 'sh bootstrap.sh && ./b2 -j6 install threading=multi link=shared',
+    require => [Class["escript_packages"], Class["vgl_common"]],
+}
+
 #Checkout, configure and install escript
 exec { "escript-co":
     cwd => "/tmp",
-    command => "/usr/bin/svn co https://svn.geocomp.uq.edu.au/svn/esys13/trunk escript_trunk",
-    creates => "/tmp/escript_trunk",
+    command => "/usr/bin/svn co https://svn.geocomp.uq.edu.au/svn/esys13/release/3.4.2/ escript-3.4.2",
+    creates => "/tmp/escript-3.4.2",
     require => [Puppi::Netinstall["proj"], Puppi::Netinstall['openmpi'], Puppi::Netinstall['silo']],
     timeout => 0,
 }
 # Copy vm_options.py to <hostname>_options.py AND set the mpi prefix to correct values
 exec { "escript-config":
-    cwd => "/tmp/escript_trunk/scons",
-    command => "/bin/sed -e \"s/^mpi_prefix.*$/mpi_prefix = ['\\/usr\\/local\\/include', '\\/usr\\/local\\/lib']/g\" -e \"\\\$a# compressed files are not supported in centos 6.5 due to old boost version.\" -e \"\\\$acompressed_files=False\" vm_options.py > `/bin/hostname | /bin/sed s/[^a-zA-Z0-9]/_/g`_options.py",
+    cwd => "/tmp/escript-3.4.2/scons",
+    command => "/bin/sed -e \"s/^mpi_prefix.*$/mpi_prefix = ['\\/usr\\/local\\/include', '\\/usr\\/local\\/lib']/g\" -e \"s/#boost_prefix.*$/boost_prefix = ['\\/usr\\/local\\/include', '\\/usr\\/local\\/lib']/g\" -e \"s/boost_libs.*$/boost_libs = ['boost_python']/g\" vm_options.py > `/bin/hostname | /bin/sed s/[^a-zA-Z0-9]/_/g`_options.py",
     require => Exec["escript-co"],
 }
 exec { "escript-install":
-    cwd => "/tmp/escript_trunk",
-    command => "/usr/bin/scons",
+    cwd => "/tmp/escript-3.4.2",
+    command => "/usr/bin/scons -j6",
     require => Exec["escript-config"],
     timeout => 0,
 }
