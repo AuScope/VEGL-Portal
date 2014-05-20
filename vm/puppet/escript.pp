@@ -24,6 +24,12 @@ class {"escript_packages": }
 # Install VisIt
 class {"visit": }
 
+#SILO needs this.
+package { ["gcc-gfortran"]:
+	ensure => latest,
+	require => Class["epel"],
+}
+
 # Note: At the time of writing the current OpenMPI package (openmpi-devel-1.5.4-1.el6.x86_64) is missing the necessary I/O component. 
 # Parts of escript require the I/O functionality and will not work. A bug was filed with CentOS who will 
 # hopefully fix the issue in an updated package (see http://bugs.centos.org/view.php?id=5931). 
@@ -70,7 +76,7 @@ puppi::netinstall { 'silo':
     extracted_dir => 'silo-4.8-bsd',
     destination_dir => '/tmp',
     postextract_command => '/tmp/silo-4.8-bsd/configure --prefix=/usr/local && make install',
-    require => [Class["escript_packages"], Class["vgl_common"]],
+    require => [Class["escript_packages"], Package["gcc-gfortran"], Class["vgl_common"]],
 }
 
 # Install SymPy
