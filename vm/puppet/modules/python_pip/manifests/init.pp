@@ -9,7 +9,7 @@ class python_pip {
     
     # Install Python-Pip
     package { ["python-pip"]: 
-        ensure => installed,
+        ensure => latest,
         require => Class["epel"],
     }
 }

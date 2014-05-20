@@ -24,9 +24,14 @@ then
     echo "Failed to install puppet module stahnma/epel"
     exit 1
 fi
-# Puppi from the forge is currently disabled - we are using a custom build checked into our SVN.
-# This should only be temporary - https://github.com/example42/puppi/pull/38
-#puppet module install example42/puppi
+
+puppet module install example42/puppi
+if [ $? -ne 0 ]
+then
+    echo "Failed to install puppet module example42/puppi"
+    exit 1
+fi
+
 puppet module install jhoblitt/autofsck 
 if [ $? -ne 0 ]
 then

@@ -6,6 +6,8 @@ import "autofsck"
 
 class {["epel", "python_pip", "vgl_common"]:}
 
+procplus = $physicalprocessorcount + 1
+
 # Disable fsck on boot
 class { autofsck:
   ensure => present, # default
@@ -24,12 +26,6 @@ class {"escript_packages": }
 # Install VisIt
 class {"visit": }
 
-#SILO needs this.
-package { ["gcc-gfortran"]:
-	ensure => latest,
-	require => Class["epel"],
-}
-
 # Note: At the time of writing the current OpenMPI package (openmpi-devel-1.5.4-1.el6.x86_64) is missing the necessary I/O component. 
 # Parts of escript require the I/O functionality and will not work. A bug was filed with CentOS who will 
 # hopefully fix the issue in an updated package (see http://bugs.centos.org/view.php?id=5931). 
@@ -38,7 +34,7 @@ puppi::netinstall { 'openmpi':
     url => 'http://www.open-mpi.org/software/ompi/v1.6/downloads/openmpi-1.6.5.tar.gz',
     extracted_dir => 'openmpi-1.6.5',
     destination_dir => '/tmp',
-    postextract_command => '/tmp/openmpi-1.6.5/configure --prefix=/usr/local && make all install',
+    postextract_command => '/tmp/openmpi-1.6.5/configure --prefix=/usr/local && make -j${procplus} all && make all install',
     require => [Class["escript_packages"], Class["vgl_common"]],
 }
 
@@ -57,7 +53,7 @@ puppi::netinstall { 'proj':
     url => 'http://download.osgeo.org/proj/proj-4.8.0.tar.gz',
     extracted_dir => 'proj-4.8.0',
     destination_dir => '/tmp',
-    postextract_command => '/tmp/proj-4.8.0/configure && make install',
+    postextract_command => '/tmp/proj-4.8.0/configure && make -j${procplus} && make install',
     require => [Class["escript_packages"], Class["vgl_common"]],
 }
 
@@ -75,7 +71,7 @@ puppi::netinstall { 'silo':
     url => 'https://wci.llnl.gov/codes/silo/silo-4.8/silo-4.8-bsd.tar.gz',
     extracted_dir => 'silo-4.8-bsd',
     destination_dir => '/tmp',
-    postextract_command => '/tmp/silo-4.8-bsd/configure --prefix=/usr/local && make install',
+    postextract_command => '/tmp/silo-4.8-bsd/configure --prefix=/usr/local && make -j${procplus} && make install',
     require => [Class["escript_packages"], Package["gcc-gfortran"], Class["vgl_common"]],
 }
 
@@ -93,7 +89,7 @@ puppi::netinstall { 'boost':
     url => 'http://downloads.sourceforge.net/boost/boost_1_55_0.tar.gz',
     extracted_dir => 'boost_1_55_0',
     destination_dir => '/tmp',
-    postextract_command => 'sh bootstrap.sh && ./b2 -j6 install threading=multi link=shared',
+    postextract_command => 'sh bootstrap.sh && ./b2 -j${procplus} install threading=multi link=shared',
     require => [Class["escript_packages"], Class["vgl_common"]],
 }
 
@@ -113,7 +109,7 @@ exec { "escript-config":
 }
 exec { "escript-install":
     cwd => "/tmp/escript-3.4.2",
-    command => "/usr/bin/scons -j6",
+    command => "/usr/bin/scons -j${procplus}",
     require => Exec["escript-config"],
     timeout => 0,
 }
