@@ -6,7 +6,7 @@ import "autofsck"
 
 class {["epel", "python_pip", "vgl_common"]:}
 
-procplus = $physicalprocessorcount + 1
+$procplus = $physicalprocessorcount + 1
 
 # Disable fsck on boot
 class { autofsck:
