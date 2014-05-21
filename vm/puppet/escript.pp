@@ -89,7 +89,7 @@ puppi::netinstall { 'boost':
     url => 'http://downloads.sourceforge.net/boost/boost_1_55_0.tar.gz',
     extracted_dir => 'boost_1_55_0',
     destination_dir => '/tmp',
-    postextract_command => 'sh bootstrap.sh && ./b2 -j${procplus} install threading=multi link=shared',
+    postextract_command => 'sh bootstrap.sh && ./b2 -j ${procplus} install threading=multi link=shared',
     require => [Class["escript_packages"], Class["vgl_common"]],
 }
 
