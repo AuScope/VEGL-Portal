@@ -91,31 +91,38 @@ Ext.application({
         var layersPanel = Ext.create('portal.widgets.panel.LayerPanel', {
             id : 'vgl-layers-panel',
             title : 'Active Layers',
-            region : 'center',
+            region : 'south',
             store : layerStore,
             map : map,
+            height: 250,
+            split: true,            
             allowDebugWindow : isDebugMode,
             listeners : {
-                //On selection, update our filter panel
-                select : function(rowModel, record, index) {
-                    filterPanel.showFilterForLayer(record);
-                },
                 removelayerrequest: function(sourceGrid, record) {
                     filterPanel.clearFilter();
                 }
             }
         });
 
+        
+        var handleFilterSelectionComplete =  function(){
+            var activePanel = tabsPanel.activeTab;
+            activePanel.addSelectedLayerToActive();
+
+        };
+        
+        
         /**
          * Used to show extra details for querying services
          */
         var filterPanel = Ext.create('portal.widgets.panel.FilterPanel', {
             id : 'vgl-filter-panel',
-            region: 'south',
+            region: 'center',
             layerPanel : layersPanel,
             map : map,
-            split: true,
-            height: 170
+            listeners : {
+                filterselectioncomplete : handleFilterSelectionComplete
+            }
         });
 
         var layerFactory = Ext.create('portal.layer.LayerFactory', {
@@ -140,9 +147,9 @@ Ext.application({
 
             //Turn our KnownLayer/CSWRecord into an actual Layer
             if (record instanceof portal.csw.CSWRecord) {
-                newLayer = layerFactory.generateLayerFromCSWRecord(record);
+                newLayer = record.get('layer');
             } else {
-                newLayer = layerFactory.generateLayerFromKnownLayer(record);
+                newLayer = record.get('layer');
             }
 
             //We may need to show a popup window with copyright info
@@ -165,6 +172,18 @@ Ext.application({
             store : knownLayerStore,
             map : map,
             listeners : {
+                //On selection, update our filter panel
+                select : function(rowModel, record, index) {
+                    var newLayer;
+                    if(record.get('layer')){
+                        newLayer = record.get('layer');
+                    }else{
+                        newLayer = layerFactory.generateLayerFromKnownLayer(record);
+                        record.set('layer', newLayer);
+                    }
+
+                    filterPanel.showFilterForLayer(newLayer);
+                },
                 addlayerrequest : handleAddRecordToMap
             }
         });
