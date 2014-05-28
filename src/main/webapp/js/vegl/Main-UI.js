@@ -95,7 +95,7 @@ Ext.application({
             store : layerStore,
             map : map,
             height: 250,
-            split: true,            
+            split: true,
             allowDebugWindow : isDebugMode,
             listeners : {
                 removelayerrequest: function(sourceGrid, record) {
@@ -104,14 +104,14 @@ Ext.application({
             }
         });
 
-        
+
         var handleFilterSelectionComplete =  function(){
             var activePanel = tabsPanel.activeTab;
             activePanel.addSelectedLayerToActive();
 
         };
-        
-        
+
+
         /**
          * Used to show extra details for querying services
          */
@@ -208,7 +208,7 @@ Ext.application({
             border: false,
             split:true,
             //margins: '100 0 0 0',
-            margins:'100 0 0 3',
+            margins:'105 0 0 3',
             width: 350,
             items:[tabsPanel , layersPanel, filterPanel]
         };
@@ -219,7 +219,7 @@ Ext.application({
         var centerPanel = Ext.create('Ext.panel.Panel', {
             region: 'center',
             id: 'center_region',
-            margins: '100 0 0 0',
+            margins: '105 0 0 0',
             cmargins:'100 0 0 0'
         });
 
@@ -275,7 +275,7 @@ Ext.application({
           }
 
         });
-        
+
         //Create our permalink generation handler
         var permalinkHandler = function() {
             var mss = Ext.create('portal.util.permalink.MapStateSerializer');
@@ -289,8 +289,8 @@ Ext.application({
                     version : version
                 });
 
-                popup.show(); 
-            });            
+                popup.show();
+            });
         };
         Ext.get('permalink').on('click', permalinkHandler);
         Ext.get('permalinkicon').on('click', permalinkHandler);
@@ -301,7 +301,7 @@ Ext.application({
         if (urlParams && (urlParams.state || urlParams.s)) {
             var decodedString = urlParams.state ? urlParams.state : urlParams.s;
             var decodedVersion = urlParams.v;
-            
+
             deserializationHandler = Ext.create('portal.util.permalink.DeserializationHandler', {
                 knownLayerStore : knownLayerStore,
                 cswRecordStore : unmappedCSWRecordStore,
@@ -310,8 +310,8 @@ Ext.application({
                 map : map,
                 stateString : decodedString,
                 stateVersion : decodedVersion
-            });           
-            
+            });
+
         }
     }
 });
