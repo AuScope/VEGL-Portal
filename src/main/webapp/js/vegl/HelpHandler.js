@@ -108,7 +108,7 @@ Ext.define('vegl.HelpHandler', {
                     description : 'After reviewing one or more layers you can draw a region of interest using this button. All layers with data in the region you draw will be selected for use in a processing job. If the layer supports it, the data will be constrained to the region you select'
                 }),Ext.create('portal.util.help.Instruction', {
                     highlightEl : 'help-button',
-                    anchor : 'bottom',
+                    anchor : 'right',
                     title : 'More information',
                     description : 'For futher information, please consult the online <a target="_blank" href="https://www.seegrid.csiro.au/wiki/NeCTARProjects/Vhirl/WebHome">VHIRL wiki</a>.'
                 })]);
