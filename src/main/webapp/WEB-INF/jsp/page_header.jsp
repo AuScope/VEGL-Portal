@@ -23,15 +23,15 @@
       </div>
       <div id="logo">
             <a href="#" onclick="window.open('about.html','AboutWin','toolbar=no, menubar=no,location=no,resizable=no,scrollbars=yes,statusbar=no,top=100,left=200,height=650,width=450');return false">
-                 		<img alt="VHIRL Header" src="img/img-vhirl-banner.gif">
+                 		<img alt="VHIRL Header" src="img/vhirl-logo.jpg">
             </a>
       </div>
-      
+
       <%if (request.getRequestURL().toString().contains("/gmap.jsp")) {%>
       <div id="permalinkicon"><a href="javascript:void(0)"><img src="img/link.png" width="16" height="16"/></a></div>
       <div id="permalink"><a href="javascript:void(0)">Permanent Link</a></div>
       <%} %>
       <span id="latlng" class="input-text"></span>
 
-      
+
    </div>
