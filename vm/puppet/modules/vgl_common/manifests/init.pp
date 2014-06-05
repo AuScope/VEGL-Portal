@@ -21,7 +21,7 @@ class vgl_common {
         provider => "pip",
         require => Class["python_pip"],
     }
-	package { ["numpy", "unittest2", "setuptools", "pip"]:
+	package { ["numpy", "unittest2", "setuptools", "pip", "matplotlib"]:
 	    ensure => latest,
         provider => "pip",
         require => [Class["python_pip"]],
