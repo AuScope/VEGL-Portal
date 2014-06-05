@@ -66,7 +66,7 @@ class pypar {
         url => "https://pypar.googlecode.com/files/pypar-2.1.5_108.tgz",
         destination_dir => "/tmp",
         extracted_dir => "pypar_2.1.5_108/source",
-        postextract_command => "perl -pi -e 's#mpicc -show#/usr/local/bin/mpicc -show#g' /tmp/pypar_2.1.5_108/source/setup.py && /usr/bin/python /tmp/pypar_2.1.5_108/source/setup.py install",
+        postextract_command => "/usr/bin/perl -pi -e 's#mpicc -show#/usr/local/bin/mpicc -show#g' /tmp/pypar_2.1.5_108/source/setup.py && /usr/bin/python /tmp/pypar_2.1.5_108/source/setup.py install",
         require => [Class["mpi"], Class["vgl_common"],],
     }
 }
@@ -91,7 +91,7 @@ exec { "anuga-co":
 #hack setup file to find mpicc
 exec { "anuga-install":
     cwd => "/usr/local/anuga",
-    command => "perl -pi -e 's#mpicc -show#/usr/local/bin/mpicc -show#g' /usr/local/anuga/source/anuga_parallel/pypar_extras/setup.py && /usr/bin/python compile_all.py",
+    command => "/usr/bin/perl -pi -e 's#mpicc -show#/usr/local/bin/mpicc -show#g' /usr/local/anuga/source/anuga_parallel/pypar_extras/setup.py && /usr/bin/python compile_all.py",
     require => Exec["anuga-co"],
     timeout => 0,
 }
