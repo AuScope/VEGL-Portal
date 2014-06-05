@@ -81,7 +81,7 @@ class {"pypar": }
 #Checkout, configure and install anuga with a 'dodgy SSL cert'
 exec { "anuga-co":
     cwd => "/usr/local",
-    command => "/bin/echo p | svn info https://anuga.anu.edu.au/svn/anuga/trunk/anuga_core/ && /usr/bin/svn co --trust-server-cert --non-interactive https://anuga.anu.edu.au/svn/anuga/trunk/anuga_core/ anuga",
+    command => "/bin/echo p | svn info https://anuga.anu.edu.au/svn/anuga/trunk/anuga_core/ && /usr/bin/svn export --trust-server-cert --non-interactive https://anuga.anu.edu.au/svn/anuga/trunk/anuga_core/ anuga",
     creates => "/usr/local/anuga",
     require => [Class["aem_packages"],Class["mpi"], Class["vgl_common"]],
     timeout => 0,
