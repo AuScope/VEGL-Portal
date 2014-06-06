@@ -111,7 +111,7 @@ file {"mpi-profile-env":
 #Checkout, configure and install escript
 exec { "escript-co":
     cwd => "/tmp",
-    command => "/usr/bin/svn co https://svn.geocomp.uq.edu.au/svn/esys13/branches/postrelease-csirofixes/ escript-3.4.2",
+    command => "/usr/bin/svn co https://svn.geocomp.uq.edu.au/svn/esys13/tags/3.4.2.1 escript-3.4.2",
     creates => "/tmp/escript-3.4.2",
     require => [Class["escript_deps"],Class["escript_packages"], Class["vgl_common"]],
     timeout => 0,

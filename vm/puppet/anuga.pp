@@ -27,8 +27,8 @@ class mpi {
     }
 
     $mpiShContent= '# Environment for MPI
-    export PATH=/usr/local/bin:$PATH
-    export LD_LIBRARY_PATH=/usr/local/lib/openmpi:/usr/local/lib/:$LD_LIBRARY_PATH'
+export PATH=/usr/local/bin:$PATH
+export LD_LIBRARY_PATH=/usr/local/lib/openmpi:/usr/local/lib/:$LD_LIBRARY_PATH'
     file {"mpi-profile-env":
         path => "/etc/profile.d/mpi.sh",
         ensure => present,
