@@ -175,7 +175,8 @@
         </constructor-arg>
     </bean>
 
-    <bean id="cloudStorageService-nci" class="org.auscope.portal.core.services.cloud.CloudStorageService">
+    <!-- temporary remark the nci cloud storage until it's ready -->
+    <!-- bean id="cloudStorageService-nci" class="org.auscope.portal.core.services.cloud.CloudStorageService">
         <constructor-arg name="endpoint" value="https://s3.nci.org.au:8080/auth/v1.0"/>
         <constructor-arg name="provider" value="swift"/>
         <constructor-arg name="accessKey" value="${env.nci.storage.accesskey}"/>
@@ -184,9 +185,11 @@
         <property name="id" value="nci-openstack-storage"/>
         <property name="name" value="National Computing Infrastructure (Canberra)"/>
         <property name="bucket" value="vegl-portal"/>
-    </bean>
+    </bean -->
 
-    <bean id="cloudStorageService-nectar-qld" class="org.auscope.portal.core.services.cloud.CloudStorageService">
+
+    <!-- regionName is not functioning, Nectar will assign randomly -->
+    <!--bean id="cloudStorageService-nectar-qld" class="org.auscope.portal.core.services.cloud.CloudStorageService">
         <constructor-arg name="endpoint" value="https://keystone.rc.nectar.org.au:5000/v2.0"/>
         <constructor-arg name="provider" value="swift-keystone"/>
         <constructor-arg name="accessKey" value="${env.nectar.storage.accesskey}"/>
@@ -208,11 +211,24 @@
         <property name="id" value="nectar-openstack-storage-melb"/>
         <property name="bucket" value="vgl-portal"/>
         <property name="authVersion" value="2.0"/>
+    </bean -->
+
+    <bean id="cloudStorageService-nectar" class="org.auscope.portal.core.services.cloud.CloudStorageService">
+        <constructor-arg name="endpoint" value="https://keystone.rc.nectar.org.au:5000/v2.0"/>
+        <constructor-arg name="provider" value="swift-keystone"/>
+        <constructor-arg name="accessKey" value="${env.nectar.storage.accesskey}"/>
+        <constructor-arg name="secretKey" value="${env.nectar.storage.secretkey}"/>
+        <constructor-arg name="regionName" value="Nectar"/>
+        <property name="name" value="National eResearch Collaboration Tools and Resources"/>
+        <property name="id" value="nectar-openstack-storage"/>
+        <property name="bucket" value="vgl-portal"/>
+        <property name="authVersion" value="2.0"/>
     </bean>
 
     <bean id="inetAddress" class="java.net.InetAddress" factory-method="getLocalHost"/>
 
-    <bean id="cloudComputeService-nci" class="org.auscope.portal.core.services.cloud.CloudComputeService">
+    <!-- temporary remark the nci cloud storage until it's ready -->
+    <!-- bean id="cloudComputeService-nci" class="org.auscope.portal.core.services.cloud.CloudComputeService">
         <constructor-arg name="provider" value="NovaEc2"/>
         <constructor-arg name="endpoint" value="http://openstack.nci.org.au:8773/services/Cloud"/>
         <constructor-arg name="accessKey" value="${env.nci.ec2.accesskey}"/>
@@ -289,7 +305,7 @@
                 </bean>
             </list>
         </property>
-    </bean>
+    </bean -->
 
     <bean id="cloudComputeService-nectar" class="org.auscope.portal.core.services.cloud.CloudComputeService">
         <constructor-arg name="provider" value="NovaKeystone"/>
@@ -297,12 +313,12 @@
         <constructor-arg name="accessKey" value="${env.nectar.ec2.accesskey}"/>
         <constructor-arg name="secretKey" value="${env.nectar.ec2.secretkey}"/>
         <property name="id" value="nectar-openstack-compute"/>
-        <property name="name" value="National eResearch Collaboration Tools and Resources (Melbourne)"/>
+        <property name="name" value="National eResearch Collaboration Tools and Resources"/>
         <property name="groupName" value ="vgl-#{inetAddress.hostName.toLowerCase()}"/>
         <property name="availableImages">
             <list>
                 <bean class="org.auscope.portal.server.vegl.VglMachineImage">
-                    <constructor-arg name="imageId" value="Melbourne/96130956-ad24-4d77-8155-b7f1fb688fd1"/>
+                    <constructor-arg name="imageId" value="Nectar/96130956-ad24-4d77-8155-b7f1fb688fd1"/>
                     <property name="name" value="escript"/>
                     <property name="description"><value>A Centos 6 machine with escript already installed.</value></property>
                     <property name="keywords">
@@ -313,29 +329,13 @@
                     </property>
                 </bean>
                 <bean class="org.auscope.portal.server.vegl.VglMachineImage">
-                    <constructor-arg name="imageId" value="Melbourne/e4dfe8cc-3b07-41c9-8b53-b82960797769"/>
-                    <property name="name" value="Underworld"/>
-                    <property name="description"><value>A Centos 6 machine with Underworld already installed.</value></property>
+                    <constructor-arg name="imageId" value="Nectar/9f6d00c9-0f41-4fa7-9482-ed1739126a44"/>
+                    <property name="name" value="ANUGA"/>
+                    <property name="description"><value>A Centos 6 machine with ANUGA already installed.</value></property>
                     <property name="keywords">
                         <array>
-                            <value>Underworld</value>
+                            <value>anuga</value>
                             <value>centos6</value>
-                        </array>
-                    </property>
-                </bean>
-                <bean class="org.auscope.portal.server.vegl.VglMachineImage">
-                    <constructor-arg name="imageId" value="Melbourne/2ee27674-2f62-4c47-ad54-f41e6ca3c42a"/>                   
-                    <property name="name" value="AEM-Inversion"/>
-                    <property name="description"><value>A Centos 6 machine with AEM Inversion already installed.</value></property>
-                    <property name="keywords">
-                        <array>
-                            <value>AEM-Inversion</value>
-                            <value>centos6</value>
-                        </array>
-                    </property>
-                    <property name="permissions">
-                        <array>
-                            <value>ROLE_USER</value>
                         </array>
                     </property>
                 </bean>

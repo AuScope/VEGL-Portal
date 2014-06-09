@@ -11,8 +11,8 @@
     <bean id="knownTypes" class="java.util.ArrayList">
         <constructor-arg>
             <list>
+            	<ref bean="knownTypeBusselton" />
                 <ref bean="knownTypeBouguerGeodetic" />
-                <ref bean="knownTypeWesternAreaAem" />
             </list>
         </constructor-arg>
     </bean>
