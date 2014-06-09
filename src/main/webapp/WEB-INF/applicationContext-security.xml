@@ -66,7 +66,7 @@
         <beans:constructor-arg index="1">
             <beans:list>
                 <!-- Administrators -->
-                <!-- Josh.Vote@csiro.au -->
+                <!-- florence.tan@csiro.au -->
                 <beans:bean class="org.auscope.portal.server.web.security.PortalUser">
                     <beans:constructor-arg name="name" value="https://www.google.com/accounts/o8/id?id=AItOawnHXArNEEIuJFvVx-2wPnx4BoNG6tMaWOA" />
                     <beans:constructor-arg name="credentials" value="" />

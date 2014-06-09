@@ -11,47 +11,20 @@ ScriptBuilder.Components.getComponents = function(selectedToolbox) {
     };
 
     switch (selectedToolbox.toLowerCase()) {
-        case "ubc-gif":
-            comps.children.push(ScriptBuilder.Components.getUBCExamples());
-            break;
         case "escript":
             comps.children.push(ScriptBuilder.Components.getEscriptExamples());
             break;
-        case "underworld":
-            comps.children.push(ScriptBuilder.Components.getUnderworldExamples());
-            break;
-        case "aem-inversion":
-            comps.children.push(ScriptBuilder.Components.getAEMExamples());
+        case "anuga":
+            comps.children.push(ScriptBuilder.Components.getANUGAExamples());
             break;
         default:
-            comps.children.push(ScriptBuilder.Components.getUBCExamples());
             comps.children.push(ScriptBuilder.Components.getEscriptExamples());
-            comps.children.push(ScriptBuilder.Components.getUnderworldExamples());
+            comps.children.push(ScriptBuilder.Components.getANUGAExamples());
     }
 
     return comps;
 };
 
-ScriptBuilder.Components.getUBCExamples = function() {
-    return {
-        type : "category",
-        text : "UBC GIF Examples",
-        expanded : true,
-        children : [{
-            id   : "ScriptBuilder.templates.UbcGravityTemplate",
-            type : "s",
-            text : "Gravity Inversion",
-            qtip : "Perform a gravity inversion using UBC GIF. Expects data in the form of a CSV file. Double click to use this example.",
-            leaf : true
-        },{
-            id   : "ScriptBuilder.templates.UbcMagneticTemplate",
-            type : "s",
-            text : "Magnetic Inversion",
-            qtip : "Perform a magnetic inversion using UBC GIF. Expects data in the form of a CSV file. Double click to use this example.",
-            leaf : true
-        }]
-    };
-};
 
 ScriptBuilder.Components.getEscriptExamples = function() {
     return {
@@ -86,31 +59,18 @@ ScriptBuilder.Components.getEscriptExamples = function() {
     };
 };
 
-ScriptBuilder.Components.getAEMExamples = function() {
-    return {
-        text : "AEM Inversion Examples",
-        type : "category",
-        expanded : true,
-        children : [{
-            id   : "ScriptBuilder.templates.AEMInversionTemplate",
-            type : "s",
-            text : "AEM Inversion",
-            qtip : "Perform a AEM inversion using some script. To be completed",
-            leaf : true
-        }]
-    };
-};
 
-ScriptBuilder.Components.getUnderworldExamples = function() {
+
+ScriptBuilder.Components.getANUGAExamples = function() {
     return {
-        text : "Underworld Examples",
+        text : "ANUGA Examples",
         type : "category",
         expanded : true,
         children : [{
-            id   : "ScriptBuilder.templates.UnderworldGocadTemplate",
+            id   : "ScriptBuilder.templates.ANUGATemplate",
             type : "s",
-            text : "Gocad Simulation",
-            qtip : "Perform an Underworld simulation using a Gocad Voxelset. Expects data in the form of a Gocad voxel set. Double click to use this example.",
+            text : "ANUGA Hydrodynamic/Hydraulic Modelling",
+            qtip : "Modelling the impact of hydrological disasters such as dam breaks, riverine flooding, storm-surge or tsunamis.  Expects data in the form of NetCDF file.  Double click to use this example.",
             leaf : true
         }]
     };

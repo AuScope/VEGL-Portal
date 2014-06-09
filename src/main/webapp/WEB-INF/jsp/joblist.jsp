@@ -23,7 +23,7 @@
 
     <%-- CSS imports - relative paths back to the webapp directory--%>
     <jsp:include page="../../cssimports.htm"/>
-    <!-- Portal Core Includes -->    
+    <!-- Portal Core Includes -->
     <jsp:include page="../../portal-core/jsimports.htm"/>
 
     <script type="text/javascript" src="mzExt/ux/form/field/Ext.ux.form.field.CodeMirror.411.js"></script>
@@ -63,6 +63,7 @@
     <script src="js/ScriptBuilder/templates/EScriptJointTemplate.js" type="text/javascript"></script>
     <script src="js/ScriptBuilder/templates/UnderworldGocadTemplate.js" type="text/javascript"></script>
     <script src="js/ScriptBuilder/templates/AEMInversionTemplate.js" type="text/javascript"></script>
+    <script src="js/ScriptBuilder/templates/ANUGATemplate.js" type="text/javascript"></script>
     <script type="text/javascript" src="js/ScriptBuilder/ScriptBuilder.js"></script>
     <script type="text/javascript" src="js/ScriptBuilder/InsertionPromptWindow.js"></script>
     <script type="text/javascript" src="js/ScriptBuilder/Components.js"></script>
