@@ -189,7 +189,7 @@
 
 
     <!-- regionName is not functioning, Nectar will assign randomly -->
-    <!--bean id="cloudStorageService-nectar-qld" class="org.auscope.portal.core.services.cloud.CloudStorageService">
+    <bean id="cloudStorageService-nectar-qld" class="org.auscope.portal.core.services.cloud.CloudStorageService">
         <constructor-arg name="endpoint" value="https://keystone.rc.nectar.org.au:5000/v2.0"/>
         <constructor-arg name="provider" value="swift-keystone"/>
         <constructor-arg name="accessKey" value="${env.nectar.storage.accesskey}"/>
@@ -209,18 +209,6 @@
         <constructor-arg name="regionName" value="Melbourne"/>
         <property name="name" value="National eResearch Collaboration Tools and Resources (Melbourne)"/>
         <property name="id" value="nectar-openstack-storage-melb"/>
-        <property name="bucket" value="vgl-portal"/>
-        <property name="authVersion" value="2.0"/>
-    </bean -->
-
-    <bean id="cloudStorageService-nectar" class="org.auscope.portal.core.services.cloud.CloudStorageService">
-        <constructor-arg name="endpoint" value="https://keystone.rc.nectar.org.au:5000/v2.0"/>
-        <constructor-arg name="provider" value="swift-keystone"/>
-        <constructor-arg name="accessKey" value="${env.nectar.storage.accesskey}"/>
-        <constructor-arg name="secretKey" value="${env.nectar.storage.secretkey}"/>
-        <constructor-arg name="regionName" value="Nectar"/>
-        <property name="name" value="National eResearch Collaboration Tools and Resources"/>
-        <property name="id" value="nectar-openstack-storage"/>
         <property name="bucket" value="vgl-portal"/>
         <property name="authVersion" value="2.0"/>
     </bean>
@@ -318,7 +306,7 @@
         <property name="availableImages">
             <list>
                 <bean class="org.auscope.portal.server.vegl.VglMachineImage">
-                    <constructor-arg name="imageId" value="Nectar/96130956-ad24-4d77-8155-b7f1fb688fd1"/>
+                    <constructor-arg name="imageId" value="Melbourne/96130956-ad24-4d77-8155-b7f1fb688fd1"/>
                     <property name="name" value="escript"/>
                     <property name="description"><value>A Centos 6 machine with escript already installed.</value></property>
                     <property name="keywords">
@@ -329,7 +317,7 @@
                     </property>
                 </bean>
                 <bean class="org.auscope.portal.server.vegl.VglMachineImage">
-                    <constructor-arg name="imageId" value="Nectar/9f6d00c9-0f41-4fa7-9482-ed1739126a44"/>
+                    <constructor-arg name="imageId" value="Melbourne/9f6d00c9-0f41-4fa7-9482-ed1739126a44"/>
                     <property name="name" value="ANUGA"/>
                     <property name="description"><value>A Centos 6 machine with ANUGA already installed.</value></property>
                     <property name="keywords">
