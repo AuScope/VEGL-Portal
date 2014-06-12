@@ -21,7 +21,7 @@ Ext.define('ScriptBuilder.templates.ANUGATemplate', {
         this._getTemplatedScriptGui(callback, 'run_busselton.py', {
             xtype : 'form',
             width : 450,
-            height : 100,
+            height : 190,
             items : [{
                 xtype : 'combo',
                 fieldLabel : 'Dataset',
@@ -49,6 +49,30 @@ Ext.define('ScriptBuilder.templates.ANUGATemplate', {
                     },
                     autoLoad : true
                 })
+            },{
+                xtype : 'numberfield',
+                fieldLabel : 'Base Scale',
+                anchor : '-5',
+                name : 'base_scale',
+                value : 400000,
+                allowBlank : false,
+                minValue : 1,
+            },{
+                xtype : 'numberfield',
+                fieldLabel : 'Tide',
+                anchor : '-5',
+                name : 'tide',
+                value : 0.0,
+                minValue : 0,
+                step : 0.1,
+                allowBlank : false,
+            },{
+                xtype : 'numberfield',
+                fieldLabel : 'Final Time',
+                anchor : '-5',
+                name : 'final_time',
+                value : 5000,
+                allowBlank : false,
             }]
         });
     }
