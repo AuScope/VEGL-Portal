@@ -14,10 +14,10 @@ class { autofsck:
 }
 
 class mpi {
-    # Note: At the time of writing the current OpenMPI package (openmpi-devel-1.5.4-1.el6.x86_64) is missing the necessary I/O component. 
-    # Parts of escript require the I/O functionality and will not work. A bug was filed with CentOS who will 
-    # hopefully fix the issue in an updated package (see http://bugs.centos.org/view.php?id=5931). 
-    # When that bug is fixed you should be able run yum install openmpi but until that time you will need to build from source: 
+    # Note: At the time of writing the current OpenMPI package (openmpi-devel-1.5.4-1.el6.x86_64) is missing the necessary I/O component.
+    # Parts of escript require the I/O functionality and will not work. A bug was filed with CentOS who will
+    # hopefully fix the issue in an updated package (see http://bugs.centos.org/view.php?id=5931).
+    # When that bug is fixed you should be able run yum install openmpi but until that time you will need to build from source:
     puppi::netinstall { "openmpi":
         url => "http://www.open-mpi.org/software/ompi/v1.6/downloads/openmpi-1.6.5.tar.gz",
         extracted_dir => "openmpi-1.6.5",
@@ -43,11 +43,11 @@ class scientificpython {
         ensure => installed,
         require => Class["epel"],
     }
-    
+
     puppi::netinstall { "scientificpython-inst":
         url => "https://sourcesup.renater.fr/frs/download.php/4425/ScientificPython-2.9.3.tar.gz",
         extracted_dir => "ScientificPython-2.9.3",
-        destination_dir => "/tmp",        
+        destination_dir => "/tmp",
         postextract_command => "python setup.py install",
         require => [Class["mpi"], Class["vgl_common"],],
     }
@@ -55,7 +55,7 @@ class scientificpython {
 
 #Install aem specific packages...
 class aem_packages {
-    package { ["fftw-devel", "fftw", "openmpi", "openmpi-devel"]: 
+    package { ["fftw-devel", "fftw", "openmpi", "openmpi-devel"]:
         ensure => installed,
         require => Class["epel"],
     }
@@ -70,12 +70,23 @@ class pypar {
         require => [Class["mpi"], Class["vgl_common"],],
     }
 }
-    
+
+class gdal {
+    puppi::netinstall { "gdal-inst":
+        url => "http://download.osgeo.org/gdal/1.11.0/gdal-1.11.0.tar.gz",
+        destination_dir => "/tmp",
+        extracted_dir => "gdal-1.11.0",
+        postextract_command => "/tmp/gdal-1.11.0/configure --with-python && make -j${::procplus} && make install",
+        require => [Class["mpi"], Class["vgl_common"],],
+    }
+}
+
 
 class {"mpi":}
 class {"aem_packages": }
 class {"scientificpython": }
 class {"pypar": }
+class {"gdal": }
 
 
 #Checkout, configure and install anuga with a 'dodgy SSL cert'
