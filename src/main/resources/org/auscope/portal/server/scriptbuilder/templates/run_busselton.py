@@ -23,6 +23,7 @@ import time
 import sys
 from math import sin, pi, exp
 import numpy as np
+import VHIRL_conversion
 
 # Related major packages
 import anuga
@@ -36,7 +37,7 @@ import anuga
 """
 
 # Filename for input data (NetCDF format)
-dataset = '${input-dataset}'
+dataset = '${input_dataset}'
 
 #from anuga.utilities.system_tools import get_user_name, get_host_name
 from time import localtime, strftime, gmtime
@@ -157,7 +158,7 @@ time00 = time.time()
 #------------------------------------------------------------------------------
 
 # Create ASC from nc data
-VHIRL_conversions.nc2asc(dataset + ‘.nc’, name_stem)
+VHIRL_conversions.nc2asc(dataset, name_stem)
 
 # Create DEM from asc data
 anuga.asc2dem(name_stem+'.asc', use_cache=v_cache, verbose=v_verbose)
