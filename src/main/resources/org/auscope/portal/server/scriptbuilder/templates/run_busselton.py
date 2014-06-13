@@ -23,7 +23,7 @@ import time
 import sys
 from math import sin, pi, exp
 import numpy as np
-import VHIRL_conversion
+import VHIRL_conversions
 
 # Related major packages
 import anuga
@@ -67,7 +67,7 @@ WaveForm=lambda t: [AA*(1/np.exp(-periodT/scaleF/DD))*np.sin(BB*t)*np.exp(-t/DD)
 #------------------------------------------------------------------------------
 # Filenames
 #------------------------------------------------------------------------------
-name_stem = scenario_name = '${namestem}'
+name_stem = scenario_name = '${name_stem}'
 event_number =  'T' + str(periodT)
 rp = 10000
 
@@ -286,6 +286,6 @@ def cloudUpload(inFilePath, cloudKey):
 
 
 # Upload results
-cloudUpload("${filename}.pts", "${filename}.pts")
-cloudUpload("${filename}.msh", "${filename}.msh")
-cloudUpload("${filename}_fixed_wave.sww", "${filename}_fixed_wave.sww")
+cloudUpload("${name_stem}.pts", "${name_stem}.pts")
+cloudUpload("${name_stem}.msh", "${name_stem}.msh")
+cloudUpload("${name_stem}_fixed_wave.sww", "${name_stem}_fixed_wave.sww")

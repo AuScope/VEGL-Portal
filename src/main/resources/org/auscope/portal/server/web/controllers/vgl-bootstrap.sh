@@ -7,7 +7,6 @@
 export VGL_BOOTSTRAP_VERSION="1"
 export WORKING_DIR="/root"
 export WORKFLOW_SCRIPT="$WORKING_DIR/vgl.sh"
-export VHIRL_NCTOASC_CONVERSION_SCRIPT="$WORKING_DIR/VHIRL_conversions.py"
 
 # These will be replaced with hardcoded values by the VGL Portal (varying for each job)
 export STORAGE_BUCKET="{0}"
@@ -37,11 +36,6 @@ echo "STORAGE_TYPE = $STORAGE_TYPE"
 echo "--------------------------------------"
 
 
-#Download data importer module
-echo "Downloading .nc to .asc conversion script from $WORKFLOW_URL and storing it at $WORKFLOW_SCRIPT"
-curl -L "https://svn.auscope.org/subversion/AuScopePortal/VEGL-Portal/branches/VHIRL-Portal/vm/VHIRL_conversions.py" > "$VHIRL_NCTOASC_CONVERSION_SCRIPT"
-echo "curl result $?"
-
 #Download our workflow and make it executable
 echo "Downloading workflow script from $WORKFLOW_URL and storing it at $WORKFLOW_SCRIPT"
 curl -L "$WORKFLOW_URL" > "$WORKFLOW_SCRIPT"
@@ -52,4 +46,3 @@ echo "chmod result $?"
 
 echo "executing workflow script $WORKFLOW_SCRIPT"
 $WORKFLOW_SCRIPT
-

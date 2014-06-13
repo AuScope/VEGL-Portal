@@ -25,7 +25,7 @@ Ext.define('ScriptBuilder.templates.ANUGATemplate', {
             items : [{
                 xtype : 'combo',
                 fieldLabel : 'Dataset',
-                name : 'input-dataset',
+                name : 'input_dataset',
                 allowBlank : false,
                 valueField : 'localPath',
                 displayField : 'localPath',

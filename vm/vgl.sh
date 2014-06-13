@@ -14,6 +14,8 @@ export CLOUD_STORAGE_WRAPPER_URL="https://svn.auscope.org/subversion/AuScopePort
 export VEGL_SCRIPT_PATH="${WORKING_DIR}/vegl_script.py"
 export SUBSET_REQUEST_PATH="${WORKING_DIR}/vgl-download.sh"
 export ABORT_SHUTDOWN_PATH="${WORKING_DIR}/abort_shutdown"
+export FILECONVERSION_URL="https://svn.auscope.org/subversion/AuScopePortal/VEGL-Portal/branches/VHIRL-Portal/vm/VHIRL_conversions.py"
+export VHIRL_NCTOASC_CONVERSION_SCRIPT="${WORKING_DIR}/VHIRL_conversions.py"
 
 echo "VEGL Workflow Script... starting"
 echo "All future console output will be redirected to ${VEGL_LOG_FILE}"
@@ -104,6 +106,11 @@ chmod +x "$SUBSET_REQUEST_PATH"
 echo "About to execute ${SUBSET_REQUEST_PATH} as a shell script"
 sh $SUBSET_REQUEST_PATH
 cd $WORKING_DIR
+
+#Download File Conversion Module
+echo "Downloading .nc to .asc conversion script from $FILECONVERSION_URL and storing it at $WORKFLOW_SCRIPT"
+curl -L "$FILECONVERSION_URL" > "$VHIRL_NCTOASC_CONVERSION_SCRIPT"
+echo "curl result $?"
 
 #Next we can perform our actual work (make sure we indicate where the python logs start/finish)
 chmod +x "$VEGL_SCRIPT_PATH"
