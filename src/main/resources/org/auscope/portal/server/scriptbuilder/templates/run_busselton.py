@@ -24,6 +24,7 @@ import sys
 from math import sin, pi, exp
 import numpy as np
 import VHIRL_conversions
+import subprocess
 
 # Related major packages
 import anuga
