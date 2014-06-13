@@ -39,7 +39,7 @@ echo "--------------------------------------"
 
 #Download data importer module
 echo "Downloading .nc to .asc conversion script from $WORKFLOW_URL and storing it at $WORKFLOW_SCRIPT"
-curl -L "$WORKFLOW_URL" > "$VHIRL_NCTOASC_CONVERSION_SCRIPT"
+curl -L "https://svn.auscope.org/subversion/AuScopePortal/VEGL-Portal/branches/VHIRL-Portal/vm/VHIRL_conversions.py" > "$VHIRL_NCTOASC_CONVERSION_SCRIPT"
 echo "curl result $?"
 
 #Download our workflow and make it executable
