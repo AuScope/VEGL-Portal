@@ -25,7 +25,7 @@ Ext.define('ScriptBuilder.templates.ANUGATemplate', {
             items : [{
                 xtype : 'combo',
                 fieldLabel : 'Dataset',
-                name : 'busselton-file',
+                name : 'input-dataset',
                 allowBlank : false,
                 valueField : 'localPath',
                 displayField : 'localPath',
@@ -63,15 +63,15 @@ Ext.define('ScriptBuilder.templates.ANUGATemplate', {
                 anchor : '-5',
                 name : 'tide',
                 value : 0.0,
-                minValue : 0,
+                minValue : 0.0,
                 step : 0.1,
                 allowBlank : false,
             },{
-                xtype : 'numberfield',
-                fieldLabel : 'Final Time',
+                xtype : 'textfield',
+                fieldLabel : 'File Name',
                 anchor : '-5',
-                name : 'final_time',
-                value : 5000,
+                name : 'namestem',
+                value : 'busselton',
                 allowBlank : false,
             }]
         });

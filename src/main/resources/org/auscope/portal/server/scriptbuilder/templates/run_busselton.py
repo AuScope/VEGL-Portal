@@ -13,11 +13,6 @@ Geoscience Australia, 2004-present
 
 """ANUGA modelling using busselton netCDF data"""
 
-# Filename for input data
-DATASET = '${busselton-file}'
-
-
-####### Do not change anything below this line #######
 
 #------------------------------------------------------------------------------
 # Import necessary modules
@@ -32,26 +27,150 @@ import numpy as np
 # Related major packages
 import anuga
 
-# Application specific imports
-import project                 # Definition of file names and polygons
+######################################################
+####### Do not change anything above this line #######
+
+# Definition of file names and polygons
+""" Common filenames and locations for topographic data, meshes and outputs.
+    This file defines the parameters of the scenario you wish to run.
+"""
+
+# Filename for input data (NetCDF format)
+dataset = '${input-dataset}'
+
+#from anuga.utilities.system_tools import get_user_name, get_host_name
+from time import localtime, strftime, gmtime
+from os.path import join, exists
+
+
+#------------------------------------------------------------------------------
+# Runtime parameters
+#------------------------------------------------------------------------------
+v_cache = False
+v_verbose = True
+
+#------------------------------------------------------------------------------
+# Define scenario as either slide or fixed_wave. Choose one.
+#------------------------------------------------------------------------------
+scenario = 'fixed_wave' # Huge wave applied at the boundary
+
+periodT=785
+heightH=3.047
+scaleF=2.06
+AA=heightH/2
+BB=2*np.pi/(periodT)
+DD=2400
+
+WaveForm=lambda t: [AA*(1/np.exp(-periodT/scaleF/DD))*np.sin(BB*t)*np.exp(-t/DD), 0, 0]
+
+#------------------------------------------------------------------------------
+# Filenames
+#------------------------------------------------------------------------------
+name_stem = scenario_name = '${namestem}'
+event_number =  'T' + str(periodT)
+rp = 10000
+
+meshname = name_stem + '.msh'
+
+# Filename for locations where timeseries are to be produced
+gauge_filename = 'gauges_busselton.csv'
+
+#------------------------------------------------------------------------------
+# Domain definitions
+#------------------------------------------------------------------------------
+# bounding polygon for study area
+bounding_polygon = anuga.read_polygon('busselton_extent_edit.csv')
+
+A = anuga.polygon_area(bounding_polygon) / 1000000.0
+print 'Area of bounding polygon = %.2f km^2' % A
+
+#------------------------------------------------------------------------------
+# Interior region definitions
+#------------------------------------------------------------------------------
+# Read interior polygons
+poly_1 = anuga.read_polygon('busselton_1km.csv')
+poly_2 = anuga.read_polygon('bunbury_1km_extend.csv')
+poly_3 = anuga.read_polygon('busselton_20m.csv')
+#poly_island2 = anuga.read_polygon('islands2.csv')
+#poly_island3 = anuga.read_polygon('islands3.csv')
+#poly_shallow = anuga.read_polygon('shallow.csv')
+
+# Optionally plot points making up these polygons
+#plot_polygons([bounding_polygon, poly_cairns, poly_island0, poly_island1,
+#               poly_island2, poly_island3, poly_shallow],
+#               style='boundingpoly', verbose=False)
+
+# Define resolutions (max area per triangle) for each polygon
+# Make these numbers larger to reduce the number of triangles in the model,
+# and hence speed up the simulation
+
+# bigger base_scale == less triangles
+just_fitting = False
+#base_scale = 2000 # 635763 # 112sec fit
+#base_scale = 50000 # 321403 # 69sec fit
+#base_scale = 100000 # 162170 triangles # 45sec fit
+#base_scale = 400000 # 42093
+base_scale = ${base_scale}
+default_res = 25 * base_scale   # Background resolution
+zoom1_res = base_scale *10
+zoom2_res = base_scale /4
+
+# Define list of interior regions with associated resolutions
+interior_regions = [[poly_1,  zoom2_res],
+                    [poly_2, zoom2_res],
+                    [poly_3, zoom1_res]]
+
+#------------------------------------------------------------------------------
+# Data for exporting ascii grid
+#------------------------------------------------------------------------------
+eastingmin = 286174
+eastingmax = 392955
+northingmin = 6267810
+northingmax = 6456235
+
+# Smaller area for export
+eastingmin = 333700
+eastingmax = 380800
+northingmin = 6272000
+northingmax = 6317000
+
+#------------------------------------------------------------------------------
+# Data for Tides
+#------------------------------------------------------------------------------
+#v_tide = 0.0
+v_tide = ${tide}
+
+
+#alpha = 0.1             # smoothing parameter for mesh
+#friction=0.01           # manning's friction coefficient
+#starttime=0             # start time for simulation
+#finaltime=80000         # final time for simulation
+
+
+####### Do not change anything below this line #######
+######################################################
 
 time00 = time.time()
 #------------------------------------------------------------------------------
 # Preparation of topographic data
-# Convert ASC 2 DEM 2 PTS using source data and store result in source data
+# Convert NC to ASC 2 DEM 2 PTS using source data and store result in source data
 #------------------------------------------------------------------------------
+
+# Create ASC from nc data
+VHIRL_conversions.nc2asc(dataset + ‘.nc’, name_stem)
+
 # Create DEM from asc data
-anuga.asc2dem(project.name_stem+'.asc', use_cache=project.cache, verbose=project.verbose)
+anuga.asc2dem(name_stem+'.asc', use_cache=v_cache, verbose=v_verbose)
 
 # Create pts file for onshore DEM
-anuga.dem2pts(project.name_stem+'.dem', use_cache=project.cache, verbose=project.verbose)
+anuga.dem2pts(name_stem+'.dem', use_cache=v_cache, verbose=v_verbose)
 
 #------------------------------------------------------------------------------
 # Create the triangular mesh and domain based on
 # overall clipping polygon with a tagged
 # boundary and interior regions as defined in project.py
 #------------------------------------------------------------------------------
-domain = anuga.create_domain_from_regions(project.bounding_polygon,
+domain = anuga.create_domain_from_regions(bounding_polygon,
                                     boundary_tags={'land_sse': [0],
                                                    'land_s': [1],
                                                    'bottom': [2],
@@ -62,11 +181,11 @@ domain = anuga.create_domain_from_regions(project.bounding_polygon,
                                                    'land_nne': [7],
                                                    'land_ese': [8],
                                                    'land_se': [9]},
-                                    maximum_triangle_area=project.default_res,
-                                    mesh_filename=project.meshname,
-                                    interior_regions=project.interior_regions,
-                                    use_cache=project.cache,
-                                    verbose=project.verbose)
+                                    maximum_triangle_area=default_res,
+                                    mesh_filename=meshname,
+                                    interior_regions=interior_regions,
+                                    use_cache=v_cache,
+                                    verbose=v_verbose)
 
 # Print some stats about mesh and domain
 print 'Number of triangles = ', len(domain)
@@ -76,7 +195,7 @@ print domain.statistics()
 #------------------------------------------------------------------------------
 # Setup parameters of computational domain
 #------------------------------------------------------------------------------
-domain.set_name('busselton_' + project.scenario) # Name of sww file
+domain.set_name('busselton_' + scenario) 	  # Name of sww file
 domain.set_datadir('.')                       # Store sww output here
 domain.set_minimum_storable_height(0.01)      # Store only depth > 1cm
 domain.set_flow_algorithm('tsunami')
@@ -86,22 +205,22 @@ domain.set_flow_algorithm('tsunami')
 #------------------------------------------------------------------------------
 # Setup initial conditions
 #------------------------------------------------------------------------------
-tide = project.tide
+tide = v_tide
 domain.set_quantity('stage', tide)
 domain.set_quantity('friction', 0.0)
 
 
 domain.set_quantity('elevation',
-                    filename=project.name_stem + '.pts',
-                    use_cache=project.cache,
-                    verbose=project.verbose,
+                    filename=name_stem + '.pts',
+                    use_cache=v_cache,
+                    verbose=v_verbose,
                     alpha=0.1)
 
 
 time01 = time.time()
 print 'That took %.2f seconds to fit data' %(time01-time00)
 
-if project.just_fitting:
+if just_fitting:
     import sys
     sys.exit()
 
@@ -113,7 +232,7 @@ print 'Available boundary tags', domain.get_boundary_tags()
 Bd = anuga.Dirichlet_boundary([tide, 0, 0]) # Mean water level
 Bs = anuga.Transmissive_stage_zero_momentum_boundary(domain) # Neutral boundary
 
-if project.scenario == 'fixed_wave':
+if scenario == 'fixed_wave':
     # Define tsunami wave (in metres and seconds).
     Bw = anuga.Transmissive_n_momentum_zero_t_momentum_set_stage_boundary(
                         domain=domain,
@@ -140,7 +259,7 @@ t0 = time.time()
 from numpy import allclose
 
 
-if project.scenario == 'fixed_wave':
+if scenario == 'fixed_wave':
     # Save every two mins leading up to wave approaching land
     for t in domain.evolve(yieldstep=2*60, finaltime=5000):
         print domain.timestepping_statistics()
@@ -155,3 +274,17 @@ if project.scenario == 'fixed_wave':
 print 'That took %.2f seconds' %(time.time()-t0)
 
 print 'Total time: %.2f seconds' %(time.time()-time00)
+
+
+def cloudUpload(inFilePath, cloudKey):
+    cloudBucket = os.environ["STORAGE_BUCKET"]
+    cloudDir = os.environ["STORAGE_BASE_KEY_PATH"]
+    queryPath = (cloudBucket + "/" + cloudDir + "/" + cloudKey).replace("//", "/")
+    retcode = subprocess.call(["cloud", "upload", cloudKey, inFilePath, "--set-acl=public-read"])
+    print ("cloudUpload: " + inFilePath + " to " + queryPath + " returned " + str(retcode))
+
+
+# Upload results
+cloudUpload("${filename}.pts", "${filename}.pts")
+cloudUpload("${filename}.msh", "${filename}.msh")
+cloudUpload("${filename}_fixed_wave.sww", "${filename}_fixed_wave.sww")
