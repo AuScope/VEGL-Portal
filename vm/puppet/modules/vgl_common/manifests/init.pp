@@ -4,7 +4,7 @@
 class vgl_common {
 
     # Install default packages
-    package { ["wget", "subversion", "mercurial", "ftp", "bzip2", "bzip2-devel", "elfutils", "ntp", "ntpdate", "gcc", "gcc-c++", "gcc-gfortran", "compat-gcc-34-g77", "make", "openssh", "openssh-clients", "swig", "libpng-devel", "freetype-devel", "atlas", "atlas-devel", "libffi-devel", "mlocate"]:
+    package { ["wget", "subversion", "netcdf-devel", "mercurial", "ftp", "bzip2", "bzip2-devel", "elfutils", "ntp", "ntpdate", "gcc", "gcc-c++", "gcc-gfortran", "compat-gcc-34-g77", "make", "openssh", "openssh-clients", "swig", "libpng-devel", "freetype-devel", "atlas", "atlas-devel", "libffi-devel", "mlocate"]:
         ensure => installed,
         require => Class["epel"],
     }
