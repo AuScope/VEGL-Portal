@@ -39,11 +39,6 @@ export LD_LIBRARY_PATH=/usr/local/lib/openmpi:/usr/local/lib/:$LD_LIBRARY_PATH'
 
 
 class scientificpython {
-    package { ["netcdf-devel"]:
-        ensure => installed,
-        require => Class["epel"],
-    }
-
     puppi::netinstall { "scientificpython-inst":
         url => "https://sourcesup.renater.fr/frs/download.php/4425/ScientificPython-2.9.3.tar.gz",
         extracted_dir => "ScientificPython-2.9.3",
@@ -76,7 +71,7 @@ class gdal {
         url => "http://download.osgeo.org/gdal/1.11.0/gdal-1.11.0.tar.gz",
         destination_dir => "/tmp",
         extracted_dir => "gdal-1.11.0",
-        postextract_command => "/tmp/gdal-1.11.0/configure --with-python && make -j${::procplus} && make install",
+        postextract_command => "/tmp/gdal-1.11.0/configure --with-python --with-netcdf && make -j${::procplus} && make install",
         require => [Class["mpi"], Class["vgl_common"],],
     }
 }
