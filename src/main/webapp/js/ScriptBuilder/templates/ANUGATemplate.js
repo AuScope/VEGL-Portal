@@ -70,7 +70,7 @@ Ext.define('ScriptBuilder.templates.ANUGATemplate', {
                 xtype : 'textfield',
                 fieldLabel : 'File Name',
                 anchor : '-5',
-                name : 'namestem',
+                name : 'name_stem',
                 value : 'busselton',
                 allowBlank : false,
             }]
