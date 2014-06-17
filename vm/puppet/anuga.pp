@@ -7,7 +7,7 @@ include "autofsck"
 $procplus = $physicalprocessorcount + 1
 
 class generic-deps {
-    package { ["netcdf-devel", "fftw-devel", "fftw"]:
+    package { ["fftw-devel", "fftw"]:
         ensure => installed,
         require => [Class["epel"], Class["mpi"], Class["vgl_common"] ]
     }
@@ -44,7 +44,7 @@ class scientificpython {
         extracted_dir => "ScientificPython-2.9.3",
         destination_dir => "/tmp",
         postextract_command => "python setup.py install",
-        require => [ Class["generic-deps"] ],
+        require => [ Class["generic-deps"], Package["netcdf-devel"], ],
     }
 }
 
