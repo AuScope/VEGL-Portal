@@ -14,19 +14,8 @@ def asc2nc(file_in, file_out):
     """
     Convert the .asc file to something THREDDS supports.
     """
-    mid_file = file_in+ ".nc"
-    try:
-        os.remove(mid_file)
-    except OSError:
-        pass
-    try:
-        os.remove(file_out)
-    except OSError:
-        pass
-    os.system("gdal_translate -a_nodata none -of netCDF " + file_in + " " + mid_file)
-    os.system("gdalwarp -t_srs EPSG:4326 -srcnodata -9999 -dstnodata -9999 -of netcdf " +mid_file+ " " +file_out)
-    os.system("ncdump " + file_in+'.nc ' + '> ' + file_in+'_nc.txt') # small.asc_nc.txt
-    os.system("ncdump " + file_out + '> ' + file_out+'_nc.txt') # small.nc_n
+    os.system("gdal_translate -of netCDF " +file_in+ " " +file_in+ ".nc")
+    os.system("gdalwarp -t_srs EPSG:4326 -of netcdf " +file_in+ ".nc " +file_out)
 
 def nc2asc(file_in, stem_out):
     """
@@ -34,56 +23,10 @@ def nc2asc(file_in, stem_out):
 
     stem_out - The file name without the extension.
     """
-    # Check in python if the file is present.
-    a_handle = open(file_in, 'r')
-    a_handle.close()
-
-    mid_file = stem_out+ "_UTM.nc"
-    try:
-        os.remove(mid_file)
-    except IOError:
-            pass
-    os.system("gdalwarp -t_srs '+proj=utm +zone=50 +south +datum=GDA94' -of netcdf " + file_in + ' ' + mid_file)
-    os.system("gdal_translate  -a_nodata -9999 -of AAIGrid " + mid_file + " " +stem_out+ ".asc")
+    os.system("gdalwarp -t_srs '+proj=utm +zone=50 +south +datum=GDA94' -of netcdf " +file_in+ ' ' +stem_out+ "_UTM.nc")
+    os.system("gdal_translate -of AAIGrid " +stem_out+ "_UTM.nc " +stem_out+ ".asc")
     convert_new_prj2old(stem_out + '.prj')
 
-
-def asc2other(file_in, file_out):
-    """
-    Convert the .asc file to something THREDDS supports.
-    """
-    mid_file = file_in+ ".nc"
-    try:
-        os.remove(mid_file)
-    except OSError:
-        pass
-    try:
-        os.remove(file_out)
-    except OSError:
-        pass
-    os.system("gdal_translate -of GeoJSON " + file_in + " " + mid_file)
-    #os.system("gdalwarp -t_srs EPSG:4326 -srcnodata -9999 -dstnodata -9999 -of netcdf " +mid_file+ " " +file_out)
-   # os.system("ncdump " + file_in+'.nc ' + '> ' + file_in+'_nc.txt') # small.asc_nc.txt
-    #os.system("ncdump " + file_out + '> ' + file_out+'_nc.txt') # small.nc_n
-
-def nc2asc(file_in, stem_out):
-    """
-    Convert an nc back to a file format ANUGA can consume.
-
-    stem_out - The file name without the extension.
-    """
-    # Check in python if the file is present.
-    a_handle = open(file_in, 'r')
-    a_handle.close()
-
-    mid_file = stem_out+ "_UTM.nc"
-    try:
-        os.remove(mid_file)
-    except IOError:
-            pass
-    os.system("gdalwarp -t_srs '+proj=utm +zone=50 +south +datum=GDA94' -of netcdf " + file_in + ' ' + mid_file)
-    os.system("gdal_translate  -a_nodata -9999 -of AAIGrid " + mid_file + " " +stem_out+ ".asc")
-    convert_new_prj2old(stem_out + '.prj')
 
 def convert_new_prj2old(prj_file):
     prj_text = open(prj_file, 'r').read()
