@@ -9,6 +9,13 @@ class vgl_common {
         require => Class["epel"],
     }
 
+	#upgrade pip and setuptools
+    package { [	"setuptools", "pip", ]:
+        ensure => installed,
+        provider => "pip",
+        require => Class["python_pip"],
+    }
+
 	# I want the new one....
     package { ["ca-certificates" ]:
 		ensure => latest,
@@ -21,10 +28,11 @@ class vgl_common {
         provider => "pip",
         require => Class["python_pip"],
     }
-	package { ["numpy", "unittest2", "setuptools", "pip",]:
+	
+	package { ["numpy", "unittest2",]:
 	    ensure => latest,
         provider => "pip",
-        require => [Class["python_pip"]],
+        require => [Class["python_pip"], Package["setuptools"] ],
 	}
 
     package { ["scipy"]:
