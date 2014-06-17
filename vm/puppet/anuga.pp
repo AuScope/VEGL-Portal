@@ -13,7 +13,6 @@ class generic-deps {
     }
 }
 
-class {"generic-deps": }
 
 class mpi {
     # Note: At the time of writing the current OpenMPI package (openmpi-devel-1.5.4-1.el6.x86_64) is missing the necessary I/O component.
@@ -76,9 +75,16 @@ exec { "anuga-co":
     cwd => "/usr/local",
     command => "/bin/echo p | svn info https://anuga.anu.edu.au/svn/anuga/trunk/anuga_core/ && /usr/bin/svn export --trust-server-cert --non-interactive https://anuga.anu.edu.au/svn/anuga/trunk/anuga_core/ anuga",
     creates => "/usr/local/anuga",
-    require => [Class["generic-deps"], Class["mpi"], Class["scientificpython"], Class["pypar"], Class["gdal"],
+    require => [Class["generic-deps"], Class["mpi"], Class["scientificpython"], Class["pypar"], Class["gdal"],],
     timeout => 0,
 }
+
+class {"generic-deps": }
+class {"mpi": }
+class {"pypar": }
+class {"scientificpython": }
+class {"gdal": }
+
 
 
 #hack setup file to find mpicc
@@ -96,5 +102,6 @@ export PYTHONPATH="$PYTHONPATH:/usr/local/anuga/source"
 file {"anuga-profile-env":
 	path => "/etc/profile.d/anuga.sh",
 	ensure => present,
+	require => Exec["anuga-install"],
 	content => $anugaenvContent,
 }
