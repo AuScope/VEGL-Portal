@@ -1,21 +1,15 @@
-import "vgl_common"
-import "epel"
-import "python_pip"
-import "puppi"
-import "autofsck"
-
-class {["epel", "python_pip", "vgl_common"]:}
+include "vgl_common"
+include "epel"
+include "python_pip"
+include "puppi"
+include "autofsck"
 
 $procplus = $physicalprocessorcount + 1
 
-# Disable fsck on boot
-class { autofsck:
-  ensure => present, # default
-}
 
 #Install escript specific packages...
 class escript_packages {
-    package { ["blas-devel", "gdal-python", "cppunit-devel", "scons", "suitesparse-devel", "python-matplotlib", ]: 
+    package { ["blas-devel", "gdal-python", "cppunit-devel", "scons", "suitesparse-devel", "python-matplotlib", ]:
         ensure => installed,
         require => Class["epel"],
     }
@@ -68,7 +62,7 @@ class escript_deps {
 		postextract_command => "chmod a+x bootstrap.sh && ./bootstrap.sh",
 		require => [Class["escript_packages"], Class["vgl_common"]],
 	}
-	
+
 	#bootstrap captures args somehow and has a sad.... seperate make process here.
 	exec { "boost-install":
 		cwd => "/tmp/boost_1_55_0",
@@ -84,10 +78,10 @@ class {"escript_deps": }
 # Install VisIt
 class {"visit": }
 
-# Note: At the time of writing the current OpenMPI package (openmpi-devel-1.5.4-1.el6.x86_64) is missing the necessary I/O component. 
-# Parts of escript require the I/O functionality and will not work. A bug was filed with CentOS who will 
-# hopefully fix the issue in an updated package (see http://bugs.centos.org/view.php?id=5931). 
-# When that bug is fixed you should be able run yum install openmpi but until that time you will need to build from source: 
+# Note: At the time of writing the current OpenMPI package (openmpi-devel-1.5.4-1.el6.x86_64) is missing the necessary I/O component.
+# Parts of escript require the I/O functionality and will not work. A bug was filed with CentOS who will
+# hopefully fix the issue in an updated package (see http://bugs.centos.org/view.php?id=5931).
+# When that bug is fixed you should be able run yum install openmpi but until that time you will need to build from source:
 puppi::netinstall { "openmpi":
     url => "http://www.open-mpi.org/software/ompi/v1.6/downloads/openmpi-1.6.5.tar.gz",
     extracted_dir => "openmpi-1.6.5",

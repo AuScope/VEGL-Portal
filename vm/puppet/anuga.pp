@@ -1,17 +1,19 @@
-import "vgl_common"
-import "epel"
-import "python_pip"
-import "puppi"
-import "autofsck"
+include "vgl_common"
+include "epel"
+include "python_pip"
+include "puppi"
+include "autofsck"
 
-class {["epel", "python_pip", "vgl_common"]:}
 $procplus = $physicalprocessorcount + 1
 
-
-# Disable fsck on boot
-class { autofsck:
-  ensure => present, # default
+class generic-deps {
+    package { ["netcdf-devel", "fftw-devel", "fftw"]:
+        ensure => installed,
+        require => [Class["epel"], Class["mpi"], Class["vgl_common"] ]
+    }
 }
+
+class {"generic-deps": }
 
 class mpi {
     # Note: At the time of writing the current OpenMPI package (openmpi-devel-1.5.4-1.el6.x86_64) is missing the necessary I/O component.
@@ -37,22 +39,13 @@ export LD_LIBRARY_PATH=/usr/local/lib/openmpi:/usr/local/lib/:$LD_LIBRARY_PATH'
     }
 }
 
-
 class scientificpython {
     puppi::netinstall { "scientificpython-inst":
         url => "https://sourcesup.renater.fr/frs/download.php/4425/ScientificPython-2.9.3.tar.gz",
         extracted_dir => "ScientificPython-2.9.3",
         destination_dir => "/tmp",
         postextract_command => "python setup.py install",
-        require => [Class["mpi"], Class["vgl_common"],],
-    }
-}
-
-#Install aem specific packages...
-class aem_packages {
-    package { ["fftw-devel", "fftw", "openmpi", "openmpi-devel"]:
-        ensure => installed,
-        require => Class["epel"],
+        require => [ Class["generic-deps"] ],
     }
 }
 
@@ -62,7 +55,7 @@ class pypar {
         destination_dir => "/tmp",
         extracted_dir => "pypar_2.1.5_108/source",
         postextract_command => "/usr/bin/perl -pi -e 's#mpicc -show#/usr/local/bin/mpicc -show#g' /tmp/pypar_2.1.5_108/source/setup.py && /usr/bin/python /tmp/pypar_2.1.5_108/source/setup.py install",
-        require => [Class["mpi"], Class["vgl_common"],],
+        require => [Class["generic-deps"] ],
     }
 }
 
@@ -72,16 +65,10 @@ class gdal {
         destination_dir => "/tmp",
         extracted_dir => "gdal-1.11.0",
         postextract_command => "/tmp/gdal-1.11.0/configure --with-python --with-netcdf && make -j${::procplus} && make install",
-        require => [Class["mpi"], Class["vgl_common"],],
+        require => [Class["generic-deps"]],
     }
 }
 
-
-class {"mpi":}
-class {"aem_packages": }
-class {"scientificpython": }
-class {"pypar": }
-class {"gdal": }
 
 
 #Checkout, configure and install anuga with a 'dodgy SSL cert'
@@ -89,7 +76,7 @@ exec { "anuga-co":
     cwd => "/usr/local",
     command => "/bin/echo p | svn info https://anuga.anu.edu.au/svn/anuga/trunk/anuga_core/ && /usr/bin/svn export --trust-server-cert --non-interactive https://anuga.anu.edu.au/svn/anuga/trunk/anuga_core/ anuga",
     creates => "/usr/local/anuga",
-    require => [Class["aem_packages"],Class["mpi"], Class["vgl_common"]],
+    require => [Class["generic-deps"], Class["mpi"], Class["scientificpython"], Class["pypar"], Class["gdal"],
     timeout => 0,
 }
 
