@@ -10,8 +10,8 @@ class vgl_common {
     }
 
 	#upgrade pip and setuptools
-    package { [	"setuptools", "pip", ]:
-        ensure => installed,
+    package { [	"setuptools", "pip", "distribute"]:
+        ensure => latest,
         provider => "pip",
         require => Class["python_pip"],
     }
