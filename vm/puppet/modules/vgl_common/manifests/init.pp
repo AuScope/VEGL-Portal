@@ -10,10 +10,16 @@ class vgl_common {
     }
 
 	#upgrade pip and setuptools
-    package { [	"setuptools", "pip", "distribute"]:
+    package { [	"setuptools", "distribute", ]:
         ensure => latest,
         provider => "pip",
         require => Class["python_pip"],
+    }
+
+    package { [	"pip", ]:
+        ensure => latest,
+        provider => "pip",
+        require => [ Class["python_pip"], Package["distribute"], Package["setuptools"], ],
     }
 
 	# I want the new one....
