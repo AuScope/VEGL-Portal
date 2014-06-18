@@ -236,7 +236,7 @@ Bs = anuga.Transmissive_stage_zero_momentum_boundary(domain) # Neutral boundary
 
 if scenario == 'fixed_wave':
     # Define tsunami wave (in metres and seconds).
-    Bw = anuga.Transmissive_n_momentum_zero_t_momentum_set_stage_boundary(
+    Bw = anuga.Time_boundary(
                         domain=domain,
                         function=lambda t: [(20*np.sin(t*np.pi/(60*10)))*np.exp(-t/600), 0, 0])
 
@@ -278,6 +278,9 @@ print 'That took %.2f seconds' %(time.time()-t0)
 print 'Total time: %.2f seconds' %(time.time()-time00)
 
 
+#------------------------------------------------------------------------------
+# Upload Result Files to Cloud Storage
+#------------------------------------------------------------------------------
 def cloudUpload(inFilePath, cloudKey):
     cloudBucket = os.environ["STORAGE_BUCKET"]
     cloudDir = os.environ["STORAGE_BASE_KEY_PATH"]
@@ -287,6 +290,11 @@ def cloudUpload(inFilePath, cloudKey):
 
 
 # Upload results
+print 'Uploading result files'
+cloudUpload("${name_stem}_UTM.nc", "${name_stem}_UTM.nc")
+cloudUpload("${name_stem}.asc", "${name_stem}.asc")
+cloudUpload("${name_stem}.prj", "${name_stem}.prj")
+cloudUpload("${name_stem}.dem", "${name_stem}.dem")
 cloudUpload("${name_stem}.pts", "${name_stem}.pts")
 cloudUpload("${name_stem}.msh", "${name_stem}.msh")
 cloudUpload("${name_stem}_fixed_wave.sww", "${name_stem}_fixed_wave.sww")
