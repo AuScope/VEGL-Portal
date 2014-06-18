@@ -26,13 +26,14 @@ class vgl_common {
     package {  ["boto", "pyproj", "python-swiftclient", "python-keystoneclient"]:
         ensure => installed,
         provider => "pip",
-        require => Class["python_pip"],
+        require => [Class["python_pip"], Package["setuptools"], Package["distribute"], Package["setuptools"], Package["pip"], ],,
     }
-	
+
+    # New/latest packages are needed here.
 	package { ["numpy", "unittest2",]:
 	    ensure => latest,
         provider => "pip",
-        require => [Class["python_pip"], Package["setuptools"] ],
+        require => [Class["python_pip"], Package["setuptools"], Package["distribute"], Package["setuptools"], Package["pip"], ],
 	}
 
     package { ["scipy"]:
@@ -44,7 +45,7 @@ class vgl_common {
     package { ["matplotlib"]:
         ensure => latest,
         provider => "pip",
-        require => [Class["python_pip"], Package["numpy"]],
+        require => [Class["python_pip"], Package["numpy"], Package["scipy"]],
     }
 
 
