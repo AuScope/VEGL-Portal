@@ -26,7 +26,7 @@ class vgl_common {
     package {  ["boto", "pyproj", "python-swiftclient", "python-keystoneclient"]:
         ensure => installed,
         provider => "pip",
-        require => [Class["python_pip"], Package["setuptools"], Package["distribute"], Package["setuptools"], Package["pip"], ],,
+        require => [Class["python_pip"], Package["setuptools"], Package["distribute"], Package["setuptools"], Package["pip"], ],
     }
 
     # New/latest packages are needed here.
