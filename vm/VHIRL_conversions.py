@@ -10,6 +10,15 @@ att_map = {'units':'Units', 'ellps':'Datum', 'proj':'Projection',
 att_order = ['Projection', 'Zone', 'Datum', 'Zunits', 'Units', 'Spheroid',
             'XShift',  'YShift']
 
+
+def geotif2nc(file_in, file_out):
+    """
+    Convert the .geotif file to something THREDDS supports.
+    """
+    os.system("gdal_translate -of netCDF " +file_in+ " " +file_in+ ".nc")
+    os.system("gdalwarp -t_srs EPSG:4326 -of netcdf " +file_in+ ".nc " +file_out)
+
+
 def asc2nc(file_in, file_out):
     """
     Convert the .asc file to something THREDDS supports.
@@ -40,7 +49,7 @@ def convert_new_prj2old(prj_file):
     print proj_sp
     blunt = 'Anuga_ignores_but_needs'
     proj_dic = {'Zunits': blunt, 'Spheroid': blunt}
-    # Should get this from the srs 
+    # Should get this from the srs
     proj_dic['XShift'] = 500000
     if '+south' in proj_sp:
         proj_dic['YShift'] = 10000000
@@ -52,7 +61,7 @@ def convert_new_prj2old(prj_file):
             print parts
             proj_dic[att_map[parts[0]]] = parts[1]
     print proj_dic
-    
+
     #Writing over the new sytle .prj
     #prj_file = 'old.prj'
     f = open(prj_file, 'w')
