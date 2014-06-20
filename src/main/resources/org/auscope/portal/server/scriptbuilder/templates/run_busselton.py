@@ -155,11 +155,15 @@ v_tide = ${tide}
 time00 = time.time()
 #------------------------------------------------------------------------------
 # Preparation of topographic data
-# Convert NC to ASC 2 DEM 2 PTS using source data and store result in source data
+# Convert GEOTIFF to NC to ASC 2 DEM 2 PTS using source data and store result in source data
 #------------------------------------------------------------------------------
 
+
+# Create nc from geotif data
+VHIRL_conversions.geotif2nc(dataset, '/tmp/'+name_stem)
+
 # Create ASC from nc data
-VHIRL_conversions.nc2asc(dataset, name_stem)
+VHIRL_conversions.nc2asc('/tmp/'+name_stem, name_stem)
 
 # Create DEM from asc data
 anuga.asc2dem(name_stem+'.asc', use_cache=v_cache, verbose=v_verbose)
