@@ -59,12 +59,21 @@ class pypar {
 }
 
 class gdal {
+	# Install cartographic projection library
+	puppi::netinstall { "proj":
+		url => "http://download.osgeo.org/proj/proj-4.8.0.tar.gz",
+		extracted_dir => "proj-4.8.0",
+		destination_dir => "/tmp",
+		postextract_command => "/tmp/proj-4.8.0/configure && make -j${::procplus} && make install",
+		require => Class["vgl_common"]],
+	}
+
     puppi::netinstall { "gdal-inst":
         url => "http://download.osgeo.org/gdal/1.11.0/gdal-1.11.0.tar.gz",
         destination_dir => "/tmp",
         extracted_dir => "gdal-1.11.0",
         postextract_command => "/tmp/gdal-1.11.0/configure --with-python --with-netcdf && make -j${::procplus} && make install",
-        require => [Class["generic-deps"]],
+        require => [Class["generic-deps"], Package["proj"]],
     }
 }
 
