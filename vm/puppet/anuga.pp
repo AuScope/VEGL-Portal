@@ -65,7 +65,7 @@ class gdal {
 		extracted_dir => "proj-4.8.0",
 		destination_dir => "/tmp",
 		postextract_command => "/tmp/proj-4.8.0/configure && make -j${::procplus} && make install",
-		require => Class["vgl_common"]],
+		require => Class["vgl_common"],
 	}
 
     puppi::netinstall { "gdal-inst":
@@ -73,7 +73,7 @@ class gdal {
         destination_dir => "/tmp",
         extracted_dir => "gdal-1.11.0",
         postextract_command => "/tmp/gdal-1.11.0/configure --with-python --with-netcdf && make -j${::procplus} && make install",
-        require => [Class["generic-deps"], Package["proj"]],
+        require => Class["generic-deps"],
     }
 }
 
