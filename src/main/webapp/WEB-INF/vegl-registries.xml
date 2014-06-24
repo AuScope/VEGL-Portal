@@ -9,8 +9,10 @@
     <bean id="cswVhirlTest" class="org.auscope.portal.core.services.csw.CSWServiceItem">
         <constructor-arg name="id" value="cswVhirlTest"/>
         <constructor-arg name="title" value="VHIRL Test Geonetwork"/>
-        <constructor-arg name="serviceUrl" value="http://vgl-reg.auscope.org/geonetwork/srv/eng/csw"/>
-        <constructor-arg name="recordInformationUrl" value="http://vgl-reg.auscope.org/geonetwork/srv/eng/main.home?uuid=%1$s"/>
+        <constructor-arg name="serviceUrl" value="http://siss1.anu.edu.au/geonetwork/srv/eng/csw"/>
+        <!--<constructor-arg name="recordInformationUrl" value="http://vgl-reg.auscope.org/geonetwork/srv/eng/main.home?uuid=%1$s"/>
+        <constructor-arg name="recordInformationUrl" value="http://vgl-reg.auscope.org/geonetwork/srv/eng/main.home?uuid=%1$s"/> -->
+        <constructor-arg name="recordInformationUrl" value="http://siss1.anu.edu.au/geonetwork/srv/eng/main.home?uuid=%1$s"/>
         <property name="userName" value="${env.outputgeonetwork.user}"/>
         <property name="password" value="${env.outputgeonetwork.password}"/>
     </bean>
@@ -18,8 +20,10 @@
     <bean id="cswVhirlProduction" class="org.auscope.portal.core.services.csw.CSWServiceItem">
         <constructor-arg name="id" value="cswVhirlProduction"/>
         <constructor-arg name="title" value="VHIRL Production Geonetwork"/>
-        <constructor-arg name="serviceUrl" value="http://vgl-reg.auscope.org/geonetwork/srv/eng/csw"/>
-        <constructor-arg name="recordInformationUrl" value="http://vgl-reg.auscope.org/geonetwork/srv/eng/main.home?uuid=%1$s"/>
+        <!-- <constructor-arg name="serviceUrl" value="http://vgl-reg.auscope.org/geonetwork/srv/eng/csw"/>
+        <constructor-arg name="recordInformationUrl" value="http://vgl-reg.auscope.org/geonetwork/srv/eng/main.home?uuid=%1$s"/> -->
+        <constructor-arg name="serviceUrl" value="http://siss1.anu.edu.au/geonetwork/srv/eng/csw"/>
+        <constructor-arg name="recordInformationUrl" value="http://siss1.anu.edu.au/geonetwork/srv/eng/main.home?uuid=%1$s"/>
         <property name="userName" value="${env.outputgeonetwork.user}"/>
         <property name="password" value="${env.outputgeonetwork.password}"/>
     </bean>
