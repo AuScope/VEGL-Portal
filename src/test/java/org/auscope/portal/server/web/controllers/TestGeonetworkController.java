@@ -2,16 +2,19 @@ package org.auscope.portal.server.web.controllers;
 
 import java.util.Arrays;
 import java.util.Date;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.auscope.portal.core.cloud.CloudFileInformation;
+import org.auscope.portal.core.services.CSWCacheService;
 import org.auscope.portal.core.services.GeonetworkService;
 import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.services.cloud.CloudComputeService;
 import org.auscope.portal.core.services.cloud.CloudStorageService;
 import org.auscope.portal.core.services.responses.csw.CSWRecord;
+import org.auscope.portal.core.view.ViewCSWRecordFactory;
 import org.auscope.portal.server.vegl.VEGLJob;
 import org.auscope.portal.server.vegl.VEGLJobManager;
 import org.auscope.portal.server.vegl.VEGLSeries;
@@ -40,6 +43,8 @@ public class TestGeonetworkController {
     private GeonetworkService mockGNService;
     private CloudStorageService[] cloudStorageServices;
     private CloudComputeService[] cloudComputeServices;
+    private CSWCacheService mockCswService;
+    private ViewCSWRecordFactory mockViewCSWRecordFactory;
 
     private GeonetworkController controller;
 
@@ -50,15 +55,19 @@ public class TestGeonetworkController {
     public void init() {
         mockJobManager = context.mock(VEGLJobManager.class);
         mockGNService = context.mock(GeonetworkService.class);
+        mockCswService = context.mock(CSWCacheService.class);
+        mockViewCSWRecordFactory = context.mock(ViewCSWRecordFactory.class);
         cloudStorageServices = new CloudStorageService[] {context.mock(CloudStorageService.class)};
         cloudComputeServices = new CloudComputeService[] {context.mock(CloudComputeService.class)};
+
 
         context.checking(new Expectations() {{
             allowing(cloudStorageServices[0]).getId();will(returnValue(storageServiceId));
             allowing(cloudComputeServices[0]).getId();will(returnValue(computeServiceId));
         }});
 
-        controller = new GeonetworkController(mockJobManager, mockGNService, cloudStorageServices, cloudComputeServices);
+        controller = new GeonetworkController(mockJobManager, mockGNService, cloudStorageServices, cloudComputeServices,
+                mockCswService, mockViewCSWRecordFactory);
     }
 
     /**
