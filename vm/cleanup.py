@@ -30,8 +30,7 @@ clouds = [{
     "path":"/services/Cloud",
     "port":8773,
     "is_secure" : False,
-    "terminated_state" : unicode("shutoff"),
-    "error_state" : unicode("error")
+    "terminated_state" : unicode("shutoff")
     },{
     "name" : "NeCTAR (Melbourne)",
     "owner":None,
@@ -41,8 +40,7 @@ clouds = [{
     "path":"/services/Cloud",
     "port":8773,
     "is_secure" : True,
-    "terminated_state" : unicode("stopped"),
-    "error_state" : unicode("error")
+    "terminated_state" : unicode("stopped")
 }]
 
 # Returns a connection for a given 'cloud' dictionary
@@ -63,10 +61,7 @@ def killthemall(connection, cloud):
     for reservation in reservations:
         if (cloud["owner"] == None) or (reservation.owner_id == cloud["owner"]):
             for instance in reservation.instances:
-                if instance.state == cloud["error_state"]:
-                    logger.warn("[%s] terminate error instance: %s" % (cloud["name"], instance.id))
-                    logger.debug("[%s] response: %s" % (cloud["name"], connection.terminate_instances([instance.id])))  
-                elif instance.state == cloud["terminated_state"]:
+                if instance.state == cloud["terminated_state"]:
                     logger.debug("%s\n%s\n\n\n\n" % (instance.id, instance.get_console_output().output))
                     if "Power down." in instance.get_console_output().output \
                             and \
