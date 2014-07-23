@@ -32,7 +32,7 @@ then
     exit 1
 fi
 
-puppet module install jhoblitt/autofsck 
+puppet module install jhoblitt/autofsck
 if [ $? -ne 0 ]
 then
     echo "Failed to install puppet module jhoblitt/autofsck"
@@ -40,8 +40,8 @@ then
 fi
 
 # VHIRL Portal Custom Modules - download from user specified SVN (or default)
-yum install -y wget 
-baseUrl="https://svn.auscope.org/subversion/AuScopePortal/VEGL-Portal/branches/VHIRL-Portal/"
+yum install -y wget
+baseUrl="https://svn.auscope.org/subversion/AuScopePortal/VHIRL-Portal/trunk/"
 pathSuffix="/vm/puppet/modules/"
 tmpModulesDir="/tmp/modules/"
 rm -rf "$tmpModulesDir"
@@ -89,4 +89,3 @@ fi
 
 #Tidy up
 rm -rf "$tmpModulesDir"
-

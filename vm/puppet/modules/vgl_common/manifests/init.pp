@@ -60,12 +60,10 @@ class vgl_common {
     $bootstrapLocation = "/etc/rc.d/rc.local"
     exec { "get-bootstrap":
         before => File[$bootstrapLocation],
-        command => "$curl_cmd -L https://svn.auscope.org/subversion/AuScopePortal/VEGL-Portal/branches/VHIRL-Portal/vm/ec2-run-user-data.sh > $bootstrapLocation",
+        command => "$curl_cmd -L https://svn.auscope.org/subversion/AuScopePortal/VHIRL-Portal/trunk/vm/ec2-run-user-data.sh > $bootstrapLocation",
     }
     file { $bootstrapLocation:
         ensure => present,
         mode => "a=rwx",
     }
 }
-
-
