@@ -1,11 +1,11 @@
-include "vgl_common"
 include "epel"
+include "vgl_common"
 include "python_pip"
 include "puppi"
 include "autofsck"
 
 class tcrmdeps {
-  package { ["geos-devel", "git", "hdf5-devel", "libxml2-devel", "libxslt-devel", "tk-devel"]:
+  package { ["geos-devel", "git", "hdf5-devel"]:
     ensure => installed,
     require => [Class["epel"], Class["vgl_common"]]
   }
@@ -25,7 +25,9 @@ exec { "basemap_install":
 #   require => [Class["epel"], Class["python_pip"], Class["vgl_common"], Class["tcrmdeps"]],
 # }
 
-package { ["netCDF4"]:
+# We need the argparse module for python 2.6
+# TODO: Remove this if/when we migrate to 2.7+
+package { ["netCDF4", "argparse"]:
   ensure => latest,
   provider => "pip",
   require => [Class["epel"], Class["python_pip"], Class["vgl_common"], Class["tcrmdeps"]],
@@ -36,7 +38,7 @@ exec { "tcrm-co":
   cwd => "/usr/local",
   command => "/usr/bin/git clone https://github.com/GeoscienceAustralia/tcrm.git",
   creates => "/usr/local/tcrm",
-  require => [Class["tcrmdeps"], Exec["basemap_install"], Package["netCDF4"]],
+  require => [Class["tcrmdeps"], Exec["basemap_install"], Package["netCDF4"], Package["argparse"]],
   timeout => 0,
 }
 
