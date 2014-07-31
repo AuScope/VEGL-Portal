@@ -40,7 +40,7 @@ then
 fi
 
 # VHIRL Portal Custom Modules - download from user specified GIT (or default)
-yum install -y wget
+yum install -y wget git
 baseUrl="https://github.com/AuScope/VHIRL-Portal.git"
 pathSuffix="/vm/puppet/modules/"
 tmpModulesDir="/tmp/modules/"
@@ -54,12 +54,6 @@ then
     pathSuffix="$2"
 fi
 
-# #Ensure base url ends with a '/'
-# if [ `tail -c 2 <<< "$baseUrl"` != "/" ]
-# then
-#     baseUrl="$baseUrl/"
-# fi
-
 #Ensure suffix doesn't start with a '/'
 if [ `head -c 2 <<< "$pathSuffix"` != "/" ]
 then
@@ -70,18 +64,6 @@ fi
 # puppet modules
 mkdir -p "$tmpModulesDir"
 git clone "$baseUrl" "$tmpModulesDir"
-
-# #When we download we don't want a long tree of directories, we just want the modules directory. Therefore we need to cut directories
-# #back by the number of slashes in the URL. Don't forget there will be a trailing '/' and a http://
-# baseUrlSlashes=`grep -o "/" <<<"$baseUrl" | wc -l`
-# pathSuffixSlashes=`grep -o "/" <<<"$pathSuffix" | wc -l`
-# cutDirs=`expr $baseUrlSlashes - 3 + $pathSuffixSlashes`
-# wget -r "$baseUrl$pathSuffix" -P "$tmpModulesDir" -R htm,html -nH -np --cut-dirs $cutDirs -l 50
-# if [ $? -ne 0 ]
-# then
-#     echo "Failed download of VGL custom modules - aborting"
-#     exit 1
-# fi
 
 #Now copy the modules to the puppet module install directory
 moduleDir="/etc/puppet/modules"
