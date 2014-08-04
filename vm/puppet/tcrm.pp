@@ -14,7 +14,7 @@ class tcrmdeps {
 
   # Clone tcrm code locally
   exec { "tcrm-co":
-    command => "/usr/bin/git clone https://github.com/squireg/tcrm.git ${tcrm_path}",
+    command => "/usr/bin/git clone -b py26 https://github.com/squireg/tcrm.git ${tcrm_path}",
     # command => "/usr/bin/git clone https://github.com/GeoscienceAustralia/tcrm.git ${tcrm_path}",
     creates => "${tcrm_path}",
     require => [Package["git"]],
