@@ -41,7 +41,8 @@ fi
 
 # VHIRL Portal Custom Modules - download from user specified GIT (or default)
 yum install -y wget git
-baseUrl="https://github.com/AuScope/VHIRL-Portal.git"
+baseUrl="https://github.com/squireg/VHIRL-Portal.git"
+branch="tcrm26"
 pathSuffix="/vm/puppet/modules/"
 tmpModulesDir="/tmp/modules/"
 rm -rf "$tmpModulesDir"
@@ -61,9 +62,11 @@ then
 fi
 
 # Clone the git repository into $tmpModulesDir so we can extract the
-# puppet modules
+# puppet modules.  Make sure to use the correct branch!
 mkdir -p "$tmpModulesDir"
 git clone "$baseUrl" "$tmpModulesDir"
+cd "$tmpModulesDir"
+git checkout "$branch"
 
 #Now copy the modules to the puppet module install directory
 moduleDir="/etc/puppet/modules"
