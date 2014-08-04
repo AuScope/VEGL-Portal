@@ -23,8 +23,7 @@ class tcrmdeps {
 
   # Install the python dependencies
   python_pip::install { "Install deps from tcrm/requirements.txt":
-    requirements_file => "/vagrant/tcrm/requirements.txt",
-    # requirements_file => "${tcrm_path}/requirements.txt",
+    requirements_file => "${tcrm_path}/requirements.txt",
     require => Package["geos-devel", "hdf5-devel"],
     alias => "tcrm_pip",
   }
