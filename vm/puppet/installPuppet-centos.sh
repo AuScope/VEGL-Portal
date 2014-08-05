@@ -6,6 +6,24 @@
 # svnUrl - The base VGL URL where additional puppet modules will be downloaded from. Defaults to "https://github.com/AuScope/VHIRL-Portal/raw/master"
 # pathSuffix - Will be appended to svnUrl to form the base url that will be recursively downloaded for modules. Defaults to "vm/puppet/modules/"
 
+# /////////////////////////////
+# VHIRL Portal Custom Modules - download from user specified GIT (or default)
+#
+# Edit these variables if you need to download from a different git
+# repo/branch.
+#
+# /////////////////////////////
+
+# baseUrl -- git repository url
+baseUrl="https://github.com/AuScope/VHIRL-Portal.git"
+
+# branch -- branch in the git repo
+branch="master"
+
+# pathSuffix -- path to puppet modules in the repo
+pathSuffix="/vm/puppet/modules/"
+
+# Install puppet itself
 sudo rpm -ivh http://yum.puppetlabs.com/el/6/products/x86_64/puppetlabs-release-6-7.noarch.rpm
 yum install puppet -y
 
@@ -39,11 +57,11 @@ then
     exit 1
 fi
 
-# VHIRL Portal Custom Modules - download from user specified GIT (or default)
+#/////////////////////////////
+# Clone specified git repository into $tmpModulesDir and install puppet modules.
+#/////////////////////////////
+
 yum install -y wget git
-baseUrl="https://github.com/squireg/VHIRL-Portal.git"
-branch="tcrm26"
-pathSuffix="/vm/puppet/modules/"
 tmpModulesDir="/tmp/modules/"
 rm -rf "$tmpModulesDir"
 if [ "$1" !=  "" ]
