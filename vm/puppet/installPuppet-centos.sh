@@ -6,6 +6,24 @@
 # svnUrl - The base VGL URL where additional puppet modules will be downloaded from. Defaults to "https://github.com/AuScope/VHIRL-Portal/raw/master"
 # pathSuffix - Will be appended to svnUrl to form the base url that will be recursively downloaded for modules. Defaults to "vm/puppet/modules/"
 
+# /////////////////////////////
+# VHIRL Portal Custom Modules - download from user specified GIT (or default)
+#
+# Edit these variables if you need to download from a different git
+# repo/branch.
+#
+# /////////////////////////////
+
+# baseUrl -- git repository url
+baseUrl="https://github.com/AuScope/VHIRL-Portal.git"
+
+# branch -- branch in the git repo
+branch="master"
+
+# pathSuffix -- path to puppet modules in the repo
+pathSuffix="/vm/puppet/modules/"
+
+# Install puppet itself
 sudo rpm -ivh http://yum.puppetlabs.com/el/6/products/x86_64/puppetlabs-release-6-7.noarch.rpm
 yum install puppet -y
 
@@ -39,10 +57,11 @@ then
     exit 1
 fi
 
-# VHIRL Portal Custom Modules - download from user specified SVN (or default)
-yum install -y wget
-baseUrl="https://github.com/AuScope/VHIRL-Portal/raw/master"
-pathSuffix="/vm/puppet/modules/"
+#/////////////////////////////
+# Clone specified git repository into $tmpModulesDir and install puppet modules.
+#/////////////////////////////
+
+yum install -y wget git
 tmpModulesDir="/tmp/modules/"
 rm -rf "$tmpModulesDir"
 if [ "$1" !=  "" ]
@@ -54,33 +73,22 @@ then
     pathSuffix="$2"
 fi
 
-#Ensure base url ends with a '/'
-if [ `tail -c 2 <<< "$baseUrl"` != "/" ]
-then
-    baseUrl="$baseUrl/"
-fi
-
 #Ensure suffix doesn't start with a '/'
 if [ `head -c 2 <<< "$pathSuffix"` != "/" ]
 then
     pathSuffix=`tail -c +2 <<< "$pathSuffix"`
 fi
 
-#When we download we don't want a long tree of directories, we just want the modules directory. Therefore we need to cut directories
-#back by the number of slashes in the URL. Don't forget there will be a trailing '/' and a http://
-baseUrlSlashes=`grep -o "/" <<<"$baseUrl" | wc -l`
-pathSuffixSlashes=`grep -o "/" <<<"$pathSuffix" | wc -l`
-cutDirs=`expr $baseUrlSlashes - 3 + $pathSuffixSlashes`
-wget -r "$baseUrl$pathSuffix" -P "$tmpModulesDir" -R htm,html -nH -np --cut-dirs $cutDirs -l 50
-if [ $? -ne 0 ]
-then
-    echo "Failed download of VGL custom modules - aborting"
-    exit 1
-fi
+# Clone the git repository into $tmpModulesDir so we can extract the
+# puppet modules.  Make sure to use the correct branch!
+mkdir -p "$tmpModulesDir"
+git clone "$baseUrl" "$tmpModulesDir"
+cd "$tmpModulesDir"
+git checkout "$branch"
 
 #Now copy the modules to the puppet module install directory
 moduleDir="/etc/puppet/modules"
-find "$tmpModulesDir" -maxdepth 1 -mindepth 1 -type d -exec cp {} -r "$moduleDir" \;
+find "$tmpModulesDir/$pathSuffix" -maxdepth 1 -mindepth 1 -type d -exec cp {} -r "$moduleDir" \;
 if [ $? -ne 0 ]
 then
     echo "Failed copying to puppet module directory - aborting"
