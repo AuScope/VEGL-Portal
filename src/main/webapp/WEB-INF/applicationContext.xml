@@ -215,8 +215,7 @@
 
     <bean id="inetAddress" class="java.net.InetAddress" factory-method="getLocalHost"/>
 
-    <!-- temporary remark the nci cloud storage until it's ready -->
-    <!-- bean id="cloudComputeService-nci" class="org.auscope.portal.core.services.cloud.CloudComputeService">
+    <bean id="cloudComputeService-nci" class="org.auscope.portal.core.services.cloud.CloudComputeService">
         <constructor-arg name="provider" value="NovaEc2"/>
         <constructor-arg name="endpoint" value="http://openstack.nci.org.au:8773/services/Cloud"/>
         <constructor-arg name="accessKey" value="${env.nci.ec2.accesskey}"/>
@@ -227,24 +226,7 @@
         <property name="availableImages">
             <list>
                 <bean class="org.auscope.portal.server.vegl.VglMachineImage">
-                    <constructor-arg name="imageId" value="nova/ami-00000034"/>
-                    <property name="name" value="UBC-GIF"/>
-                    <property name="description"><value>A Centos 6 machine with the University of British Columbia's Geophysical inversion facility already installed.</value></property>
-                    <property name="keywords">
-                        <array>
-                            <value>ubc-gif</value>
-                            <value>centos6</value>
-                        </array>
-                    </property>
-                    <property name="permissions">
-                        <array>
-                            <value>ROLE_UBC</value>
-                            <value>ROLE_ADMINISTRATOR</value>
-                        </array>
-                    </property>
-                </bean>
-                <bean class="org.auscope.portal.server.vegl.VglMachineImage">
-                    <constructor-arg name="imageId" value="nova/ami-0000003e"/>
+                    <constructor-arg name="imageId" value="nova/8e05dc4f-6912-41a9-8169-9d1fc055d7cc"/>
                     <property name="name" value="escript"/>
                     <property name="description"><value>A Centos 6 machine with escript already installed.</value></property>
                     <property name="keywords">
@@ -253,47 +235,24 @@
                             <value>centos6</value>
                         </array>
                     </property>
-                    <property name="permissions">
-                        <array>
-                            <value>ROLE_USER</value>
-                        </array>
-                    </property>
                 </bean>
                 <bean class="org.auscope.portal.server.vegl.VglMachineImage">
-                    <constructor-arg name="imageId" value="nova/ami-00000038"/>
-                    <property name="name" value="Underworld"/>
-                    <property name="description"><value>A Centos 6 machine with Underworld already installed.</value></property>
+                    <constructor-arg name="imageId" value="nova/8e05dc4f-6912-41a9-8169-9d1fc055d7cc"/>
+                    <property name="name" value="ANUGA"/>
+                    <property name="description">
+                        <value>A Centos 6 machine with ANUGA already installed.</value>
+                    </property>
                     <property name="keywords">
                         <array>
-                            <value>Underworld</value>
+                            <value>anuga</value>
                             <value>centos6</value>
                         </array>
                     </property>
-                    <property name="permissions">
-                        <array>
-                            <value>ROLE_USER</value>
-                        </array>
-                    </property>
-                </bean>
-                <bean class="org.auscope.portal.server.vegl.VglMachineImage">
-                    <constructor-arg name="imageId" value="nova/ami-0000003d"/>
-                    <property name="name" value="AEM-Inversion"/>
-                    <property name="description"><value>A Centos 6 machine with AEM Inversion already installed.</value></property>
-                    <property name="keywords">
-                        <array>
-                            <value>AEM-Inversion</value>
-                            <value>centos6</value>
-                        </array>
-                    </property>
-                    <property name="permissions">
-                        <array>
-                            <value>ROLE_USER</value>
-                        </array>
-                    </property>
+
                 </bean>
             </list>
         </property>
-    </bean -->
+    </bean>
 
     <bean id="cloudComputeService-nectar" class="org.auscope.portal.core.services.cloud.CloudComputeService">
         <constructor-arg name="provider" value="NovaKeystone"/>
