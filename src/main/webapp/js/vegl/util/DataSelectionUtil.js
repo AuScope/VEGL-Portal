@@ -233,16 +233,16 @@ Ext.define('vegl.util.DataSelectionUtil', {
 
             //Unfortunately ERDDAP requests that extend beyond the spatial bounds of the dataset
             //will fail. To workaround this, we need to crop our selection to the dataset bounds
-            if (dlOptions.dsEastBoundLongitude != null && (dlOptions.dsEastBoundLongitude < dlOptions.eastBoundLongitude)) {
+            if (dlOptions.dsEastBoundLongitude !== null && (dlOptions.dsEastBoundLongitude < dlOptions.eastBoundLongitude)) {
                 dlOptions.eastBoundLongitude = dlOptions.dsEastBoundLongitude;
             }
-            if (dlOptions.dsWestBoundLongitude != null && (dlOptions.dsWestBoundLongitude > dlOptions.westBoundLongitude)) {
+            if (dlOptions.dsWestBoundLongitude !== null && (dlOptions.dsWestBoundLongitude > dlOptions.westBoundLongitude)) {
                 dlOptions.westBoundLongitude = dlOptions.dsWestBoundLongitude;
             }
-            if (dlOptions.dsNorthBoundLatitude != null && (dlOptions.dsNorthBoundLatitude < dlOptions.northBoundLatitude)) {
+            if (dlOptions.dsNorthBoundLatitude !== null && (dlOptions.dsNorthBoundLatitude < dlOptions.northBoundLatitude)) {
                 dlOptions.northBoundLatitude = dlOptions.dsNorthBoundLatitude;
             }
-            if (dlOptions.dsSouthBoundLatitude != null && (dlOptions.dsSouthBoundLatitude > dlOptions.southBoundLatitude)) {
+            if (dlOptions.dsSouthBoundLatitude !== null && (dlOptions.dsSouthBoundLatitude > dlOptions.southBoundLatitude)) {
                 dlOptions.southBoundLatitude = dlOptions.dsSouthBoundLatitude;
             }
 

@@ -218,8 +218,8 @@
     <bean id="cloudComputeService-nci" class="org.auscope.portal.core.services.cloud.CloudComputeService">
         <constructor-arg name="provider" value="NovaKeystone"/>
         <constructor-arg name="endpoint" value="http://130.56.241.100:35357/v2.0/"/>
-        <constructor-arg name="accessKey" value="${env.nci.ec2.accesskey}"/>
-        <constructor-arg name="secretKey" value="${env.nci.ec2.secretkey}"/>
+        <constructor-arg name="accessKey" value="${env.nci.nova.accesskey}"/>
+        <constructor-arg name="secretKey" value="${env.nci.nova.secretkey}"/>
         <property name="id" value="nci-openstack-compute"/>
         <property name="name" value="National Computing Infrastructure (Canberra)"/>
         <property name="groupName" value ="vgl-#{inetAddress.hostName.toLowerCase()}"/>
@@ -260,9 +260,9 @@
     <bean id="cloudComputeService-nectar" class="org.auscope.portal.core.services.cloud.CloudComputeService">
         <constructor-arg name="provider" value="NovaKeystone"/>
         <constructor-arg name="endpoint" value="https://keystone.rc.nectar.org.au:5000/v2.0"/>
-        <constructor-arg name="accessKey" value="${env.nectar.ec2.accesskey}"/>
-        <constructor-arg name="secretKey" value="${env.nectar.ec2.secretkey}"/>
-        <property name="id" value="nectar-openstack-compute"/>
+        <constructor-arg name="accessKey" value="${env.nectar.nova.accesskey}"/>
+        <constructor-arg name="secretKey" value="${env.nectar.nova.secretkey}"/>
+        <property name="id" value="necta:wr-openstack-compute"/>
         <property name="name" value="National eResearch Collaboration Tools and Resources"/>
         <property name="groupName" value ="vgl-#{inetAddress.hostName.toLowerCase()}"/>
         <property name="availableImages">
