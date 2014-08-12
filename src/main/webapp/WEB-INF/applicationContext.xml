@@ -281,6 +281,17 @@
                         </array>
                     </property>
                 </bean>
+                <bean class="org.auscope.portal.server.vegl.VglMachineImage">
+                    <constructor-arg name="imageId" value="Melbourne/8f9f364c-9945-44cd-bd64-5327d04d4489"/>
+                    <property name="name" value="TCRM"/>
+                    <property name="description"><value>A Centos 6 machine with TCRM already installed.</value></property>
+                    <property name="keywords">
+                        <array>
+                            <value>tcrm</value>
+                            <value>centos6</value>
+                        </array>
+                    </property>
+                </bean>
             </list>
         </property>
     </bean>
