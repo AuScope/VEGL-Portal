@@ -195,6 +195,8 @@
         <constructor-arg name="accessKey" value="${env.nectar.storage.accesskey}"/>
         <constructor-arg name="secretKey" value="${env.nectar.storage.secretkey}"/>
         <constructor-arg name="regionName" value="Qld"/>
+        <constructor-arg name="relaxHostName" value="false"/>
+        <constructor-arg name="stripExpectHeader" value="true"/>
         <property name="name" value="National eResearch Collaboration Tools and Resources (Queensland)"/>
         <property name="id" value="nectar-openstack-storage-qld"/>
         <property name="bucket" value="vgl-portal"/>
@@ -207,6 +209,8 @@
         <constructor-arg name="accessKey" value="${env.nectar.storage.accesskey}"/>
         <constructor-arg name="secretKey" value="${env.nectar.storage.secretkey}"/>
         <constructor-arg name="regionName" value="Melbourne"/>
+        <constructor-arg name="relaxHostName" value="false"/>
+        <constructor-arg name="stripExpectHeader" value="true"/>
         <property name="name" value="National eResearch Collaboration Tools and Resources (Melbourne)"/>
         <property name="id" value="nectar-openstack-storage-melb"/>
         <property name="bucket" value="vgl-portal"/>
@@ -226,27 +230,15 @@
         <property name="availableImages">
             <list>
                 <bean class="org.auscope.portal.server.vegl.VglMachineImage">
-                    <constructor-arg name="imageId" value="nova/8e05dc4f-6912-41a9-8169-9d1fc055d7cc"/>
-                    <property name="name" value="escript"/>
-                    <property name="description">
-                        <value>A Centos 6 machine with escript already installed.</value>
-                    </property>
-                    <property name="keywords">
-                        <array>
-                            <value>escript</value>
-                            <value>centos6</value>
-                        </array>
-                    </property>
-                </bean>
-                <bean class="org.auscope.portal.server.vegl.VglMachineImage">
-                    <constructor-arg name="imageId" value="nova/8e05dc4f-6912-41a9-8169-9d1fc055d7cc"/>
+                    <constructor-arg name="imageId" value="RegionOne/8e05dc4f-6912-41a9-8169-9d1fc055d7cc"/>
                     <property name="name" value="ANUGA"/>
                     <property name="description">
-                        <value>A Centos 6 machine with ANUGA already installed.</value>
+                        <value>A Centos 6 machine with ANUGA/eScript already installed.</value>
                     </property>
                     <property name="keywords">
                         <array>
                             <value>anuga</value>
+                            <value>escript</value>
                             <value>centos6</value>
                         </array>
                     </property>
