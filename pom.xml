@@ -13,9 +13,9 @@
         <url>https://jira.csiro.au/browse/VHIRL</url>
     </issueManagement>
     <scm>
-        <connection>scm:svn:https://svn.auscope.org/subversion/AuScopePortal/VEGL-Portal/branches/VHIRL-Portal/</connection>
-        <developerConnection>scm:svn:https://svn.auscope.org/subversion/AuScopePortal/VEGL-Portal/branches/VHIRL-Portal/</developerConnection>
-        <url>https://svn.auscope.org/subversion/AuScopePortal/VEGL-Portal/branches/VHIRL-Portal/</url>
+        <connection>scm:git:git@github.com:AuScope/VHIRL-Portal.git</connection>
+        <developerConnection>scm:git:git@github.com:AuScope/VHIRL-Portal.git</developerConnection>
+        <url>https://github.com/AuScope/VHIRL-Portal</url>
     </scm>
 
     <!-- Build Configuration -->
