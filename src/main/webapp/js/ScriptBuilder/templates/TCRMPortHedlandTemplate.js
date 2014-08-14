@@ -1,5 +1,5 @@
 /**
- * A template for generating a eScript gravity inversion example.
+ * A template for generating a TCRM example.
  */
 Ext.define('ScriptBuilder.templates.TCRMPortHedlandTemplate', {
     extend : 'ScriptBuilder.templates.BaseTemplate',
@@ -34,6 +34,12 @@ Ext.define('ScriptBuilder.templates.TCRMPortHedlandTemplate', {
             autoLoad : true
         });
 
+        var MIN_SEED = 1, MAX_SEED = 10000000;
+        // Return a random integer from [MIN_SEED, MAX_SEED)
+        var seed = function() {
+            return Math.floor(Math.random() * (MAX_SEED - MIN_SEED)) + MIN_SEED;
+        };
+
         var trackGenTab = {
             title : 'Track Generator Options',
             items : [{
@@ -49,6 +55,20 @@ Ext.define('ScriptBuilder.templates.TCRMPortHedlandTemplate', {
                 anchor : '-20',
                 name : 'years-per-simulation',
                 value : 1,
+                allowBlank: false
+            },{
+                xtype : 'numberfield',
+                fieldLabel : 'Random seed for season',
+                anchor : '-20',
+                name : 'season-seed',
+                value : seed(),
+                allowBlank: false
+            },{
+                xtype : 'numberfield',
+                fieldLabel : 'Random seed for track',
+                anchor : '-20',
+                name : 'track-seed',
+                value : seed(),
                 allowBlank: false
             }]
         };

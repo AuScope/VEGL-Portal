@@ -1,4 +1,5 @@
 import glob
+import os
 import subprocess
 import tempfile
 
@@ -132,18 +133,39 @@ def cloudDownload(cloudKey, outFilePath):
     print "cloudDownload: " + queryPath + " to " + outFilePath + " returned " + str(retcode)
 
 # Write the config file
-fh, fname = tempfile.mkstemp(suffix=".ini", prefix="vhirl-tcrm")
-fh.close()
-with open(fname, 'w') as f:
+ini_file = tempfile.NamedTemporaryFile(mode='w',
+                                       suffix=".ini",
+                                       prefix="vhirl-tcrm",
+                                       delete=False)
+with ini_file as f:
     f.write(iniString)
 
 # Execute TCRM job
-print "Executing TCRM in {}".format(TCRM_DIR)
+print "Executing TCRM in {0}".format(TCRM_DIR)
 os.chdir(TCRM_DIR)
-subprocess.call(["/usr/bin/python", "tcrm.py", "-c", fname])
+subprocess.call(["/usr/bin/python", "tcrm.py", "-c", ini_file.name])
 
 # Upload results
-hazard_plots = glob.glob("output/port_hedland/plots/hazard/*.png")
-print "Found hazard plots: {}".format(hazard_plots)
-for p in hazard_plots:
-    cloudUpload(p, p)
+def upload_results(spec, keyfn=None):
+    """Upload files specified by spec.
+
+    Spec will be passed to glob.glob to find files.  If keyfn is
+    supplied it should be a function that takes a filename from glob
+    and returns the corresponding cloud key to use.
+
+    """
+    files = glob.glob(spec)
+    for f in files:
+        k = None
+        if keyfn:
+            k = keyfn(f)
+        if k is None:
+            k = f
+        cloudUpload(f, k)
+
+# Track files
+upload_results("output/port_hedland/tracks/*.csv")
+# Windfield files
+upload_results("output/port_hedland/windfield/*.nc")
+# Hazard plots
+upload_results("output/port_hedland/plots/hazard/*.png")
