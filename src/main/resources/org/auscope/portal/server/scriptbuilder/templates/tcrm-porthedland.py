@@ -26,11 +26,11 @@ FilterSeasons=True
 
 [Region]
 ; Domain for windfield and hazard calculation
-gridLimit={'xMin':113.0,'xMax':124.0,'yMin':-26.0,'yMax':-15.0}
+gridLimit={'xMin':${west-bound-lon},'xMax':${east-bound-lon},'yMin':${south-bound-lat},'yMax':${north-bound-lat}}
 gridSpace={'x':1.0,'y':1.0}
 gridInc={'x':1.0,'y':0.5}
-LocalityID=250913860
-LocalityName=Port Hedland, Western Australia, Australia.
+LocalityID=${locality-id}
+LocalityName=${locality-name}
 
 [StatInterface]
 kdeType=Biweight
