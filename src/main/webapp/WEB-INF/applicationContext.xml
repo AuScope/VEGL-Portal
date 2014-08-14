@@ -230,7 +230,7 @@
         <property name="availableImages">
             <list>
                 <bean class="org.auscope.portal.server.vegl.VglMachineImage">
-                    <constructor-arg name="imageId" value="RegionOne/8e05dc4f-6912-41a9-8169-9d1fc055d7cc"/>
+                    <constructor-arg name="imageId" value="RegionOne/3f98cc0f-8b27-44ce-8979-df1f57c00558"/>
                     <property name="name" value="ANUGA"/>
                     <property name="description">
                         <value>A Centos 6 machine with ANUGA/eScript already installed.</value>

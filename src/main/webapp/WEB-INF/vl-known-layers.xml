@@ -11,7 +11,7 @@
         <constructor-arg name="id" value="ga-busselton"/>
         <constructor-arg name="knownLayerSelector">
             <bean class="org.auscope.portal.core.view.knownlayer.WMSSelector">
-                <constructor-arg name="layerName" value="Band1"/>
+                <constructor-arg name="layerName" value="elevation"/>
             </bean>
         </constructor-arg>
         <property name="name" value="Busselton"/>
