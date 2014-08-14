@@ -16,10 +16,11 @@ export SUBSET_REQUEST_PATH="${WORKING_DIR}/vgl-download.sh"
 export ABORT_SHUTDOWN_PATH="${WORKING_DIR}/abort_shutdown"
 export FILECONVERSION_URL="https://github.com/AuScope/VHIRL-Portal/raw/master/vm/VHIRL_conversions.py"
 export VHIRL_NCTOASC_CONVERSION_SCRIPT="${WORKING_DIR}/VHIRL_conversions.py"
+export PROJECT_REPO="https://github.com/AuScope/VHIRL-Portal/"
 
 echo "VEGL Workflow Script... starting"
 echo "All future console output will be redirected to ${VEGL_LOG_FILE}"
-exec &> "$VEGL_LOG_FILE"
+exec > >(tee -a "$VEGL_LOG_FILE")
 
 echo "Loading system wide profile:"
 source /etc/profile
@@ -81,6 +82,9 @@ svn info ${WORKFLOW_URL}
 echo "                                      "
 echo "svn info ${CLOUD_STORAGE_WRAPPER_URL}"
 svn info ${CLOUD_STORAGE_WRAPPER_URL}
+echo "                                      "
+echo "git ls-remote -U master ${PROJECT_REPO}"
+git ls-remote -U master ${PROJECT_REPO}
 echo "--------------------------------------"
 
 #Upload a file indicating that work has started
