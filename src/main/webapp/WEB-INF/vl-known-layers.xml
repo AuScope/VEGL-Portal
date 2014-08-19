@@ -6,18 +6,30 @@
       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
-
     <bean id="knownTypeBusselton" class="org.auscope.portal.core.view.knownlayer.KnownLayer">
         <constructor-arg name="id" value="ga-busselton"/>
         <constructor-arg name="knownLayerSelector">
-            <bean class="org.auscope.portal.core.view.knownlayer.WMSSelector">
-                <constructor-arg name="layerName" value="elevation"/>
+            <bean class="org.auscope.portal.core.view.knownlayer.CSWRecordSelector">
+                <property name="descriptiveKeyword" value="Busselton"/>
             </bean>
         </constructor-arg>
         <property name="name" value="Busselton"/>
         <property name="description" value=""/>
         <property name="group" value="Geoscience Australia Coverages"/>
     </bean>
+
+    <bean id="knownTypeAusBath" class="org.auscope.portal.core.view.knownlayer.KnownLayer">
+        <constructor-arg name="id" value="ga-ausbath"/>
+        <constructor-arg name="knownLayerSelector">
+            <bean class="org.auscope.portal.core.view.knownlayer.CSWRecordSelector">
+                <property name="descriptiveKeyword" value="ausbath"/>
+            </bean>
+        </constructor-arg>
+        <property name="name" value="Australia"/>
+        <property name="description" value="GEOCAT: 67703"/>
+        <property name="group" value="Geoscience Australia Coverages"/>
+    </bean>
+
 
 
     <bean id="knownTypeBouguerGeodetic" class="org.auscope.portal.core.view.knownlayer.KnownLayer">

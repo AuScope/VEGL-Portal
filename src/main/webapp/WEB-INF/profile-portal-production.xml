@@ -12,6 +12,7 @@
         <constructor-arg>
             <list>
             	<ref bean="knownTypeBusselton" />
+				<ref bean="knownTypeAusBath" />            	
                 <ref bean="knownTypeBouguerGeodetic" />
             </list>
         </constructor-arg>
