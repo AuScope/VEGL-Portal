@@ -7,6 +7,8 @@ include "autofsck"
 $tcrm_path = "/opt/tcrm"
 
 class tcrmdeps {
+  include centos65_pypar
+
   package { ["geos-devel", "git", "hdf5-devel"]:
     ensure => installed,
     require => [Class["epel"], Class["vgl_common"]]
@@ -17,14 +19,14 @@ class tcrmdeps {
     command => "/usr/bin/git clone -b py26 https://github.com/squireg/tcrm.git ${tcrm_path}",
     # command => "/usr/bin/git clone https://github.com/GeoscienceAustralia/tcrm.git ${tcrm_path}",
     creates => "${tcrm_path}",
-    require => [Package["git"]],
+    require => [Package["git"], Class["centos65_pypar"]],
     timeout => 0,
   }
 
   # Install the python dependencies
   python_pip::install { "Install deps from tcrm/requirements.txt":
     requirements_file => "${tcrm_path}/requirements.txt",
-    require => Package["geos-devel", "hdf5-devel"],
+    require => [Package["geos-devel", "hdf5-devel"], Exec["tcrm-co"]],
     alias => "tcrm_pip",
   }
 
