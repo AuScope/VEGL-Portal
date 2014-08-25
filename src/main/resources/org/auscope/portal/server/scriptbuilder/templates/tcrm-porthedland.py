@@ -143,7 +143,7 @@ with ini_file as f:
 # Execute TCRM job
 print "Executing TCRM in {0}".format(TCRM_DIR)
 os.chdir(TCRM_DIR)
-subprocess.call(["/usr/bin/python", "tcrm.py", "-c", ini_file.name])
+subprocess.call(["mpirun", "-np", "${n-threads}", "/usr/bin/python", "tcrm.py", "-c", ini_file.name])
 
 # Upload results
 def upload_results(spec, keyfn=None):
@@ -163,9 +163,12 @@ def upload_results(spec, keyfn=None):
             k = f
         cloudUpload(f, k)
 
+# Logs
+upload_results("output/port_hedland/log/*")
 # Track files
 upload_results("output/port_hedland/tracks/*.csv")
 # Windfield files
 upload_results("output/port_hedland/windfield/*.nc")
-# Hazard plots
+# Hazard data and plots
 upload_results("output/port_hedland/plots/hazard/*.png")
+upload_results("output/port_hedland/hazard/*.nc")
