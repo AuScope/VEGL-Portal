@@ -195,6 +195,25 @@ Ext.define('ScriptBuilder.templates.TCRMPortHedlandTemplate', {
             }]
         };
 
+        var jobTab = {
+            title : 'Job Options',
+            items : [{
+                xtype : 'numberfield',
+                fieldLabel : 'Max Threads',
+                anchor : '-20',
+                margin : '10',
+                name : 'n-threads',
+                value : maxThreads,
+                minValue : 1,
+                allowBlank : false,
+                allowDecimals : false,
+                plugins : [{
+                    ptype : 'fieldhelptext',
+                    text : Ext.String.format('The maximum number of execution threads to run (this job will have {0} CPUs)', maxThreads)
+                }]
+            }]
+        };
+
         this._getTemplatedScriptGui(callback, 'tcrm-porthedland.py', {
             xtype : 'form',
             width : 500,
@@ -210,7 +229,7 @@ Ext.define('ScriptBuilder.templates.TCRMPortHedlandTemplate', {
                     padding : '20',
                     border : false
                 },
-                items : [regionTab, trackGenTab, windfieldTab]
+                items : [regionTab, trackGenTab, windfieldTab, jobTab]
             }]
         });
     }
