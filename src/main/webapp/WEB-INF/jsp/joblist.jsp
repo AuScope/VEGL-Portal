@@ -64,7 +64,7 @@
     <script src="js/ScriptBuilder/templates/UnderworldGocadTemplate.js" type="text/javascript"></script>
     <script src="js/ScriptBuilder/templates/AEMInversionTemplate.js" type="text/javascript"></script>
     <script src="js/ScriptBuilder/templates/ANUGATemplate.js" type="text/javascript"></script>
-    <script src="js/ScriptBuilder/templates/TCRMPortHedlandTemplate.js" type="text/javascript"></script>
+    <script src="js/ScriptBuilder/templates/TCRMTemplate.js" type="text/javascript"></script>
     <script type="text/javascript" src="js/ScriptBuilder/ScriptBuilder.js"></script>
     <script type="text/javascript" src="js/ScriptBuilder/InsertionPromptWindow.js"></script>
     <script type="text/javascript" src="js/ScriptBuilder/Components.js"></script>
