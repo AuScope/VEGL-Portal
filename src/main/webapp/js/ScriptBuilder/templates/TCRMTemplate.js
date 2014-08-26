@@ -214,7 +214,7 @@ Ext.define('ScriptBuilder.templates.TCRMPortHedlandTemplate', {
             }]
         };
 
-        this._getTemplatedScriptGui(callback, 'tcrm-porthedland.py', {
+        this._getTemplatedScriptGui(callback, 'tcrm.py', {
             xtype : 'form',
             width : 500,
             height : 520,

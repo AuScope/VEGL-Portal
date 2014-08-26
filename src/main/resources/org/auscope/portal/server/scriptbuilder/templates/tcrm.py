@@ -48,7 +48,7 @@ TrackSeed=${track-seed}
 ;TrackSeed=89333
 
 [WindfieldInterface]
-;TrackPath=./output/port_hedland/tracks
+;TrackPath=./output/vl/tracks
 Margin=2.0
 Resolution=${windfield-interface-resolution}
 ;Resolution=0.05
@@ -58,7 +58,7 @@ windFieldType=kepert
 
 [Hazard]
 ; Years to calculate return period wind speeds
-;InputPath=./output/port_hedland/windfield
+;InputPath=./output/vl/windfield
 ;Resolution=0.05
 Years=5,10,20,25,50,100,200,250,500,1000,2000,2500
 MinimumRecords=10
@@ -72,16 +72,16 @@ datasets = IBTRACS,LTMSLP
 MSLPGrid=1,2,3,4,12
 
 [Output]
-Path=./output/port_hedland
+Path=./output/vl
 
 [Logging]
-LogFile=./output/port_hedland/log/port_hedland.log
+LogFile=./output/vl/log/tcrm.log
 LogLevel=INFO
 Verbose=False
 
 [Process]
 ExcludePastProcessed=True
-DatFile=./output/port_hedland/process/dat/port_hedland.dat
+DatFile=./output/vl/process/dat/tcrm.dat
 
 [RMW]
 GetRMWDistFromInputData=False
@@ -164,11 +164,11 @@ def upload_results(spec, keyfn=None):
         cloudUpload(f, k)
 
 # Logs
-upload_results("output/port_hedland/log/*")
+upload_results("output/vl/log/*")
 # Track files
-upload_results("output/port_hedland/tracks/*.csv")
+upload_results("output/vl/tracks/*.csv")
 # Windfield files
-upload_results("output/port_hedland/windfield/*.nc")
+upload_results("output/vl/windfield/*.nc")
 # Hazard data and plots
-upload_results("output/port_hedland/plots/hazard/*.png")
-upload_results("output/port_hedland/hazard/*.nc")
+upload_results("output/vl/plots/hazard/*.png")
+upload_results("output/vl/hazard/*.nc")
