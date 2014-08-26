@@ -304,3 +304,5 @@ cloudUpload("${name_stem}.dem", "${name_stem}.dem")
 cloudUpload("${name_stem}.pts", "${name_stem}.pts")
 cloudUpload("${name_stem}.msh", "${name_stem}.msh")
 cloudUpload("${name_stem}_fixed_wave.sww", "${name_stem}_fixed_wave.sww")
+
+print 'If you wish to view your output - please look at anuga-viewer here: http://sourceforge.net/projects/anuga/files/'
