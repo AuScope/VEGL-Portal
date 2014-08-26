@@ -53,7 +53,7 @@ Ext.define('vegl.util.DataSelectionUtil', {
         switch(or.get('type')) {
         case portal.csw.OnlineResource.WCS:
             delete downloadOptions.url;
-            downloadOptions.format = 'geotif';
+            downloadOptions.format = 'nc';
             downloadOptions.layerName = or.get('name');
             break;
         case portal.csw.OnlineResource.WFS:
