@@ -2,6 +2,7 @@ import glob
 import os
 import subprocess
 import tempfile
+import zipfile
 
 TCRM_DIR="/opt/tcrm"
 
@@ -145,6 +146,7 @@ print "Executing TCRM in {0}".format(TCRM_DIR)
 os.chdir(TCRM_DIR)
 subprocess.call(["mpirun", "-np", "${n-threads}", "/usr/bin/python", "tcrm.py", "-c", ini_file.name])
 
+
 # Upload results
 def upload_results(spec, keyfn=None):
     """Upload files specified by spec.
@@ -163,12 +165,26 @@ def upload_results(spec, keyfn=None):
             k = f
         cloudUpload(f, k)
 
+
+# Zip then upload results
+def zip_upload_results(spec, name, key=None):
+    """Zip files globbed from spec into zipfile name and upload under key.
+
+    If key is None it will default to name.
+
+    """
+    with zipfile.ZipFile(name, 'w') as z:
+        for f in glob.glob(spec):
+            z.write(f)
+    cloudUpload(name, name if key is None else key)
+
+
 # Logs
 upload_results("output/vl/log/*")
 # Track files
-upload_results("output/vl/tracks/*.csv")
+zip_upload_results("output/vl/tracks/*.csv", "tracks.zip")
 # Windfield files
-upload_results("output/vl/windfield/*.nc")
+zip_upload_results("output/vl/windfield/*.nc", "windfields.zip")
 # Hazard data and plots
 upload_results("output/vl/plots/hazard/*.png")
 upload_results("output/vl/hazard/*.nc")
