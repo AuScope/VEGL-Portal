@@ -1,4 +1,4 @@
-"""Script for running a tsunami inundation scenario for Cairns, QLD Australia.
+"""Script for running a tsunami inundation scenario for Busselton, WA Australia.
 
 Source data such as elevation and boundary data is assumed to be available in
 directories specified by project.py
