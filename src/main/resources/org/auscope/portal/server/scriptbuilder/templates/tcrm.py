@@ -170,12 +170,13 @@ def upload_results(spec, keyfn=None):
 def zip_upload_results(spec, name, key=None):
     """Zip files globbed from spec into zipfile name and upload under key.
 
-    If key is None it will default to name.
+    If key is None it will default to <name>.zip.
 
     """
-    with zipfile.ZipFile(name, 'w') as z:
-        for f in glob.glob(spec):
-            z.write(f)
+    z = zipfile.ZipFile(name, 'w')
+    for f in glob.glob(spec):
+        z.write(f)
+    z.close()
     cloudUpload(name, name if key is None else key)
 
 
