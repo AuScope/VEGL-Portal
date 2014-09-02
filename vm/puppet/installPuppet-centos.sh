@@ -3,7 +3,7 @@
 # Originally sourced from http://awaseroot.wordpress.com/2012/09/01/new-script-install-puppet-on-centos/
 # Usage:
 # installPuppet-centos.sh [svnUrl] [pathSuffix]
-# svnUrl - The base VGL URL where additional puppet modules will be downloaded from. Defaults to "https://github.com/AuScope/VHIRL-Portal/raw/master"
+# svnUrl - The base VL URL where additional puppet modules will be downloaded from. Defaults to "https://github.com/AuScope/VHIRL-Portal/raw/master"
 # pathSuffix - Will be appended to svnUrl to form the base url that will be recursively downloaded for modules. Defaults to "vm/puppet/modules/"
 
 # /////////////////////////////

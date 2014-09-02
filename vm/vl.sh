@@ -1,26 +1,26 @@
 #!/usr/bin/env bash
 # chkconfig: 2345 90 10
-# description: vgl.sh - Shell Script performing the "workflow" of the VGL VM
-# NOTE: Please ensure that VEGL_WORKFLOW_VERSION gets incremented with any changes
+# description: vl.sh - Shell Script performing the "workflow" of the VL VM
+# NOTE: Please ensure that VL_WORKFLOW_VERSION gets incremented with any changes
 
 #configure our environment
 export VGL_WORKFLOW_VERSION="1"
-export VEGL_LOG_FILE_NAME="vegl.sh.log"
-export VEGL_LOG_FILE="${WORKING_DIR}/$VEGL_LOG_FILE_NAME"
+export VL_LOG_FILE_NAME="vl.sh.log"
+export VL_LOG_FILE="${WORKING_DIR}/$VL_LOG_FILE_NAME"
 export EC2_METADATA_SCRIPT="${WORKING_DIR}/ec2-metadata"
 export FINAL_SLEEP_LENGTH="15m"
 export NTP_DATE_SERVER="pool.ntp.org"
 export CLOUD_STORAGE_WRAPPER_URL="https://github.com/AuScope/VHIRL-Portal/raw/master/vm/cloud.sh"
-export VEGL_SCRIPT_PATH="${WORKING_DIR}/vegl_script.py"
-export SUBSET_REQUEST_PATH="${WORKING_DIR}/vgl-download.sh"
+export VL_SCRIPT_PATH="${WORKING_DIR}/vl_script.py"
+export SUBSET_REQUEST_PATH="${WORKING_DIR}/vl-download.sh"
 export ABORT_SHUTDOWN_PATH="${WORKING_DIR}/abort_shutdown"
 export FILECONVERSION_URL="https://github.com/AuScope/VHIRL-Portal/raw/master/vm/VHIRL_conversions.py"
 export VHIRL_NCTOASC_CONVERSION_SCRIPT="${WORKING_DIR}/VHIRL_conversions.py"
 export PROJECT_REPO="https://github.com/AuScope/VHIRL-Portal/"
 
 echo "VEGL Workflow Script... starting"
-echo "All future console output will be redirected to ${VEGL_LOG_FILE}"
-exec > >(tee -a "$VEGL_LOG_FILE")
+echo "All future console output will be redirected to ${VL_LOG_FILE}"
+exec > >(tee -a "$VL_LOG_FILE")
 
 echo "Loading system wide profile:"
 source /etc/profile
@@ -34,7 +34,7 @@ echo "VGL_WORKFLOW_VERSION = ${VGL_WORKFLOW_VERSION}"
 echo "PATH = ${PATH}"
 echo "LD_LIBRARY_PATH = ${LD_LIBRARY_PATH}"
 echo "WORKING_DIR = ${WORKING_DIR}"
-echo "VEGL_LOG_FILE = ${VEGL_LOG_FILE}"
+echo "VL_LOG_FILE = ${VL_LOG_FILE}"
 echo "EC2_METADATA_SCRIPT = ${EC2_METADATA_SCRIPT}"
 echo "FINAL_SLEEP_LENGTH = ${FINAL_SLEEP_LENGTH}"
 echo "NTP_DATE_SERVER = ${NTP_DATE_SERVER}"
@@ -89,7 +89,7 @@ echo "--------------------------------------"
 
 #Upload a file indicating that work has started
 echo "Uploading script version file..."
-echo "${VEGL_WORKFLOW_VERSION}" > workflow-version.txt
+echo "${VL_WORKFLOW_VERSION}" > workflow-version.txt
 echo "cloud upload workflow-version.txt workflow-version.txt"
 cloud upload workflow-version.txt workflow-version.txt
 
@@ -117,11 +117,11 @@ curl -L "$FILECONVERSION_URL" > "$VHIRL_NCTOASC_CONVERSION_SCRIPT"
 echo "curl result $?"
 
 #Next we can perform our actual work (make sure we indicate where the python logs start/finish)
-chmod +x "$VEGL_SCRIPT_PATH"
-echo "About to execute ${VEGL_SCRIPT_PATH} as a python script"
+chmod +x "$VL_SCRIPT_PATH"
+echo "About to execute ${VL_SCRIPT_PATH} as a python script"
 echo "#### Python start ####"
 computeStartTime=`date +%s`
-python $VEGL_SCRIPT_PATH
+python $VL_SCRIPT_PATH
 computeEndTime=`date +%s`
 echo "#### Python end ####"
 
@@ -135,8 +135,8 @@ cd $WORKING_DIR
 
 #Finally upload our logs for debug purposes
 echo "About to upload output log..."
-echo "cloud upload $VEGL_LOG_FILE_NAME $VEGL_LOG_FILE"
-cloud upload $VEGL_LOG_FILE_NAME $VEGL_LOG_FILE_NAME
+echo "cloud upload $VL_LOG_FILE_NAME $VL_LOG_FILE"
+cloud upload $VL_LOG_FILE_NAME $VL_LOG_FILE_NAME
 
 #At this point we can give developers a grace period in which they can login to the VM for debugging
 echo "Sleeping for ${FINAL_SLEEP_LENGTH} before shutting down"
