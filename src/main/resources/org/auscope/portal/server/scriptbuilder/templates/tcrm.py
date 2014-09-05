@@ -2,6 +2,7 @@ import glob
 import os
 import subprocess
 import tempfile
+import zipfile
 
 TCRM_DIR="/opt/tcrm"
 
@@ -48,7 +49,7 @@ TrackSeed=${track-seed}
 ;TrackSeed=89333
 
 [WindfieldInterface]
-;TrackPath=./output/port_hedland/tracks
+;TrackPath=./output/vl/tracks
 Margin=2.0
 Resolution=${windfield-interface-resolution}
 ;Resolution=0.05
@@ -58,7 +59,7 @@ windFieldType=kepert
 
 [Hazard]
 ; Years to calculate return period wind speeds
-;InputPath=./output/port_hedland/windfield
+;InputPath=./output/vl/windfield
 ;Resolution=0.05
 Years=5,10,20,25,50,100,200,250,500,1000,2000,2500
 MinimumRecords=10
@@ -72,16 +73,16 @@ datasets = IBTRACS,LTMSLP
 MSLPGrid=1,2,3,4,12
 
 [Output]
-Path=./output/port_hedland
+Path=./output/vl
 
 [Logging]
-LogFile=./output/port_hedland/log/port_hedland.log
+LogFile=./output/vl/log/tcrm.log
 LogLevel=INFO
 Verbose=False
 
 [Process]
 ExcludePastProcessed=True
-DatFile=./output/port_hedland/process/dat/port_hedland.dat
+DatFile=./output/vl/process/dat/tcrm.dat
 
 [RMW]
 GetRMWDistFromInputData=False
@@ -145,6 +146,7 @@ print "Executing TCRM in {0}".format(TCRM_DIR)
 os.chdir(TCRM_DIR)
 subprocess.call(["mpirun", "-np", "${n-threads}", "/usr/bin/python", "tcrm.py", "-c", ini_file.name])
 
+
 # Upload results
 def upload_results(spec, keyfn=None):
     """Upload files specified by spec.
@@ -163,12 +165,27 @@ def upload_results(spec, keyfn=None):
             k = f
         cloudUpload(f, k)
 
+
+# Zip then upload results
+def zip_upload_results(spec, name, key=None):
+    """Zip files globbed from spec into zipfile name and upload under key.
+
+    If key is None it will default to <name>.zip.
+
+    """
+    z = zipfile.ZipFile(name, 'w')
+    for f in glob.glob(spec):
+        z.write(f)
+    z.close()
+    cloudUpload(name, name if key is None else key)
+
+
 # Logs
-upload_results("output/port_hedland/log/*")
+upload_results("output/vl/log/*")
 # Track files
-upload_results("output/port_hedland/tracks/*.csv")
+zip_upload_results("output/vl/tracks/*.csv", "tracks.zip")
 # Windfield files
-upload_results("output/port_hedland/windfield/*.nc")
+zip_upload_results("output/vl/windfield/*.nc", "windfields.zip")
 # Hazard data and plots
-upload_results("output/port_hedland/plots/hazard/*.png")
-upload_results("output/port_hedland/hazard/*.nc")
+upload_results("output/vl/plots/hazard/*.png")
+upload_results("output/vl/hazard/*.nc")
