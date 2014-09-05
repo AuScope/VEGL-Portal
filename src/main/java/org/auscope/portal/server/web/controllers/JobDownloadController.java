@@ -176,7 +176,7 @@ public class JobDownloadController extends BasePortalController {
 
         //String serviceUrl = hostConfigurer.resolvePlaceholder("HOST.erddapservice.url");
         CSWGeographicBoundingBox bbox = new CSWGeographicBoundingBox(westBoundLongitude, eastBoundLongitude, southBoundLatitude, northBoundLatitude);
-        String netcdfsubsetserviceUrl = getNetcdfSubsetUrl(bbox, url, name, "nc");
+        String netcdfsubsetserviceUrl = getNetcdfSubsetUrl(bbox, url, name, description, "nc");
 
         // Append this download list to the existing list of download objects
         VglDownload newDownload = new VglDownload();
@@ -302,8 +302,8 @@ public class JobDownloadController extends BasePortalController {
      * @param layerName The coverage layername to request
      * @return The NCSS subset request URL
      */
-    private String getNetcdfSubsetUrl(CSWGeographicBoundingBox bbox, String serviceUrl, String name, String format) {
-        logger.debug(String.format("serviceUrl='%1$s' bbox='%2$s' layerName='%3$s'", serviceUrl, bbox, name));
+    private String getNetcdfSubsetUrl(CSWGeographicBoundingBox bbox, String serviceUrl, String name, String description, String format) {
+        logger.debug(String.format("serviceUrl='%1$s' bbox='%2$s' layerName='%3$s'", serviceUrl, bbox, name, description));
         
         // convert bbox co-ordinates to an netcdfsubsetservice dimension string
         String netcdfsubsetserviceDimensions = "&spatial=bb" +
@@ -313,7 +313,7 @@ public class JobDownloadController extends BasePortalController {
         		"&east="+ bbox.getEastBoundLongitude();
         String otherParams = "&temporal=all&time_start=&time_end=&horizStride=";
 
-        String url = serviceUrl + "?var=" + name + netcdfsubsetserviceDimensions + otherParams;
+        String url = serviceUrl + "?var=" + description + netcdfsubsetserviceDimensions + otherParams;
 
         return url;
     }

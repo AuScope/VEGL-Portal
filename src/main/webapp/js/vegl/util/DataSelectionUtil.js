@@ -64,8 +64,8 @@ Ext.define('vegl.util.DataSelectionUtil', {
             downloadOptions.featureType = or.get('name');
             break;
         case portal.csw.OnlineResource.NCSS:
-        	downloadOptions.name = or.get('name');
-        	downloadOptions.method = 'GET';
+            //downloadOptions.name = or.get('name');
+            downloadOptions.method = 'GET';
             //delete eastBoundLongitude;
             //delete northBoundLatitude;
             //delete southBoundLatitude;
