@@ -74,7 +74,6 @@ busselton_extent = np.asarray([[357325,6270510],
                                [392955,6320400],
                                [379095,6288910]])
 
-
 base_scale = ${base_scale}
 default_res = 25 * base_scale   # Background resolution
 
@@ -117,6 +116,7 @@ domain = anuga.create_domain_from_regions(busselton_extent,
                                                    'land_se': [9]},
                                     maximum_triangle_area=default_res,
                                     mesh_filename=meshname,
+                                    interior_regions=interior_regions,
                                     use_cache=v_cache,
                                     verbose=v_verbose)
 
