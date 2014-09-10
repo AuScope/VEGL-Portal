@@ -3,6 +3,8 @@
 import os
 import sys
 import osr
+import re
+import subprocess
 
 # Capitalisation doesn't actually matter to ANUGA
 att_map = {'units':'Units', 'ellps':'Datum', 'proj':'Projection',
@@ -34,7 +36,16 @@ def nc2asc(file_in, stem_out, s_srs='WGS84'):
     s_srs -- Source file SRS
 
     """
-    os.system("gdalwarp -s_srs '{0}' -t_srs '+proj=utm +zone=50 +south +datum=GDA94' -of netcdf {1} {2}_UTM.nc".format(s_srs, file_in, stem_out))
+    # Attempt to determine the NODATA value from the source
+    info = subprocess.Popen(["gdalinfo", file_in],
+                            stdout=subprocess.PIPE).communicate()[0]
+    nodata = re.findall("NoData Value=(-?\d+\.?\d*)", info)
+    if nodata:
+        nodata = " ".join([str(x) for x in nodata])
+    else:
+        # Default value
+        nodata = "-9999"
+    os.system("gdalwarp -s_srs '{0}' -t_srs '+proj=utm +zone=50 +south +datum=GDA94' -of netcdf -dstnodata \"{1}\" {2} {3}_UTM.nc".format(s_srs, nodata, file_in, stem_out))
     os.system("gdal_translate -of AAIGrid " +stem_out+ "_UTM.nc " +stem_out+ ".asc")
     convert_new_prj2old(stem_out + '.prj')
 
