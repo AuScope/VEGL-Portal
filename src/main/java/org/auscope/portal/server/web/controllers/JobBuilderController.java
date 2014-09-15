@@ -214,20 +214,24 @@ public class JobBuilderController extends BaseCloudController {
             return generateJSONResponseMAV(false, null, "Error fetching job with id " + jobId);
         }
 
-        //Handle incoming file
-        StagedFile file = null;
+                
+        List<StagedFile> files = new ArrayList<StagedFile>();
         try {
-            file = fileStagingService.handleFileUpload(job, (MultipartHttpServletRequest) request);
+            files = fileStagingService.handleMultiFileUpload(job, (MultipartHttpServletRequest) request);
         } catch (Exception ex) {
-            logger.error("Error uploading file", ex);
-            return generateJSONResponseMAV(false, null, "Error uploading file");
+            logger.error("Error uploading file(s)", ex);
+            return generateJSONResponseMAV(false, null, "Error uploading file(s)");
         }
-        FileInformation fileInfo = stagedFileToFileInformation(file);
-
+        List<FileInformation> fileInfos = new ArrayList<FileInformation>();
+        for (StagedFile file : files) {
+            fileInfos.add(stagedFileToFileInformation(file));
+        }
+        
+        
         //We have to use a HTML response due to ExtJS's use of a hidden iframe for file uploads
         //Failure to do this will result in the upload working BUT the user will also get prompted
         //for a file download containing the encoded response from this function (which we don't want).
-        return generateHTMLResponseMAV(true, Arrays.asList(fileInfo), "");
+        return generateHTMLResponseMAV(true, Arrays.asList(fileInfos), "");
     }
 
     /**
