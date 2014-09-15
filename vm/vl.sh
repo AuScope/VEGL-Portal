@@ -18,7 +18,7 @@ export FILECONVERSION_URL="https://github.com/AuScope/VHIRL-Portal/raw/master/vm
 export VHIRL_NCTOASC_CONVERSION_SCRIPT="${WORKING_DIR}/VHIRL_conversions.py"
 export PROJECT_REPO="https://github.com/AuScope/VHIRL-Portal/"
 
-echo "VEGL Workflow Script... starting"
+echo "VL Workflow Script... starting"
 echo "All future console output will be redirected to ${VL_LOG_FILE}"
 exec > >(tee -a "$VL_LOG_FILE")
 
@@ -27,7 +27,7 @@ source /etc/profile
 
 # Print environment variables (don't print any credentials here)
 echo "#### Environment start ####"
-echo "------ VEGL Workflow Script ----------"
+echo "------- VL Workflow Script -----------"
 echo "                                      "
 echo "------ Printing Environment ----------"
 echo "VGL_WORKFLOW_VERSION = ${VGL_WORKFLOW_VERSION}"
