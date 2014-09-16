@@ -7,7 +7,7 @@
     <packaging>war</packaging>
     <version>1.1.0-RELEASE</version>
     <name>VHIRL-Portal</name>
-    <url>https://www.seegrid.csiro.au/wiki/NeCTARProjects/Vhirl/WebHome</url>
+    <url>https://www.seegrid.csiro.au/wiki/VirtualLabs/Vhirl/WebHome</url>
     <issueManagement>
         <system>Jira</system>
         <url>https://jira.csiro.au/browse/VHIRL</url>
