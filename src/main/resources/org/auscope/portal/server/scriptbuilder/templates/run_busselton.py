@@ -186,13 +186,13 @@ evolveStartTime = time.time()
 
 
 # Save every two mins leading up to wave approaching land
-for t in domain.evolve(yieldstep=2*60, 
+for t in domain.evolve(yieldstep=2*60,
                        finaltime=5000):
     print domain.timestepping_statistics()
     print domain.boundary_statistics(tags='ocean_wnw')
 
 # Save every 30 secs as wave starts inundating ashore
-for t in domain.evolve(yieldstep=60*0.5, 
+for t in domain.evolve(yieldstep=60*0.5,
                        finaltime=7000,
                        skip_initial_step=True):
     print domain.timestepping_statistics()
@@ -216,6 +216,7 @@ uploadStartTime = time.time()
 
 # Upload results
 print 'Uploading result files'
+cloudUpload("${input_dataset}", "raw_elevation")
 cloudUpload("${name_stem}_UTM.nc", "${name_stem}_UTM.nc")
 cloudUpload("${name_stem}.asc", "${name_stem}.asc")
 cloudUpload("${name_stem}.prj", "${name_stem}.prj")
@@ -236,3 +237,4 @@ print 'Bounding      : %.2f seconds' %(evolveStartTime-bounaryStartTime)
 print 'Evolve        : %.2f seconds' %(uploadStartTime-evolveStartTime)
 print 'Upload        : %.2f seconds' %(time.time()-uploadStartTime)
 print 'Total time: %.2f seconds' %(time.time()-jobstart)
+
