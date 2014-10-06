@@ -94,7 +94,7 @@ Ext.application({
             region : 'south',
             store : layerStore,
             map : map,
-            height: 250,
+            height: '30%',
             split: true,
             allowDebugWindow : isDebugMode,
             listeners : {
@@ -194,7 +194,7 @@ Ext.application({
             activeTab : 0,
             region : 'north',
             split : true,
-            height : 265,
+            height : '45%',
             enableTabScroll : true,
             items:[knownLayersPanel]
         });
