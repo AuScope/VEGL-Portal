@@ -27,14 +27,23 @@ Ext.define('vegl.widgets.JobInputFileWindow', {
                     xtype : 'form',
                     itemId : 'tab-local',
                     title : 'From Local File',
-                    items : [{
-                        xtype: 'filefield',
+//                    items : [{
+//                        xtype: 'filefield',
+//                        name: 'file',
+//                        anchor : '100%',
+//                        labelWidth: 150,
+//                        allowBlank: false,
+//                        fieldLabel: 'Select File to upload'
+//                    }]
+                      items: [{
+                        xtype: 'multifilefield',
                         name: 'file',
-                        anchor : '100%',
-                        labelWidth: 150,
+                        labelWidth: 80,
+                        fieldLabel: 'Choose file(s)',
+                        anchor: '100%',
                         allowBlank: false,
-                        fieldLabel: 'Select File to upload'
-                    }]
+                        margin: 0
+                      }]
                 },{
                     xtype : 'form',
                     itemId : 'tab-remote',
