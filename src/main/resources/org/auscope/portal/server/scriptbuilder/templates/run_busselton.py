@@ -74,6 +74,7 @@ busselton_extent = np.asarray([[357325,6270510],
                                [392955,6320400],
                                [379095,6288910]])
 
+zone = 50
 base_scale = ${base_scale}
 default_res = 25 * base_scale   # Background resolution
 
@@ -90,7 +91,7 @@ jobstart = time.time()
 
 
 # Create ASC from nc data
-VHIRL_conversions.nc2asc(dataset, name_stem)
+VHIRL_conversions.nc2asc(dataset, name_stem, zone=zone)
 
 # Create DEM from asc data
 anuga.asc2dem(name_stem+'.asc', use_cache=v_cache, verbose=v_verbose)
@@ -237,4 +238,3 @@ print 'Bounding      : %.2f seconds' %(evolveStartTime-bounaryStartTime)
 print 'Evolve        : %.2f seconds' %(uploadStartTime-evolveStartTime)
 print 'Upload        : %.2f seconds' %(time.time()-uploadStartTime)
 print 'Total time: %.2f seconds' %(time.time()-jobstart)
-

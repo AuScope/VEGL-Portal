@@ -28,7 +28,7 @@ def asc2nc(file_in, file_out):
     os.system("gdal_translate -of netCDF " +file_in+ " " +file_in+ ".nc")
     os.system("gdalwarp -t_srs EPSG:4326 -of netcdf " +file_in+ ".nc " +file_out)
 
-def nc2asc(file_in, stem_out, s_srs='WGS84'):
+def nc2asc(file_in, stem_out, s_srs='WGS84', zone=50):
     """
     Convert an nc back to a file format ANUGA can consume.
 
@@ -45,7 +45,11 @@ def nc2asc(file_in, stem_out, s_srs='WGS84'):
     else:
         # Default value
         nodata = "-9999"
-    os.system("gdalwarp -s_srs '{0}' -t_srs '+proj=utm +zone=50 +south +datum=GDA94' -of netcdf -dstnodata \"{1}\" {2} {3}_UTM.nc".format(s_srs, nodata, file_in, stem_out))
+    cmd = "gdalwarp -s_srs '" + s_srs + "' -t_srs '+proj=utm "
+    cmd += "+zone=" + str(zone) + " +south +datum=GDA94' "
+    cmd += '-of netcdf -dstnodata "' + nodata + '" '
+    cmd += file_in +' ' + stem_out + '_UTM.nc'
+    os.system(cmd)
     os.system("gdal_translate -of AAIGrid " +stem_out+ "_UTM.nc " +stem_out+ ".asc")
     convert_new_prj2old(stem_out + '.prj')
 
