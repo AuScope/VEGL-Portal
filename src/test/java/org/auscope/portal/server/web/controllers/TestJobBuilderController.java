@@ -387,16 +387,17 @@ public class TestJobBuilderController {
         final VEGLJob jobObj = new VEGLJob(new Integer(13));
         final MultipartHttpServletRequest mockMultipartRequest = context.mock(MultipartHttpServletRequest.class);
         final File mockFile = context.mock(File.class);
-        final StagedFile mockStagedFile = new StagedFile(jobObj, "mockFile", mockFile);
+        final ArrayList<StagedFile> mockStagedFileList = new ArrayList<StagedFile>();
+        mockStagedFileList.add(new StagedFile(jobObj, "mockFile", mockFile));
 
         context.checking(new Expectations() {{
             //We should have a call to our job manager to get our job object
-            oneOf(mockJobManager).getJobById(jobObj.getId());
+            atLeast(1).of(mockJobManager).getJobById(jobObj.getId());
             will(returnValue(jobObj));
 
             //We should have a call to file staging service to update a file
-            oneOf(mockFileStagingService).handleFileUpload(jobObj, mockMultipartRequest);
-            will(returnValue(mockStagedFile));
+            oneOf(mockFileStagingService).handleMultiFileUpload(jobObj, mockMultipartRequest);
+            will(returnValue(mockStagedFileList));
 
             oneOf(mockFile).length();
             will(returnValue(1024L));
@@ -418,11 +419,11 @@ public class TestJobBuilderController {
 
         context.checking(new Expectations() {{
             //We should have a call to our job manager to get our job object
-            oneOf(mockJobManager).getJobById(jobObj.getId());
+        	atLeast(1).of(mockJobManager).getJobById(jobObj.getId());
             will(returnValue(jobObj));
 
             //We should have a call to file staging service to update a file
-            oneOf(mockFileStagingService).handleFileUpload(jobObj, mockMultipartRequest);
+            oneOf(mockFileStagingService).handleMultiFileUpload(jobObj, mockMultipartRequest);
             will(throwException(new PortalServiceException("Test Exception","Test Exception")));
         }});
 

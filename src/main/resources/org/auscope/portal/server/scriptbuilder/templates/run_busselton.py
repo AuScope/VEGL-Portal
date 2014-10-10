@@ -74,6 +74,7 @@ busselton_extent = np.asarray([[357325,6270510],
                                [392955,6320400],
                                [379095,6288910]])
 
+zone = 50
 base_scale = ${base_scale}
 default_res = 25 * base_scale   # Background resolution
 
@@ -90,7 +91,7 @@ jobstart = time.time()
 
 
 # Create ASC from nc data
-VHIRL_conversions.nc2asc(dataset, name_stem)
+VHIRL_conversions.nc2asc(dataset, name_stem, zone=zone)
 
 # Create DEM from asc data
 anuga.asc2dem(name_stem+'.asc', use_cache=v_cache, verbose=v_verbose)
@@ -186,13 +187,13 @@ evolveStartTime = time.time()
 
 
 # Save every two mins leading up to wave approaching land
-for t in domain.evolve(yieldstep=2*60, 
+for t in domain.evolve(yieldstep=2*60,
                        finaltime=5000):
     print domain.timestepping_statistics()
     print domain.boundary_statistics(tags='ocean_wnw')
 
 # Save every 30 secs as wave starts inundating ashore
-for t in domain.evolve(yieldstep=60*0.5, 
+for t in domain.evolve(yieldstep=60*0.5,
                        finaltime=7000,
                        skip_initial_step=True):
     print domain.timestepping_statistics()
@@ -216,6 +217,7 @@ uploadStartTime = time.time()
 
 # Upload results
 print 'Uploading result files'
+cloudUpload("${input_dataset}", "raw_elevation")
 cloudUpload("${name_stem}_UTM.nc", "${name_stem}_UTM.nc")
 cloudUpload("${name_stem}.asc", "${name_stem}.asc")
 cloudUpload("${name_stem}.prj", "${name_stem}.prj")
