@@ -190,7 +190,7 @@
         <repository>
             <id>cgsrv8.arrc.csiro.au</id>
             <name>AuScope Artifactory - PortalRepo</name>
-            <url>https://cgsrv8.arrc.csiro.au/artifactory/PortalRepo</url>
+            <url>https://cgsrv8.arrc.csiro.au/nexus/content/repositories/PortalRepository</url>
         </repository>
         <repository>
             <id>osgeo</id>
