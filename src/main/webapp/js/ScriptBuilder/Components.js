@@ -10,21 +10,93 @@ ScriptBuilder.Components.getComponents = function(selectedToolbox) {
         children : []
     };
 
-    switch (selectedToolbox.toLowerCase()) {
-        case "escript":
-            comps.children.push(ScriptBuilder.Components.getEscriptExamples());
-            break;
-        case "anuga":
-            comps.children.push(ScriptBuilder.Components.getANUGAExamples());
-            break;
-        case "tcrm":
-            comps.children.push(ScriptBuilder.Components.getTCRMExamples());
-            break;
-        default:
-            comps.children.push(ScriptBuilder.Components.getEscriptExamples());
-            comps.children.push(ScriptBuilder.Components.getANUGAExamples());
-            comps.children.push(ScriptBuilder.Components.getTCRMExamples());
-    }
+    
+    console.log("Testing..");
+
+    // http://jupiter-bt.nexus.csiro.au:5000/templates
+    // http://localhost:8000/templates
+    Ext.data.JsonP.request({
+        url : 'http://localhost:8000/templates',
+        callbackKey: 'callback',
+        //scope : this,
+
+        
+        
+        callback : function(options, success, response) {
+            var errorMsg, errorInfo;
+            console.log("options");
+            console.log(options);
+            console.log(success);
+            console.log(response);
+            
+
+            if (success) {
+                //var responseObj = Ext.JSON.decode(response.responseText);
+                //if (responseObj.success) {
+                    console.log("success")
+                	
+                	success.forEach( function (template) {
+                	    console.log(template.name);
+                	    if (template.dependencies instanceof Array){
+                	    	
+                	    	template.dependencies.forEach( function (toolbox) {
+                	    		console.log(toolbox.name);
+                	    	});
+                	    }
+                	});
+                	
+                	
+                	
+                	
+                	
+                	
+                	
+                	//this.scriptBuilderFrm.replaceScript(responseObj.data);                    
+                    return;
+                //} else {
+                //    errorMsg = responseObj.msg;
+                //    errorInfo = responseObj.debugInfo;
+                //}
+            } else {
+                console.log("no success")
+
+                errorMsg = "There was an error loading your script.";
+                errorInfo = "Please try again in a few minutes or report this error to cg_admin@csiro.au.";
+            }
+
+            //Create an error object and pass it to custom error window
+            var errorObj = {
+                title : 'Script Loading Error',
+                message : errorMsg,
+                info : errorInfo
+            };
+
+            var errorWin = Ext.create('portal.widgets.window.ErrorWindow', {
+                errorObj : errorObj
+            });
+            errorWin.show();
+        }
+    });
+
+ 
+        
+//    
+//    
+//    switch (selectedToolbox.toLowerCase()) {
+//        case "escript":
+//            comps.children.push(ScriptBuilder.Components.getEscriptExamples());
+//            break;
+//        case "anuga":
+//            comps.children.push(ScriptBuilder.Components.getANUGAExamples());
+//            break;
+//        case "tcrm":
+//            comps.children.push(ScriptBuilder.Components.getTCRMExamples());
+//            break;
+//        default:
+//            comps.children.push(ScriptBuilder.Components.getEscriptExamples());
+//            comps.children.push(ScriptBuilder.Components.getANUGAExamples());
+//            comps.children.push(ScriptBuilder.Components.getTCRMExamples());
+//    }
 
     return comps;
 };
