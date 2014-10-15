@@ -10,55 +10,67 @@ ScriptBuilder.Components.getComponents = function(selectedToolbox) {
         children : []
     };
 
-    
     console.log("Testing..");
 
     // http://jupiter-bt.nexus.csiro.au:5000/templates
     // http://localhost:8000/templates
-    Ext.data.JsonP.request({
-        url : 'http://localhost:8000/templates',
-        callbackKey: 'callback',
-        //scope : this,
+    Ext.Ajax.request({
+        url : 'http://jupiter-bt.nexus.csiro.au:5000/templates',
+        // url : 'http://localhost:5000/templates',
+        // callbackKey: 'callback',
+        scope : this,
 
-        
-        
         callback : function(options, success, response) {
             var errorMsg, errorInfo;
             console.log("options");
             console.log(options);
             console.log(success);
             console.log(response);
-            
 
             if (success) {
-                //var responseObj = Ext.JSON.decode(response.responseText);
-                //if (responseObj.success) {
-                    console.log("success")
-                	
-                	success.forEach( function (template) {
-                	    console.log(template.name);
-                	    if (template.dependencies instanceof Array){
-                	    	
-                	    	template.dependencies.forEach( function (toolbox) {
-                	    		console.log(toolbox.name);
-                	    	});
-                	    }
-                	});
-                	
-                	
-                	
-                	
-                	
-                	
-                	
-                	//this.scriptBuilderFrm.replaceScript(responseObj.data);                    
-                    return;
-                //} else {
-                //    errorMsg = responseObj.msg;
-                //    errorInfo = responseObj.debugInfo;
-                //}
+                var responseObj = Ext.JSON.decode(response.responseText);
+                if (responseObj) {
+                    var toolboxes = {};
+                    var template, toolbox, data;
+
+                    for (var k in responseObj) {
+                        data = responseObj[k];
+                        template = {
+                            id: data['@id'],
+                            type: "s",
+                            text: data['name'],
+                            qtip: data['description'],
+                            leaf: true
+                        };
+                        data['dependencies'].forEach(function(e, i, a) {
+                            if (e['type'] == 'toolbox') {
+                                toolbox = toolboxes[e['@id']];
+                                if (!toolbox) {
+                                    toolbox = {
+                                        text: e['name'],
+                                        type: "category",
+                                        expanded: true,
+                                        children: []
+                                    };
+
+                                    toolboxes[e['@id']] = toolbox;
+                                }
+                                toolbox.children.push(template);
+                            }
+                        });
+                    }
+
+                    //this.scriptBuilderFrm.replaceScript(responseObj.data);
+                    for (var t in toolboxes) {
+                        comps.children.push(t);
+                    }
+
+                } else {
+                    errorMsg = responseObj.msg;
+                    errorInfo = responseObj.debugInfo;
+                }
             } else {
-                console.log("no success")
+                console.log("no success");
 
                 errorMsg = "There was an error loading your script.";
                 errorInfo = "Please try again in a few minutes or report this error to cg_admin@csiro.au.";
