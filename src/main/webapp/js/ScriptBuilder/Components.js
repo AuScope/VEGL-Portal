@@ -2,16 +2,11 @@ Ext.ns('ScriptBuilder.Components');
 
 /**
  * The raw configuration for building the scriptbuilder tree
+ *
+ * Retrieve available templates from the marketplace then populate the
+ * panel with the resulting tree.
  */
-ScriptBuilder.Components.getComponents = function(selectedToolbox) {
-    var comps = {
-        text : "Script Builder Components",
-        expanded : true,
-        children : []
-    };
-
-    console.log("Testing..");
-
+ScriptBuilder.Components.getComponents = function(tree) {
     // http://jupiter-bt.nexus.csiro.au:5000/templates
     // http://localhost:8000/templates
     Ext.Ajax.request({
@@ -30,6 +25,12 @@ ScriptBuilder.Components.getComponents = function(selectedToolbox) {
             if (success) {
                 var responseObj = Ext.JSON.decode(response.responseText);
                 if (responseObj) {
+                    // var comps = {
+                    //     text : "Script Builder Components",
+                    //     expanded : true,
+                    //     children : []
+                    // };
+
                     var toolboxes = {};
                     var template, toolbox, data;
 
@@ -60,12 +61,13 @@ ScriptBuilder.Components.getComponents = function(selectedToolbox) {
                         });
                     }
 
-                    //this.scriptBuilderFrm.replaceScript(responseObj.data);
+                    // Populate the tree in panel
                     for (var t in toolboxes) {
-                        comps.children.push(t);
+                        tree.getRootNode().appendChild(toolboxes[t]);
                     }
-
                 } else {
+                    console.log("No response");
+
                     errorMsg = responseObj.msg;
                     errorInfo = responseObj.debugInfo;
                 }
@@ -76,17 +78,19 @@ ScriptBuilder.Components.getComponents = function(selectedToolbox) {
                 errorInfo = "Please try again in a few minutes or report this error to cg_admin@csiro.au.";
             }
 
-            //Create an error object and pass it to custom error window
-            var errorObj = {
-                title : 'Script Loading Error',
-                message : errorMsg,
-                info : errorInfo
-            };
+            if (errorMsg) {
+                //Create an error object and pass it to custom error window
+                var errorObj = {
+                    title : 'Script Loading Error',
+                    message : errorMsg,
+                    info : errorInfo
+                };
 
-            var errorWin = Ext.create('portal.widgets.window.ErrorWindow', {
-                errorObj : errorObj
-            });
-            errorWin.show();
+                var errorWin = Ext.create('portal.widgets.window.ErrorWindow', {
+                    errorObj : errorObj
+                });
+                errorWin.show();
+            }
         }
     });
 
@@ -110,7 +114,8 @@ ScriptBuilder.Components.getComponents = function(selectedToolbox) {
 //            comps.children.push(ScriptBuilder.Components.getTCRMExamples());
 //    }
 
-    return comps;
+    
+    // return comps;
 };
 
 

@@ -39,6 +39,11 @@ Ext.define('ScriptBuilder.ScriptBuilder', {
             title : 'Available Templates',
             itemId : 'sb-templates-panel',
             width : 250,
+            root : {
+                expanded: true,
+                text : "Script Builder Components",
+                children: []
+            },
             listeners : {
                 addcomponent : Ext.bind(this.onAddComponent, this)
             }
@@ -105,8 +110,11 @@ Ext.define('ScriptBuilder.ScriptBuilder', {
      * Builds components panel with selected toolbox
      */
     buildComponentsPanel : function(selectedToolbox) {
-        var comps = ScriptBuilder.Components.getComponents(selectedToolbox);
-        this.componentsPanel.setRootNode(comps);
+        // Populate the panel after retrieving the templates
+        ScriptBuilder.Components.getComponents(this.componentsPanel);
+
+        // var comps = ScriptBuilder.Components.getComponents(selectedToolbox);
+        // this.componentsPanel.setRootNode(comps);
     },
 
     /**
