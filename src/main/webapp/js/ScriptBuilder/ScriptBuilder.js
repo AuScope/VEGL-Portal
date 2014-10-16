@@ -67,11 +67,12 @@ Ext.define('ScriptBuilder.ScriptBuilder', {
         this.callParent(arguments);
     },
 
-    onAddComponent : function(panel, templateClass, name, description) {
+    onAddComponent : function(panel, entry, name, description) {
         var me = this;
 
         //Create the template which will load our script
-        var template = Ext.create(templateClass, {
+        var template = Ext.create('ScriptBuilder.templates.DynamicTemplate', {
+            entry: entry,
             name : name,
             description : description,
             wizardState : me.wizardState,

@@ -41,7 +41,7 @@ ScriptBuilder.Components.getComponents = function(tree) {
                             type: "s",
                             text: data['name'],
                             qtip: data['description'],
-                            leaf: true
+                            leaf: true                            
                         };
                         data['dependencies'].forEach(function(e, i, a) {
                             if (e['type'] == 'toolbox') {

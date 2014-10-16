@@ -25,11 +25,13 @@ Ext.define('ScriptBuilder.templates.BaseTemplate', {
     description : null,
     name : null,
     wizardState : null,
+    entry : {},
 
     constructor : function(config) {
         this.description = config.description ? config.description : '';
         this.name = config.name ? config.name : '';
         this.wizardState = config.wizardState ? config.wizardState : {};
+        this.entry = config.entry ? config.entry : {};
 
         this.callParent(arguments);
     },

@@ -54,6 +54,7 @@
     <script src="js/ScriptBuilder/templates/ANUGATemplate.js" type="text/javascript"></script>
     <script src="js/ScriptBuilder/templates/EScriptGravityPointTemplate.js" type="text/javascript"></script>
     <script src="js/ScriptBuilder/templates/TCRMTemplate.js" type="text/javascript"></script>
+    <script src="js/ScriptBuilder/templates/DynamicTemplate.js" type="text/javascript"></script>    
     <script src="js/ScriptBuilder/Components.js" type="text/javascript"></script>
     <script src="js/ScriptBuilder/ComponentTreePanel.js" type="text/javascript"></script>
     <script src="js/ScriptBuilder/InsertionPromptWindow.js" type="text/javascript"></script>
