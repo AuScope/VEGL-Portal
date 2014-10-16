@@ -95,55 +95,24 @@ Ext.define('ScriptBuilder.templates.BaseTemplate', {
      *
      * callback(Number status, String script) - called by the template when a script snippet has finished templating.
      * additionalParams - a regular object containing key/value pairs to inject into the specified template
-     * templateName - the name of the template to use
+     * template - template script
      */
-    _getTemplatedScript : function(callback, templateName, additionalParams) {
-        //Convert our keys/values into a form the controller can read
-        var keys = [];
-        var values = [];
-        //Utility function
-        var denormaliseKvp = function(keyList, valueList, kvpObj) {
-            if (kvpObj) {
-                for (key in kvpObj) {
-                    keyList.push(key);
-                    valueList.push(kvpObj[key]);
-                }
-            }
+    _getTemplatedScript : function(callback, template, additionalParams) {
+        var params = {};
+        for (var k in this.getParameters()) {
+            params[k] = this.getParameters()[k];
+        }
+        for (var k in additionalParams) {
+            params[k] = additionalParams[k];
+        }
+
+        var f = function(match, p1, offset, string) {
+            return params[p1];
         };
 
-        denormaliseKvp(keys, values, this.getParameters());
-        denormaliseKvp(keys, values, additionalParams);
-
-        var loadMask = new Ext.LoadMask(Ext.getBody(), {
-            msg : 'Loading script...',
-            removeMask : true
-        });
-        loadMask.show();
-
-        Ext.Ajax.request({
-            url : 'getTemplatedScript.do',
-            params : {
-                templateName : templateName,
-                key : keys,
-                value : values
-            },
-            callback : function(options, success, response) {
-                loadMask.hide();
-
-                if (!success) {
-                    callback(ScriptBuilder.templates.BaseTemplate.TEMPLATE_RESULT_ERROR, null);
-                    return;
-                }
-
-                var responseObj = Ext.JSON.decode(response.responseText);
-                if (!responseObj || !responseObj.success) {
-                    callback(ScriptBuilder.templates.BaseTemplate.TEMPLATE_RESULT_ERROR, null);
-                    return;
-                }
-
-                callback(ScriptBuilder.templates.BaseTemplate.TEMPLATE_RESULT_SUCCESS, responseObj.data);
-            }
-        });
+        template = template.replace(/\$\{([a-zA-Z0-9_-]+)\}/g, f);
+        callback(ScriptBuilder.templates.BaseTemplate.TEMPLATE_RESULT_SUCCESS,
+                 template);
     },
 
     /**
@@ -155,4 +124,3 @@ Ext.define('ScriptBuilder.templates.BaseTemplate', {
      */
     requestScript : portal.util.UnimplementedFunction
 });
-
