@@ -361,4 +361,8 @@
         </property>
     </bean>
 
+    <bean id="vlScmSnapshotDao" class="org.auscope.portal.server.vegl.VLScmSnapshotDao">
+        <property name="sessionFactory" ref="veglSessionFactory"/>
+    </bean>
+
 </beans>
