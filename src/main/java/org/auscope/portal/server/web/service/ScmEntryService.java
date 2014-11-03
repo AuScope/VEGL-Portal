@@ -23,7 +23,7 @@ import org.springframework.ui.velocity.VelocityEngineUtils;
  *
  */
 @Service
-public class SCMEntryService {
+public class ScmEntryService {
     private final Log logger = LogFactory.getLog(getClass());
 
     /** Puppet module template resource */
@@ -37,7 +37,7 @@ public class SCMEntryService {
      * Create a new instance.
      */
     @Autowired
-    public SCMEntryService(VLScmSnapshotDao vlScmSnapshotDao,
+    public ScmEntryService(VLScmSnapshotDao vlScmSnapshotDao,
                            VelocityEngine velocityEngine) {
         super();
         this.vlScmSnapshotDao = vlScmSnapshotDao;
@@ -51,7 +51,7 @@ public class SCMEntryService {
      * @param computeServiceId ID of the CloudComputeService provider
      * @return Snapshot id if one exists, otherwise null
      */
-    public String getTemplateSnapshotId(String entryId,
+    public String getScmEntrySnapshotId(String entryId,
                                         String computeServiceId) {
         String vmId = null;
         VLScmSnapshot snapshot = vlScmSnapshotDao
