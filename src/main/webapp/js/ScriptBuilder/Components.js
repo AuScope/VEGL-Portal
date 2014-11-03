@@ -10,9 +10,7 @@ ScriptBuilder.Components.getComponents = function(tree) {
     // http://jupiter-bt.nexus.csiro.au:5000/templates
     // http://localhost:8000/templates
     Ext.Ajax.request({
-        url : 'http://jupiter-bt.nexus.csiro.au:5000/templates',
-        // url : 'http://localhost:5000/templates',
-        // callbackKey: 'callback',
+        url : 'http://vhirl-dev.csiro.au/scm/solutions',
         scope : this,
 
         callback : function(options, success, response) {
@@ -25,45 +23,37 @@ ScriptBuilder.Components.getComponents = function(tree) {
             if (success) {
                 var responseObj = Ext.JSON.decode(response.responseText);
                 if (responseObj) {
-                    // var comps = {
-                    //     text : "Script Builder Components",
-                    //     expanded : true,
-                    //     children : []
-                    // };
+                    var problems = {};
+                    var solution, problem, data, prob_id;
 
-                    var toolboxes = {};
-                    var template, toolbox, data;
-
-                    for (var k in responseObj) {
-                        data = responseObj[k];
-                        template = {
+                    for (var idx in responseObj.solutions) {
+                        data = responseObj.solutions[idx];
+                        solution = {
                             id: data['@id'],
                             type: "s",
-                            text: data['name'],
-                            qtip: data['description'],
-                            leaf: true                            
+                            text: data.name,
+                            qtip: data.description,
+                            leaf: true
                         };
-                        data['dependencies'].forEach(function(e, i, a) {
-                            if (e['type'] == 'toolbox') {
-                                toolbox = toolboxes[e['@id']];
-                                if (!toolbox) {
-                                    toolbox = {
-                                        text: e['name'],
-                                        type: "category",
-                                        expanded: true,
-                                        children: []
-                                    };
+                        prob_id = data.problem['@id'];
+                        problem = problems[prob_id];
+                        if (!problem) {
+                            problem = {
+                                text: data.problem.name,
+                                type: "category",
+                                qtip: data.problem.description,
+                                expanded: true,
+                                children: []
+                            };
 
-                                    toolboxes[e['@id']] = toolbox;
-                                }
-                                toolbox.children.push(template);
-                            }
-                        });
+                            problems[prob_id] = problem;
+                        }
+                        problem.children.push(solution);
                     }
 
                     // Populate the tree in panel
-                    for (var t in toolboxes) {
-                        tree.getRootNode().appendChild(toolboxes[t]);
+                    for (var t in problems) {
+                        tree.getRootNode().appendChild(problems[t]);
                     }
                 } else {
                     console.log("No response");
