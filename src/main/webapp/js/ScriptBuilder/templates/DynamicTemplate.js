@@ -33,13 +33,13 @@ Ext.define('ScriptBuilder.templates.DynamicTemplate', {
         var item;
 
         if (this.entry) {
-            this.entry['variables'].forEach(function(variable, index) {
+            this.entry.variables.forEach(function(variable, index) {
                 item = {
-                    id: variable['name'],
-                    name: variable['name'],
-                    fieldLabel: variable['label'],
+                    id: variable.name,
+                    name: variable.name,
+                    fieldLabel: variable.label,
                     anchor: '-20',
-                    allowBlank: variable['optional']
+                    allowBlank: variable.optional
                 };
 
                 // Add help text if available
@@ -52,21 +52,24 @@ Ext.define('ScriptBuilder.templates.DynamicTemplate', {
                                    });
 
                 // Map var type to item type
-                if (variable['values']) {
+                if (variable.values) {
                     item.xtype = 'combo';
-                    item.forceSelection = !variable['optional'];
+                    item.forceSelection = !variable.optional;
                     item.queryMode = 'local';
                     item.valueField = 'value';
                     item.displayField = 'value';
                     item.store = Ext.create('Ext.data.Store', {
                         fields: ['value'],
-                        data: variable['values'].map(function(v) {
+                        data: variable.values.map(function(v) {
                             return {'value': v};
                         })
                     });
+                    // Default to the first entry in the list - this
+                    // will be overidden by a 'default' entry below
+                    item.value = variable.values[0];
                 }
                 else {
-                    switch (variable['type']) {
+                    switch (variable.type) {
                     case 'int':
                         item.xtype = 'numberfield';
                         item.allowDecimals = false;
@@ -80,8 +83,8 @@ Ext.define('ScriptBuilder.templates.DynamicTemplate', {
                         break;
                     case 'random-int':
                         item.xtype = 'numberfield';
-                        var min = variable['min'];
-                        var max = variable['max'];
+                        var min = variable.min;
+                        var max = variable.max;
                         item.value =
                             Math.floor(Math.random() * (max - min)) + min;
                         break;
@@ -97,11 +100,25 @@ Ext.define('ScriptBuilder.templates.DynamicTemplate', {
                 _setItemField(variable, 'max', item, 'maxValue');
                 _setItemField(variable, 'step', item, 'step');
 
+                // If this is a 'n-threads' variable, use maxThreads
+                // as the default value as long as there isn't already
+                // a default and maxThreads doesn't violate any
+                // constraints.
+                if (item.name == 'n-threads' &&
+                    item.value === undefined &&
+                    (item.minValue === undefined || maxThreads >= item.minValue) &&
+                    (item.maxValue === undefined || maxThreads <= item.maxValue) &&
+                    (item.xtype != 'combo' ||
+                     item.store.find('value', maxThreads) >= 0)) {
+                    item.value = maxThreads;
+                }
+
                 items.push(item);
             });
+
         }
 
-        this._getTemplatedScriptGui(callback, this.entry['template'], {
+        this._getTemplatedScriptGui(callback, this.entry.template, {
             xtype : 'form',
             width : 500,
             height : 520,
