@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 public class VLScmSnapshot implements Serializable {
 
+    private static final long serialVersionUID = -6638880820028925202L;
+
     private Integer id;
 
     private String scmEntryId;

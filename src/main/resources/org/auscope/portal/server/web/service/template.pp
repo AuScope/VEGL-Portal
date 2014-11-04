@@ -4,7 +4,7 @@ include "python_pip"
 include "puppi"
 include "autofsck"
 
-$sc_path = "${sc_path}"
+$sc_path = "/opt/scm/${sc_name}"
 
 class "sys_deps" {
   #foreach( $package in $system_packages )
@@ -49,9 +49,9 @@ class ${sc_name}_deps {
 
   # Install dependencies
   # Python requirements.txt
-  #if( $python_requirements )
+  #foreach( $requirements in $python_requirements )
   python_pip::install { "python requirements":
-    requirements_file => "${sc_path}/${python_requirements}",
+    requirements_file => "${sc_path}/${requirements}",
     require => [Class["python_pip"], Exec["source_checkout"], Class["py_deps"]]
   }
   #end
