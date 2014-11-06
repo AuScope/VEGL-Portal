@@ -88,6 +88,27 @@ Ext.define('ScriptBuilder.templates.DynamicTemplate', {
                         item.value =
                             Math.floor(Math.random() * (max - min)) + min;
                         break;
+                    case 'file':
+                        item.xtype = 'combo';
+                        item.allowBlank = false;
+                        item.valueField = 'localPath';
+                        item.displayField = 'localPath';
+                        item.store = Ext.create('Ext.data.Store', {
+                            model : 'vegl.models.Download',
+                            proxy : {
+                                type : 'ajax',
+                                url : 'getAllJobInputs.do',
+                                extraParams : {
+                                    jobId : jobId
+                                },
+                                reader : {
+                                    type : 'json',
+                                    root : 'data'
+                                }
+                            },
+                            autoLoad : true
+                        });
+                        break;
                     default:
                         item.xtype = 'textfield';
                     };

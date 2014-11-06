@@ -12,6 +12,7 @@ import junit.framework.Assert;
 import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.util.FileIOUtil;
 import org.auscope.portal.server.test.VGLPortalTestClass;
+import org.auscope.portal.server.web.service.ScmEntryService;
 import org.auscope.portal.server.web.service.ScriptBuilderService;
 import org.jmock.Expectations;
 import org.junit.Before;
@@ -23,11 +24,13 @@ import org.springframework.web.servlet.ModelAndView;
 public class TestScriptBuilderController extends VGLPortalTestClass {
     private ScriptBuilderController controller;
     private ScriptBuilderService mockSbService = context.mock(ScriptBuilderService.class);
+    private ScmEntryService mockScmEntryService = context.mock(ScmEntryService.class);
 
     @Before
     public void setup() {
         // Object Under Test
-        controller = new ScriptBuilderController(mockSbService);
+        controller = new ScriptBuilderController(mockSbService,
+                                                 mockScmEntryService);
     }
 
     /**
@@ -38,12 +41,14 @@ public class TestScriptBuilderController extends VGLPortalTestClass {
     public void testSaveScript() throws Exception {
         final String jobId = "1";
         final String sourceText = "print 'test'";
-        
+        final String solutionId = "http://vhirl-dev.csiro.au/scm/solutions/1";
+
         context.checking(new Expectations() {{
             oneOf(mockSbService).saveScript(jobId, sourceText);
+            oneOf(mockScmEntryService).updateJobForSolution(jobId, solutionId);
         }});
-        
-        ModelAndView mav = controller.saveScript(jobId, sourceText);
+
+        ModelAndView mav = controller.saveScript(jobId, sourceText, solutionId);
         Assert.assertTrue((Boolean)mav.getModel().get("success"));
     }
 
@@ -55,9 +60,10 @@ public class TestScriptBuilderController extends VGLPortalTestClass {
     public void testSaveScript_EmptySourceText() throws Exception {
         final String jobId = "1";
         final String sourceText = "";
-                
-        ModelAndView mav = controller.saveScript(jobId, sourceText);
-        Assert.assertFalse((Boolean)mav.getModel().get("success"));        
+        final String solutionId = "http://vhirl-dev.csiro.au/scm/solutions/1";
+
+        ModelAndView mav = controller.saveScript(jobId, sourceText, solutionId);
+        Assert.assertFalse((Boolean)mav.getModel().get("success"));
     }
     
     /**
@@ -69,13 +75,14 @@ public class TestScriptBuilderController extends VGLPortalTestClass {
     public void testSaveScript_Exception() throws Exception {
         final String jobId = "1";
         final String sourceText = "print 'test'";
+        final String solutionId = "http://vhirl-dev.csiro.au/scm/solutions/1";        
         
         context.checking(new Expectations() {{
             oneOf(mockSbService).saveScript(jobId, sourceText);
             will(throwException(new PortalServiceException("")));
         }});
         
-        ModelAndView mav = controller.saveScript(jobId, sourceText);
+        ModelAndView mav = controller.saveScript(jobId, sourceText, solutionId);
         Assert.assertFalse((Boolean)mav.getModel().get("success"));
     }
     

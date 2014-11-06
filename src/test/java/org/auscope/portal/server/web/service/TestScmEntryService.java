@@ -4,6 +4,7 @@ import java.util.Properties;
 
 import org.apache.velocity.app.VelocityEngine;
 import org.auscope.portal.core.test.PortalTestClass;
+import org.auscope.portal.server.vegl.VEGLJobManager;
 import org.auscope.portal.server.vegl.VLScmSnapshotDao;
 import org.auscope.portal.server.web.service.scm.Solution;
 import org.auscope.portal.server.web.service.scm.Toolbox;
@@ -20,6 +21,7 @@ import org.springframework.ui.velocity.VelocityEngineFactoryBean;
 public class TestScmEntryService extends PortalTestClass {
     private ScmEntryService service;
     private VLScmSnapshotDao mockSnapshotDao = context.mock(VLScmSnapshotDao.class);
+    private VEGLJobManager mockJobManager = context.mock(VEGLJobManager.class);    
 
     @Before
     public void init() throws Exception {
@@ -31,7 +33,9 @@ public class TestScmEntryService extends PortalTestClass {
         vecEngFBean.setVelocityProperties(p);
         VelocityEngine velocityEngine = vecEngFBean.createVelocityEngine();
 
-        service = new ScmEntryService(mockSnapshotDao, velocityEngine);
+        service = new ScmEntryService(mockSnapshotDao,
+                                      mockJobManager,
+                                      velocityEngine);
     }
 
     @Test
@@ -41,18 +45,18 @@ public class TestScmEntryService extends PortalTestClass {
         Solution solution = service.getScmSolution(solutionId);
         System.out.println("name = " + solution.getName());
         System.out.println("createdAt = " + solution.getCreatedAt());
-        Toolbox toolbox = solution.getToolbox();
+        Toolbox toolbox = solution.getToolbox(true);
         System.out.println("toolbox = ");
         System.out.println("    name = " + toolbox.getName());
         System.out.println("    source = " + toolbox.getSource());
         System.out.println("    dependencies = " + toolbox.getDependencies());
     }
 
-    @Test
-    public void testCreatePuppetModule() throws Exception {
-        final String solutionId = "http://vhirl-dev.csiro.au/scm/solutions/2";
+    // @Test
+    // public void testCreatePuppetModule() throws Exception {
+    //     final String solutionId = "http://vhirl-dev.csiro.au/scm/solutions/2";
 
-        String puppet = service.createPuppetModule(solutionId);
-        System.out.println(puppet);
-    }
+    //     String puppet = service.createPuppetModule(solutionId);
+    //     System.out.println(puppet);
+    // }
 }

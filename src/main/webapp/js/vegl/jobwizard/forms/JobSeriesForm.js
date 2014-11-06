@@ -167,6 +167,7 @@ Ext.define('vegl.jobwizard.forms.JobSeriesForm', {
         var radioGroup = this.getComponent('seriesRadioGroup');
         var wizardState = this.wizardState;
         var numDownloadReqs = this.getNumDownloadRequests();
+        var cjFunc = this.createJob(wizardState, callback);
 
         if (radioGroup.getValue().sCreateSelect === 0) {
             if (Ext.isEmpty(wizardState.seriesId)) {
@@ -189,7 +190,8 @@ Ext.define('vegl.jobwizard.forms.JobSeriesForm', {
                             }
                     });
             } else {
-                callback(true);
+                // Create the job then call callback.
+                cjFunc();
                 return;
             }
         } else {
@@ -201,7 +203,7 @@ Ext.define('vegl.jobwizard.forms.JobSeriesForm', {
                 return;
             }
 
-            var csFunc = this.createSeries(wizardState, seriesName, seriesDesc, callback);
+            var csFunc = this.createSeries(wizardState, seriesName, seriesDesc, cjFunc, callback);
 
             if (numDownloadReqs === 0) {
                 Ext.Msg.confirm('Confirm',
@@ -231,7 +233,7 @@ Ext.define('vegl.jobwizard.forms.JobSeriesForm', {
         return size;
     },
 
-    createSeries : function(wizardState, seriesName, seriesDesc, callback) {
+    createSeries : function(wizardState, seriesName, seriesDesc, cjFunc, callback) {
         return function() {
 
             Ext.Ajax.request({
@@ -245,7 +247,7 @@ Ext.define('vegl.jobwizard.forms.JobSeriesForm', {
                         var responseObj = Ext.JSON.decode(response.responseText);
                         if (responseObj.success && Ext.isNumber(responseObj.data[0].id)) {
                             wizardState.seriesId = responseObj.data[0].id;
-                            callback(true);
+                            cjFunc();
                             return;
                         } else {
                             errorMsg = responseObj.msg;
@@ -262,6 +264,35 @@ Ext.define('vegl.jobwizard.forms.JobSeriesForm', {
                 }
             });
         }
+    },
+
+    createJob : function(wizardState, callback) {
+        return function() {
+            Ext.Ajax.request({
+                url : 'updateOrCreateJob.do',
+                params : {
+                    seriesId: wizardState.seriesId
+                },
+                callback : function(options, success, response) {
+                    if (!success) {
+                        portal.widgets.window.ErrorWindow.showText('Error creating job', 'There was an unexpected error when attempting to save the details on this form. Please try again in a few minutes.');
+                        callback(false);
+                        return;
+                    }
+
+                    var responseObj = Ext.JSON.decode(response.responseText);
+                    if (!responseObj.success) {
+                        portal.widgets.window.ErrorWindow.showText('Error saving details', 'There was an unexpected error when attempting to save the details on this form.', responseObj.msg);
+                        callback(false);
+                        return;
+                    }
+
+                    wizardState.jobId = responseObj.data[0].id;
+                    callback(true);
+                    return;
+                }
+            });
+        };
     },
 
     getHelpInstructions : function() {
