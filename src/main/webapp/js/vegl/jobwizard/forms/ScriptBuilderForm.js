@@ -92,32 +92,73 @@ Ext.define('vegl.jobwizard.forms.ScriptBuilderForm', {
 
     // submit script source for storage at the server
     beginValidation : function(callback) {
-        sourceText = this.scriptBuilderFrm.getScript();
-        // replace tab with 4 spaces whenever it occurs in the sourceText
-        sourceText = sourceText.replace(/\t/g,"\u0020\u0020\u0020\u0020");
-
+        var me = this;
+        
+        // Create a job based on selected solution
+        var values = {};
+        values.seriesId = this.scriptBuilderFrm.wizardState.seriesId;
         Ext.Ajax.request({
-            url: 'secure/saveScript.do',
-            success: function(response, opts) {
-                responseObj = Ext.JSON.decode(response.responseText);
-                if (responseObj.success) {
-                    callback(true);
-                } else {
-                    errorMsg = responseObj.msg;
-                    errorInfo = responseObj.debugInfo;
-                    portal.widgets.window.ErrorWindow.showText('Error', errorMsg, errorInfo);
+            url : 'updateOrCreateJob.do',
+            params : values,
+            callback : function(options, success, response) {
+                if (!success) {
+                    portal.widgets.window.ErrorWindow.showText('Error saving details', 'There was an unexpected error when attempting to save the details on this form. Please try again in a few minutes.');
                     callback(false);
+                    return;
                 }
-            },
-            failure: function(response, opts) {
-                Ext.Msg.alert('Error', 'Error storing script file! Please try again in a few minutes');
-                callback(false);
-            },
-            params: {
-                'sourceText': sourceText,
-                'jobId': this.wizardState.jobId
+
+                var responseObj = Ext.JSON.decode(response.responseText);
+                if (!responseObj.success) {
+                    portal.widgets.window.ErrorWindow.showText('Error saving details', 'There was an unexpected error when attempting to save the details on this form.', responseObj.msg);
+                    callback(false);
+                    return;
+                }
+
+                me.scriptBuilderFrm.wizardState.jobId = responseObj.data[0].id;                
+                // // Store user selected toolbox into wizard state. That toolbox
+                // // will be used to select relevant script templates or examples.
+                // wizardState.toolbox = jobObjectFrm.getForm().findField("computeVmId").getRawValue();
+                
+                // // Store selected resource limits into wizard state. These values will be included
+                // // in template generation (to ensure valid numbers of CPU's are chosen etc)
+                // var computeTypeId = jobObjectFrm.getComponent('resource-combo').getValue();
+                // var computeType = jobObjectFrm.computeTypeStore.getById(computeTypeId);
+                // wizardState.ncpus = computeType.get('vcpus');
+                // wizardState.nrammb = computeType.get('ramMB');
+                // callback(true);
+
+                // Save script content
+                sourceText = me.scriptBuilderFrm.getScript();
+                // replace tab with 4 spaces whenever it occurs in the sourceText
+                sourceText = sourceText.replace(/\t/g,"\u0020\u0020\u0020\u0020");
+
+                Ext.Ajax.request({
+                    url: 'secure/saveScript.do',
+                    success: function(response, opts) {
+                        responseObj = Ext.JSON.decode(response.responseText);
+                        if (responseObj.success) {
+                            callback(true);
+                        } else {
+                            errorMsg = responseObj.msg;
+                            errorInfo = responseObj.debugInfo;
+                            portal.widgets.window.ErrorWindow.showText('Error', errorMsg, errorInfo);
+                            callback(false);
+                        }
+                    },
+                    failure: function(response, opts) {
+                        Ext.Msg.alert('Error', 'Error storing script file! Please try again in a few minutes');
+                        callback(false);
+                    },
+                    params: {
+                        'sourceText': sourceText,
+                        'jobId': me.wizardState.jobId,
+                        'solutionId': me.scriptBuilderFrm.getSolutionId()
+                    }
+                });
+                
             }
         });
+
     },
 
     /**

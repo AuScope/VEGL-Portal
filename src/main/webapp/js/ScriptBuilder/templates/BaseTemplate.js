@@ -111,6 +111,13 @@ Ext.define('ScriptBuilder.templates.BaseTemplate', {
         };
 
         template = template.replace(/\$\{([a-zA-Z0-9_-]+)\}/g, f);
+
+        // If the template config specified a value for 'n-threads',
+        // store for later use in selecting an appropriate vm type.
+        if (params['n-threads']) {
+            this.wizardState.nthreads = params['n-threads'];
+        }
+
         callback(ScriptBuilder.templates.BaseTemplate.TEMPLATE_RESULT_SUCCESS,
                  template);
     },

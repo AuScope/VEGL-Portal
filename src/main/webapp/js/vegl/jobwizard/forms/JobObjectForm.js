@@ -104,10 +104,18 @@ Ext.define('vegl.jobwizard.forms.JobObjectForm', {
                                     jobObjectFrm.computeTypeStore.load({
                                         params : {
                                             computeServiceId : responseObj.data[0].computeServiceId
+                                        },
+                                        scope: jobObjectFrm,
+                                        callback: function(records, operation, success) {
+                                            jobObjectFrm.preselectVmType();
                                         }
                                     });
+
                                     frm.setValues(responseObj.data[0]);
                                     jobObjectFrm.wizardState.jobId = frm.getValues().id;
+
+                                    // Store the vm type if specified in the job
+                                    jobObjectFrm.wizardState.jobComputeInstanceType = responseObj.data[0].computeInstanceType;
                                 }
                             }
                         });
@@ -257,11 +265,40 @@ Ext.define('vegl.jobwizard.forms.JobObjectForm', {
                 computeServiceId : records[0].get('id')
             }
         });
+
+        var jobObjectFrm = this;
         this.computeTypeStore.load({
             params : {
                 computeServiceId : records[0].get('id')
+            },
+            scope: jobObjectFrm,
+            callback: function(records, operation, success) {
+                jobObjectFrm.preselectVmType();
             }
         });
+    },
+
+    preselectVmType: function() {
+        var jobObjectFrm = this;
+
+        // Select a vm type that has ncpus
+        // >= nthreads if one hasn't
+        // already been selected.
+        if (jobObjectFrm.wizardState.nthreads &&
+            !jobObjectFrm.wizardState.jobComputeInstanceType) {
+            // Get vm types that are big enough
+            var vmtype;
+            var ncpus = 99999;
+            jobObjectFrm.computeTypeStore.each(function(r) {
+                if (r.get('vcpus') < ncpus &&
+                    r.get('vcpus') >= jobObjectFrm.wizardState.nthreads) {
+                    vmtype = r;
+                }
+            });
+            if (vmtype) {
+                jobObjectFrm.getForm().setValues({computeTypeId: vmtype.get('id')});
+            }
+        }
     },
 
     getTitle : function() {

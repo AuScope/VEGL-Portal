@@ -30,8 +30,8 @@ Ext.define('ScriptBuilder.ComponentTreePanel', {
         var name = node.get('text');
         var description = node.get('qtip');
 
-        // Retrieve detailed entry for the template and fire
-        // addcomponent to create and show the GUI.
+        // Retrieve detailed entry for the template from the SCM and
+        // fire addcomponent to create and show the GUI.
         if (!Ext.isEmpty(componentName)) {
             Ext.Ajax.request({
                 url: componentName,

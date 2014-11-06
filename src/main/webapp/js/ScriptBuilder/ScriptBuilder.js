@@ -81,6 +81,8 @@ Ext.define('ScriptBuilder.ScriptBuilder', {
         template.requestScript(function(status, script) {
             //Once we have the script text - ask the user what they want to do with it
             if (status === ScriptBuilder.templates.BaseTemplate.TEMPLATE_RESULT_SUCCESS) {
+                me.solution = entry;
+                
                 //If there's nothing in the window - just put text in there
                 if (me.getScript().length === 0) {
                     me.replaceScript(script);
@@ -144,5 +146,9 @@ Ext.define('ScriptBuilder.ScriptBuilder', {
 
     getScript : function() {
         return this.sourceText.getValue();
+    },
+
+    getSolutionId: function() {
+        return this.solution['@id'];
     }
 });

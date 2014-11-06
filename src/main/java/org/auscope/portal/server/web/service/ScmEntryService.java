@@ -8,6 +8,9 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.app.VelocityEngine;
+import org.auscope.portal.core.services.PortalServiceException;
+import org.auscope.portal.server.vegl.VEGLJob;
+import org.auscope.portal.server.vegl.VEGLJobManager;
 import org.auscope.portal.server.vegl.VLScmSnapshot;
 import org.auscope.portal.server.vegl.VLScmSnapshotDao;
 import org.auscope.portal.server.web.service.scm.Solution;
@@ -33,15 +36,18 @@ public class ScmEntryService {
 
     private VLScmSnapshotDao vlScmSnapshotDao;
     private VelocityEngine velocityEngine;
+    private VEGLJobManager jobManager;
 
     /**
      * Create a new instance.
      */
     @Autowired
     public ScmEntryService(VLScmSnapshotDao vlScmSnapshotDao,
+                           VEGLJobManager jobManager,
                            VelocityEngine velocityEngine) {
         super();
         this.vlScmSnapshotDao = vlScmSnapshotDao;
+        this.jobManager = jobManager;
         this.setVelocityEngine(velocityEngine);
     }
 
@@ -61,6 +67,52 @@ public class ScmEntryService {
             vmId = snapshot.getComputeVmId();
         }
         return vmId;
+    }
+
+    /**
+     * Update job (jobId) with vmId and computeServiceId for solution
+     * if we have one.
+     *
+     * @param jobId String job ID
+     * @param solutionId String solution URL
+     * @throws PortalServiceException
+     */
+    public void updateJobForSolution(String jobId, String solutionId)
+        throws PortalServiceException {
+        logger.warn("updateJobForSol(" + jobId + ", " + solutionId + ")");
+        //Lookup our job
+        VEGLJob job = null;
+        try {
+            job = jobManager.getJobById(Integer.parseInt(jobId));
+        } catch (Exception ex) {
+            logger.warn("Unable to lookup job with id " + jobId + ": " + ex.getMessage());
+            logger.debug("exception:", ex);
+            throw new PortalServiceException("Unable to lookup job with id " + jobId, ex);
+        }
+
+        // Get the solution details
+        Solution solution = getScmSolution(solutionId);
+
+        // Get VM id if we have one (or null), pick one arbitrarily if many
+        String vmId = null;
+        String computeServiceId = null;
+        for (Map<String, String> image: solution.getToolbox(true).getImages()) {
+            vmId = image.get("image_id");
+            computeServiceId = image.get("provider");
+        }
+
+        // Update job
+        logger.warn("Updating job: (" + vmId + ", " + computeServiceId + ")");
+        job.setComputeVmId(vmId);
+        job.setComputeServiceId(computeServiceId);
+
+        //Save the VEGL job
+        try {
+            jobManager.saveJob(job);
+        } catch (Exception ex) {
+            logger.error("Error updating job " + job, ex);
+            throw new PortalServiceException("Error updating job for solution: ", ex);
+        }
     }
 
     /**

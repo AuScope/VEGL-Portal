@@ -100,17 +100,15 @@ Ext.define('ScriptBuilder.templates.DynamicTemplate', {
                 _setItemField(variable, 'max', item, 'maxValue');
                 _setItemField(variable, 'step', item, 'step');
 
-                // If this is a 'n-threads' variable, use maxThreads
-                // as the default value as long as there isn't already
-                // a default and maxThreads doesn't violate any
-                // constraints.
-                if (item.name == 'n-threads' &&
-                    item.value === undefined &&
-                    (item.minValue === undefined || maxThreads >= item.minValue) &&
-                    (item.maxValue === undefined || maxThreads <= item.maxValue) &&
-                    (item.xtype != 'combo' ||
-                     item.store.find('value', maxThreads) >= 0)) {
-                    item.value = maxThreads;
+                // If this is a numeric field with a minimum value and
+                // no default, default to the min value.
+                if (item.xtype == 'numberfield' && item.value === undefined) {
+                    if (variable.min !== undefined) {
+                        item.value = variable.min;
+                    }
+                    else {
+                        item.value = 1;
+                    }
                 }
 
                 items.push(item);

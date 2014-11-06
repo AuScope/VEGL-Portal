@@ -15,6 +15,7 @@ public class Toolbox {
     private Date createdAt;
     private Map<String, String> source;
     private List<Map<String, String>> dependencies;
+    private List<Map<String, String>> images;
 
     @JsonProperty("@id")
     public String getId() { return id; }
@@ -71,5 +72,13 @@ public class Toolbox {
      */
     public void setDependencies(List<Map<String, String>> dependencies) {
         this.dependencies = dependencies;
+    }
+
+    public List<Map<String, String>> getImages() {
+        return images;
+    }
+
+    public void setImages(List<Map<String, String>> images) {
+        this.images = images;
     }
 }

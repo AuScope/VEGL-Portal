@@ -16,6 +16,7 @@ import org.apache.commons.logging.LogFactory;
 import org.auscope.portal.core.server.controllers.BasePortalController;
 import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.util.FileIOUtil;
+import org.auscope.portal.server.web.service.ScmEntryService;
 import org.auscope.portal.server.web.service.ScriptBuilderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -38,6 +39,9 @@ public class ScriptBuilderController extends BasePortalController {
     /** Handles saving scripts against a job*/
     private ScriptBuilderService sbService;
 
+    /** Handles SCM entries. */
+    private ScmEntryService scmEntryService;
+
     /**
      * Creates a new instance
      *
@@ -45,19 +49,25 @@ public class ScriptBuilderController extends BasePortalController {
      * @param jobManager
      */
     @Autowired
-    public ScriptBuilderController(ScriptBuilderService sbService) {
+    public ScriptBuilderController(ScriptBuilderService sbService,
+                                   ScmEntryService scmEntryService) {
         super();
         this.sbService = sbService;
+        this.scmEntryService = scmEntryService;
     }
 
     /**
      * Writes provided script text to a file in the specified jobs stage in directory
      *
+     * @param jobId
+     * @param sourceText
+     * @param solution
      * @return A JSON encoded response with a success flag
      */
     @RequestMapping("/secure/saveScript.do")
     public ModelAndView saveScript(@RequestParam("jobId") String jobId,
-                                  @RequestParam("sourceText") String sourceText) {
+                                   @RequestParam("sourceText") String sourceText,
+                                   @RequestParam("solutionId") String solutionId) {
 
         if (sourceText == null || sourceText.trim().isEmpty()) {
             return generateJSONResponseMAV(false, null, "No source text specified");
@@ -68,6 +78,17 @@ public class ScriptBuilderController extends BasePortalController {
         } catch (PortalServiceException ex) {
             logger.warn("Unable to save job script for job with id " + jobId + ": " + ex.getMessage());
             logger.debug("error:", ex);
+            return generateJSONResponseMAV(false, null, "Unable to write script file");
+        }
+
+        // Update job with vmId for solution if we have one.
+        try {
+            scmEntryService.updateJobForSolution(jobId, solutionId);
+        }
+        catch (PortalServiceException e) {
+            logger.warn("Failed to update job (" + jobId + ") for solution (" +
+                        solutionId + "): " + e.getMessage());
+            logger.debug("error: ", e);
             return generateJSONResponseMAV(false, null, "Unable to write script file");
         }
 
