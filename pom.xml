@@ -220,8 +220,9 @@
         <log4j.version>1.2.16</log4j.version>
         <targetJdk>1.7</targetJdk>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <powermock.version>1.5.5</powermock.version>
+        <powermock.version>1.5.6</powermock.version>
         <portal.core.version>2014-09-22</portal.core.version>
+        <httpclient.version>4.3.5</httpclient.version>
     </properties>
 
     <repositories>
@@ -234,11 +235,6 @@
             <id>osgeo</id>
             <name>Open Source Geospatial Foundation Repository</name>
             <url>http://download.osgeo.org/webdav/geotools</url>
-        </repository>
-        <repository>
-            <id>mygrid</id>
-            <name>MyGrid Repository</name>
-            <url>http://build.mygrid.org.uk/maven/repository/</url>
         </repository>
         <repository>
             <id>geotoolkit</id>
@@ -270,12 +266,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.2.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-            <version>4.2.1</version>
+            <version>${httpclient.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-dbcp</groupId>
