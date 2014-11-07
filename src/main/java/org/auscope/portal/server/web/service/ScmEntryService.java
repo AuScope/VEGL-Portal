@@ -2,8 +2,10 @@ package org.auscope.portal.server.web.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -90,23 +92,8 @@ public class ScmEntryService {
             throw new PortalServiceException("Unable to lookup job with id " + jobId, ex);
         }
 
-        // Get the solution details
-        Solution solution = getScmSolution(solutionId);
-
-        // Get VM id if we have one (or null), pick one arbitrarily if many
-        String vmId = null;
-        String computeServiceId = null;
-        for (Map<String, String> image: solution.getToolbox(true).getImages()) {
-            vmId = image.get("image_id");
-            computeServiceId = image.get("provider");
-        }
-
-        // Update job
-        logger.warn("Updating job: (" + vmId + ", " + computeServiceId + ")");
-        job.setComputeVmId(vmId);
-        job.setComputeServiceId(computeServiceId);
-
-        //Save the VEGL job
+        // Store the solutionId in the job
+        job.setSolutionId(solutionId);
         try {
             jobManager.saveJob(job);
         } catch (Exception ex) {
@@ -163,6 +150,69 @@ public class ScmEntryService {
         RestTemplate rest = new RestTemplate();
         Solution solution = rest.getForObject(entryUrl, Solution.class);
         return solution;
+    }
+
+    /**
+     * Return the Solution object for job (if known).
+     *
+     * @param job VEGLJob object
+     * @returns Solution object if job has a solutionId
+     */
+    public Solution getJobSolution(VEGLJob job) {
+        Solution solution = null;
+
+        if (job != null) {
+            String solutionId = job.getSolutionId();
+            if (solutionId != null) {
+                solution = getScmSolution(solutionId);
+            }
+        }
+
+        return solution;
+    }
+
+    /**
+     * Return a map of computeServiceId to imageIds valid for job.
+     *
+     * @return Map<String, Set<String>> with images for job, or null.
+     */
+    public Map<String, Set<String>> getJobImages(Integer jobId) {
+        if (jobId == null) {
+            return null;
+        }
+
+        Map<String, Set<String>> images = new HashMap<String, Set<String>>();
+        VEGLJob job = jobManager.getJobById(jobId);
+        if (job != null) {
+            Solution solution = getJobSolution(job);
+            if (solution != null) {
+                for (Map<String, String> img:
+                         solution.getToolbox(true).getImages()) {
+                    String providerId = img.get("provider");
+                    Set<String> vms = images.get(providerId);
+                    if (vms == null) {
+                        vms = new HashSet<String>();
+                        images.put(providerId, vms);
+                    }
+                    vms.add(img.get("image_id"));
+                }
+            }
+        }
+
+        return images;
+    }
+
+    /**
+     * Return a Set of compute service ids with images for job with jobId.
+     *
+     * @return Set<String> of compute service ids for job, or null if jobId == null.
+     */
+    public Set<String> getJobProviders(Integer jobId) {
+        Map<String, Set<String>> images = getJobImages(jobId);
+        if (images != null) {
+            return images.keySet();
+        }
+        return null;
     }
 
     private Map<String, Object> puppetTemplateVars(Solution solution) {

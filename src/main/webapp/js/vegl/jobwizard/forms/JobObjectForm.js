@@ -23,6 +23,9 @@ Ext.define('vegl.jobwizard.forms.JobObjectForm', {
             proxy: {
                 type: 'ajax',
                 url: 'getVmImagesForComputeService.do',
+                extraParams: {
+                    jobId: wizardState.jobId
+                },
                 reader: {
                    type: 'json',
                    root : 'data'
@@ -35,6 +38,9 @@ Ext.define('vegl.jobwizard.forms.JobObjectForm', {
             proxy: {
                 type: 'ajax',
                 url: 'getVmTypesForComputeService.do',
+                extraParams: {
+                    jobId: wizardState.jobId
+                },
                 reader: {
                    type: 'json',
                    root : 'data'
@@ -63,6 +69,9 @@ Ext.define('vegl.jobwizard.forms.JobObjectForm', {
             proxy: {
                 type: 'ajax',
                 url: 'getComputeServices.do',
+                extraParams: {
+                    jobId: wizardState.jobId
+                },
                 reader: {
                    type: 'json',
                    root : 'data'
@@ -70,7 +79,7 @@ Ext.define('vegl.jobwizard.forms.JobObjectForm', {
             },
             autoLoad : true
         });
-        this.storageServicesStore.load();
+        this.computeServicesStore.load();
 
         this.callParent([{
             wizardState : wizardState,

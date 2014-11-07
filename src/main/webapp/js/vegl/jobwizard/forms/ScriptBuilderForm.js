@@ -133,7 +133,7 @@ Ext.define('vegl.jobwizard.forms.ScriptBuilderForm', {
 
     getHelpInstructions : function() {
         var templates = this.scriptBuilderFrm.queryById('sb-templates-panel');
-        var script = this.scriptBuilderFrm.queryById('sb-script-panel')
+        var script = this.scriptBuilderFrm.queryById('sb-script-panel');
 
         return [Ext.create('portal.util.help.Instruction', {
             highlightEl : script.getEl(),
