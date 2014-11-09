@@ -23,24 +23,18 @@ Ext.define('vegl.jobwizard.forms.JobObjectForm', {
             proxy: {
                 type: 'ajax',
                 url: 'getVmImagesForComputeService.do',
-                extraParams: {
-                    jobId: wizardState.jobId
-                },
                 reader: {
                    type: 'json',
                    root : 'data'
                 }
             }
         });
-        
+
         this.computeTypeStore = Ext.create('Ext.data.Store', {
             model: 'vegl.models.ComputeType',
             proxy: {
                 type: 'ajax',
                 url: 'getVmTypesForComputeService.do',
-                extraParams: {
-                    jobId: wizardState.jobId
-                },
                 reader: {
                    type: 'json',
                    root : 'data'
@@ -61,7 +55,6 @@ Ext.define('vegl.jobwizard.forms.JobObjectForm', {
             },
             autoLoad : true
         });
-        this.storageServicesStore.load();
 
         this.computeServicesStore = Ext.create('Ext.data.Store', {
             fields : [{name: 'id', type: 'string'},
@@ -69,17 +62,12 @@ Ext.define('vegl.jobwizard.forms.JobObjectForm', {
             proxy: {
                 type: 'ajax',
                 url: 'getComputeServices.do',
-                extraParams: {
-                    jobId: wizardState.jobId
-                },
                 reader: {
                    type: 'json',
                    root : 'data'
                 }
-            },
-            autoLoad : true
+            }
         });
-        this.computeServicesStore.load();
 
         this.callParent([{
             wizardState : wizardState,
@@ -105,6 +93,12 @@ Ext.define('vegl.jobwizard.forms.JobObjectForm', {
 
                                 if (responseObj.success) {
                                     //Loads the image store of user selected compute provider
+                                    jobObjectFrm.computeServicesStore.load({
+                                        params : {
+                                            jobId: jobObjectFrm.wizardState.jobId
+                                        }
+                                    });
+
                                     jobObjectFrm.imageStore.load({
                                         params : {
                                             computeServiceId : responseObj.data[0].computeServiceId
@@ -128,6 +122,9 @@ Ext.define('vegl.jobwizard.forms.JobObjectForm', {
                                 }
                             }
                         });
+                    }
+                    else {
+                        console.log("No jobId available to load in JobObjectForm!");
                     }
                 }
             },
@@ -271,7 +268,8 @@ Ext.define('vegl.jobwizard.forms.JobObjectForm', {
         this.getComponent('image-combo').clearValue();
         this.imageStore.load({
             params : {
-                computeServiceId : records[0].get('id')
+                computeServiceId : records[0].get('id'),
+                jobId: this.wizardState.jobId
             }
         });
 

@@ -81,7 +81,6 @@ public class ScmEntryService {
      */
     public void updateJobForSolution(String jobId, String solutionId)
         throws PortalServiceException {
-        logger.warn("updateJobForSol(" + jobId + ", " + solutionId + ")");
         //Lookup our job
         VEGLJob job = null;
         try {

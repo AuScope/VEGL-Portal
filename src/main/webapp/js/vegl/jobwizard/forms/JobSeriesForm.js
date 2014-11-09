@@ -182,7 +182,8 @@ Ext.define('vegl.jobwizard.forms.JobSeriesForm', {
                         function(button) {
                             if (button === 'yes') {
                                 wizardState.skipConfirmPopup = true;
-                                callback(true);
+                                // Make sure we create the job
+                                cjFunc();
                                 return;
                             } else {
                                 callback(false);
