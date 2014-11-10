@@ -36,7 +36,9 @@ Ext.define('ScriptBuilder.ComponentTreePanel', {
             Ext.Ajax.request({
                 url: componentName,
                 scope: this,
-
+                headers: {
+                    Accept: 'application/json'
+                },
                 success: function(response) {
                     entry = Ext.JSON.decode(response.responseText);
                     if (entry) {
