@@ -92,7 +92,10 @@ Ext.define('vegl.jobwizard.forms.ScriptBuilderForm', {
 
     // submit script source for storage at the server
     beginValidation : function(callback) {
-        sourceText = this.scriptBuilderFrm.getScript();
+        var me = this;
+
+        // Save script content
+        sourceText = me.scriptBuilderFrm.getScript();
         // replace tab with 4 spaces whenever it occurs in the sourceText
         sourceText = sourceText.replace(/\t/g,"\u0020\u0020\u0020\u0020");
 
@@ -115,7 +118,8 @@ Ext.define('vegl.jobwizard.forms.ScriptBuilderForm', {
             },
             params: {
                 'sourceText': sourceText,
-                'jobId': this.wizardState.jobId
+                'jobId': me.wizardState.jobId,
+                'solutionId': me.scriptBuilderFrm.getSolutionId()
             }
         });
     },
@@ -129,7 +133,7 @@ Ext.define('vegl.jobwizard.forms.ScriptBuilderForm', {
 
     getHelpInstructions : function() {
         var templates = this.scriptBuilderFrm.queryById('sb-templates-panel');
-        var script = this.scriptBuilderFrm.queryById('sb-script-panel')
+        var script = this.scriptBuilderFrm.queryById('sb-script-panel');
 
         return [Ext.create('portal.util.help.Instruction', {
             highlightEl : script.getEl(),

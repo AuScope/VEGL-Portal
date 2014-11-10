@@ -39,6 +39,11 @@ Ext.define('ScriptBuilder.ScriptBuilder', {
             title : 'Available Templates',
             itemId : 'sb-templates-panel',
             width : 250,
+            root : {
+                expanded: true,
+                text : "Script Builder Components",
+                children: []
+            },
             listeners : {
                 addcomponent : Ext.bind(this.onAddComponent, this)
             }
@@ -62,11 +67,12 @@ Ext.define('ScriptBuilder.ScriptBuilder', {
         this.callParent(arguments);
     },
 
-    onAddComponent : function(panel, templateClass, name, description) {
+    onAddComponent : function(panel, entry, name, description) {
         var me = this;
 
         //Create the template which will load our script
-        var template = Ext.create(templateClass, {
+        var template = Ext.create('ScriptBuilder.templates.DynamicTemplate', {
+            entry: entry,
             name : name,
             description : description,
             wizardState : me.wizardState,
@@ -75,6 +81,8 @@ Ext.define('ScriptBuilder.ScriptBuilder', {
         template.requestScript(function(status, script) {
             //Once we have the script text - ask the user what they want to do with it
             if (status === ScriptBuilder.templates.BaseTemplate.TEMPLATE_RESULT_SUCCESS) {
+                me.solution = entry;
+                
                 //If there's nothing in the window - just put text in there
                 if (me.getScript().length === 0) {
                     me.replaceScript(script);
@@ -105,8 +113,11 @@ Ext.define('ScriptBuilder.ScriptBuilder', {
      * Builds components panel with selected toolbox
      */
     buildComponentsPanel : function(selectedToolbox) {
-        var comps = ScriptBuilder.Components.getComponents(selectedToolbox);
-        this.componentsPanel.setRootNode(comps);
+        // Populate the panel after retrieving the templates
+        ScriptBuilder.Components.getComponents(this.componentsPanel);
+
+        // var comps = ScriptBuilder.Components.getComponents(selectedToolbox);
+        // this.componentsPanel.setRootNode(comps);
     },
 
     /**
@@ -135,5 +146,9 @@ Ext.define('ScriptBuilder.ScriptBuilder', {
 
     getScript : function() {
         return this.sourceText.getValue();
+    },
+
+    getSolutionId: function() {
+        return this.solution['@id'];
     }
 });

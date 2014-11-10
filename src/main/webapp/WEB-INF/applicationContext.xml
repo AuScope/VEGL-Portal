@@ -354,11 +354,16 @@
                 <value>vgljobsauditlog.hbm.xml</value>
                 <value>vgldownload.hbm.xml</value>
                 <value>vglsignature.hbm.xml</value>
+                <value>scmentrysnapshot.hbm.xml</value>
             </list>
         </property>
         <property name="hibernateProperties">
             <value>hibernate.dialect=org.hibernate.dialect.HSQLDialect</value>
         </property>
+    </bean>
+
+    <bean id="vlScmSnapshotDao" class="org.auscope.portal.server.vegl.VLScmSnapshotDao">
+        <property name="sessionFactory" ref="veglSessionFactory"/>
     </bean>
 
 </beans>

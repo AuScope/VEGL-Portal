@@ -12,6 +12,8 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -39,6 +41,7 @@ import org.auscope.portal.server.vegl.VGLQueueJob;
 import org.auscope.portal.server.vegl.VglDownload;
 import org.auscope.portal.server.vegl.VglMachineImage;
 import org.auscope.portal.server.vegl.VglParameter.ParameterType;
+import org.auscope.portal.server.web.service.ScmEntryService;
 import org.auscope.portal.server.web.service.monitor.VGLJobStatusChangeHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
@@ -70,6 +73,7 @@ public class JobBuilderController extends BaseCloudController {
     private VEGLJobManager jobManager;
     private FileStagingService fileStagingService;
     private VGLPollingJobQueueManager vglPollingJobQueueManager;
+    private ScmEntryService scmEntryService;
 
     public static final String STATUS_PENDING = "Pending";//VT:Request accepted by compute service
     public static final String STATUS_ACTIVE = "Active";//VT:Running
@@ -90,7 +94,7 @@ public class JobBuilderController extends BaseCloudController {
     @Autowired
     public JobBuilderController(VEGLJobManager jobManager, FileStagingService fileStagingService,
             PortalPropertyPlaceholderConfigurer hostConfigurer, CloudStorageService[] cloudStorageServices,
-            CloudComputeService[] cloudComputeServices,VGLJobStatusChangeHandler vglJobStatusChangeHandler,VGLPollingJobQueueManager vglPollingJobQueueManager) {
+                                CloudComputeService[] cloudComputeServices,VGLJobStatusChangeHandler vglJobStatusChangeHandler,VGLPollingJobQueueManager vglPollingJobQueueManager, ScmEntryService scmEntryService) {
         super(cloudStorageServices, cloudComputeServices,hostConfigurer);
         this.jobManager = jobManager;
         this.fileStagingService = fileStagingService;
@@ -98,6 +102,7 @@ public class JobBuilderController extends BaseCloudController {
         this.cloudComputeServices = cloudComputeServices;
         this.vglJobStatusChangeHandler=vglJobStatusChangeHandler;
         this.vglPollingJobQueueManager = vglPollingJobQueueManager;
+        this.scmEntryService = scmEntryService;
     }
 
 
@@ -848,15 +853,47 @@ public class JobBuilderController extends BaseCloudController {
     }
 
     /**
-     * Gets the set of cloud images available for use by a particular user
+     * Gets the set of cloud images available for use by a particular user.
+     *
+     * If jobId is specified, limit the set to images that are
+     * compatible with the solution selected for the job.
+     *
      * @param request
+     * @param computeServiceId
+     * @param jobId (optional) id of a job to limit suitable images
      * @return
      */
     @RequestMapping("/getVmImagesForComputeService.do")
-    public ModelAndView getImagesForComputeService(HttpServletRequest request,
-            @RequestParam("computeServiceId") String computeServiceId) {
+    public ModelAndView getImagesForComputeService(
+        HttpServletRequest request,
+        @RequestParam("computeServiceId") String computeServiceId,
+        @RequestParam(value="jobId", required=false) Integer jobId) {
         try {
+            // Get images available to the current user
             List<MachineImage> images = getImagesForJobAndUser(request, computeServiceId);
+
+            // Filter list to images suitable for job solution, if specified
+            if (jobId != null) {
+                Set<String> vmIds =
+                    scmEntryService.getJobImages(jobId).get(computeServiceId);
+
+                if (vmIds == null) {
+                    // There are no suitable images at the specified compute service.
+                    log.warn("No suitable images at compute service (" + computeServiceId + ") for job (" + jobId + ")");
+                    images.clear();
+                }
+                else {
+                    ListIterator<MachineImage> it = images.listIterator();
+                    while (it.hasNext()) {
+                        MachineImage mi = it.next();
+                        if (!vmIds.contains(mi.getImageId())) {
+                            it.remove();
+                        }
+                    }
+                }
+            }
+
+            // return result
             return generateJSONResponseMAV(true, images, "");
         } catch (Exception ex) {
             log.error("Unable to access image list:" + ex.getMessage(), ex);
@@ -864,6 +901,16 @@ public class JobBuilderController extends BaseCloudController {
         }
     }
 
+    public ModelAndView getImagesForComputeService(HttpServletRequest request,
+                                                   String computeServiceId) {
+        return getImagesForComputeService(request, computeServiceId, null);
+    }
+
+    /**
+     * Return a JSON list of VM types available for the compute service.
+     *
+     * @param computeServiceId
+     */
     @RequestMapping("/getVmTypesForComputeService.do")
     public ModelAndView getTypesForComputeService(HttpServletRequest request,
             @RequestParam("computeServiceId") String computeServiceId) {
@@ -882,20 +929,40 @@ public class JobBuilderController extends BaseCloudController {
 
     /**
      * Gets a JSON list of id/name pairs for every available compute service
+     *
+     * If a jobId parameter is provided, then return compute services
+     * compatible with that job. Currently that is only those services
+     * that have images available for the solution used for the job.
+     *
+     * @param jobId (optional) job id to limit acceptable services
      * @return
      */
     @RequestMapping("/getComputeServices.do")
-    public ModelAndView getComputeServices() {
+    public ModelAndView getComputeServices(@RequestParam(value="jobId",
+                                                         required=false)
+                                           Integer jobId) {
+        Set<String> jobCCSIds = scmEntryService.getJobProviders(jobId);
+
         List<ModelMap> simpleComputeServices = new ArrayList<ModelMap>();
 
         for (CloudComputeService ccs : cloudComputeServices) {
-            ModelMap map = new ModelMap();
-            map.put("id", ccs.getId());
-            map.put("name", ccs.getName());
-            simpleComputeServices.add(map);
+            // Add the ccs to the list if it's valid for job or we have no job
+            if (jobCCSIds == null || jobCCSIds.contains(ccs.getId())) {
+                ModelMap map = new ModelMap();
+                map.put("id", ccs.getId());
+                map.put("name", ccs.getName());
+                simpleComputeServices.add(map);
+            }
         }
 
         return generateJSONResponseMAV(true, simpleComputeServices, "");
+    }
+
+    /**
+     * Convenience method for getComputeServices(null).
+     */
+    public ModelAndView getComputeServices() {
+        return getComputeServices(null);
     }
 
     /**
@@ -962,6 +1029,4 @@ public class JobBuilderController extends BaseCloudController {
 
         return generateJSONResponseMAV(true, allInputs, "");
     }
-
-
 }
