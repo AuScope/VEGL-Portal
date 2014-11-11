@@ -9,9 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.auscope.portal.core.cloud.CloudJob;
 import org.auscope.portal.server.vegl.VglParameter.ParameterType;
-import org.auscope.portal.server.web.controllers.JobBuilderController;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.auscope.portal.server.web.service.scm.Solution;
 
 /**
  * A specialisation of a generic cloud job for the VEGL Portal
@@ -27,6 +25,7 @@ public class VEGLJob extends CloudJob implements Cloneable {
     private Integer seriesId;
     private boolean emailNotification;
     private String processTimeLog;
+    private String solutionId;
 
 
     /** A map of VglParameter objects keyed by their parameter names*/
@@ -195,6 +194,14 @@ public class VEGLJob extends CloudJob implements Cloneable {
         for (VglDownload dl : jobDownloads) {
             dl.setParent(this);
         }
+    }
+
+    public String getSolutionId() {
+        return solutionId;
+    }
+
+    public void setSolutionId(String solutionId) {
+        this.solutionId = solutionId;
     }
 
     /**
