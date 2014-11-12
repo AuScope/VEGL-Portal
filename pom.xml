@@ -5,7 +5,7 @@
     <groupId>org.auscope.portal</groupId>
     <artifactId>VHIRL-Portal</artifactId>
     <packaging>war</packaging>
-    <version>1.1.0-RELEASE</version>
+    <version>2.0.0-RC1</version>
     <name>VHIRL-Portal</name>
     <url>https://www.seegrid.csiro.au/wiki/VirtualLabs/Vhirl/WebHome</url>
     <issueManagement>
